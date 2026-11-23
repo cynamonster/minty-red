@@ -7,6 +7,7 @@ import {
 import { NavBar } from '../../shared/components/NavBar';
 import { ConfettiCanvas } from '../../shared/components/ConfettiCanvas';
 import { NextGameDrawer } from '../../shared/components/NextGameDrawer';
+import { AdBanner } from '../../shared/components/AdBanner';
 import { soundEngine } from '../../shared/audio/soundEngine';
 import {
   getDailySeed,
@@ -657,6 +658,11 @@ export function FlagHexGame({ onHome, onSelectGame, challengeCode }) {
               </div>
             </div>
 
+            {/* Menu Ad Banner */}
+            <div className="pt-2">
+              <AdBanner game="flaghex" onSelectGame={onSelectGame} />
+            </div>
+
             {/* Next Game Drawer in Menu */}
             <NextGameDrawer currentGameSlug="flaghex" onSelectGame={onSelectGame} />
           </div>
@@ -878,6 +884,11 @@ export function FlagHexGame({ onHome, onSelectGame, challengeCode }) {
                 );
               })}
             </div>
+
+            {/* Gameplay Bottom Ad Banner */}
+            <div className="pt-2">
+              <AdBanner game="flaghex" onSelectGame={onSelectGame} />
+            </div>
           </div>
         )}
 
@@ -1002,6 +1013,11 @@ export function FlagHexGame({ onHome, onSelectGame, challengeCode }) {
                 {copyToast}
               </div>
             )}
+
+            {/* Game Over Bottom Ad Banner */}
+            <div className="pt-1">
+              <AdBanner game="flaghex" onSelectGame={onSelectGame} />
+            </div>
 
             {/* Next Game Drawer */}
             <NextGameDrawer currentGameSlug="flaghex" onSelectGame={onSelectGame} />

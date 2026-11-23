@@ -8,6 +8,7 @@ import {
 import { NavBar } from '../../shared/components/NavBar';
 import { ConfettiCanvas } from '../../shared/components/ConfettiCanvas';
 import { NextGameDrawer } from '../../shared/components/NextGameDrawer';
+import { AdBanner } from '../../shared/components/AdBanner';
 import { soundEngine } from '../../shared/audio/soundEngine';
 import {
   getDailySeed,
@@ -419,6 +420,10 @@ export function CityGridGame({ onHome, onSelectGame, challengeCode }) {
             </div>
           </div>
 
+          <div className="w-full pt-2">
+            <AdBanner game="citygrid" onSelectGame={onSelectGame} />
+          </div>
+
           <NextGameDrawer currentGameSlug="citygrid" onSelectGame={onSelectGame} />
         </main>
       </div>
@@ -718,6 +723,10 @@ export function CityGridGame({ onHome, onSelectGame, challengeCode }) {
               </button>
             </div>
           )}
+
+          <div className="w-full pt-2">
+            <AdBanner game="citygrid" onSelectGame={onSelectGame} />
+          </div>
         </main>
       </div>
     );
@@ -906,6 +915,10 @@ export function CityGridGame({ onHome, onSelectGame, challengeCode }) {
               <span>Play Another Blitz</span>
             </button>
           </div>
+        </div>
+
+        <div className="w-full pt-2">
+          <AdBanner game="citygrid" onSelectGame={onSelectGame} />
         </div>
 
         <NextGameDrawer currentGameSlug="citygrid" onSelectGame={onSelectGame} />

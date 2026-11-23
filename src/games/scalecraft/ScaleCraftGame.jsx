@@ -8,6 +8,7 @@ import {
 import { NavBar } from '../../shared/components/NavBar';
 import { ConfettiCanvas } from '../../shared/components/ConfettiCanvas';
 import { NextGameDrawer } from '../../shared/components/NextGameDrawer';
+import { AdBanner } from '../../shared/components/AdBanner';
 import { soundEngine } from '../../shared/audio/soundEngine';
 import {
   getDailySeed,
@@ -610,6 +611,10 @@ export function ScaleCraftGame({ onHome, onSelectGame, challengeCode }) {
               </button>
             </div>
           )}
+
+          <div className="mt-auto pt-2">
+            <AdBanner game="scalecraft" onSelectGame={onSelectGame} />
+          </div>
         </div>
       )}
 
@@ -742,6 +747,10 @@ export function ScaleCraftGame({ onHome, onSelectGame, challengeCode }) {
             >
               Mode Menu
             </button>
+          </div>
+
+          <div className="pt-1">
+            <AdBanner game="scalecraft" onSelectGame={onSelectGame} />
           </div>
 
           <NextGameDrawer currentGameSlug="scalecraft" onSelectGame={onSelectGame} />

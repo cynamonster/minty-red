@@ -10,6 +10,7 @@ import {
 import { NavBar } from '../../shared/components/NavBar';
 import { ConfettiCanvas } from '../../shared/components/ConfettiCanvas';
 import { NextGameDrawer } from '../../shared/components/NextGameDrawer';
+import { AdBanner } from '../../shared/components/AdBanner';
 import { soundEngine } from '../../shared/audio/soundEngine';
 import {
   getDailySeed,
@@ -560,6 +561,11 @@ export function LogicGateGame({ onHome, onSelectGame, challengeCode }) {
                 <HelpCircle className="w-4 h-4 text-cyan-400" />
                 Logic Gate Field Guide & Sandbox (AND, OR, XOR...)
               </button>
+            </div>
+
+            {/* Menu Bottom Ad Banner */}
+            <div className="pt-2">
+              <AdBanner game="logicgate" onSelectGame={onSelectGame} />
             </div>
 
             <NextGameDrawer currentGameSlug="logicgate" onSelectGame={onSelectGame} />
@@ -1451,6 +1457,11 @@ export function LogicGateGame({ onHome, onSelectGame, challengeCode }) {
                 <RotateCcw className="w-4 h-4" />
                 Return to Menu
               </button>
+            </div>
+
+            {/* Menu Bottom Ad Banner */}
+            <div className="pt-2">
+              <AdBanner game="logicgate" onSelectGame={onSelectGame} />
             </div>
 
             <NextGameDrawer currentGameSlug="logicgate" onSelectGame={onSelectGame} />
