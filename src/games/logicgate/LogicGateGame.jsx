@@ -1356,6 +1356,11 @@ export function LogicGateGame({ onHome, onSelectGame, challengeCode }) {
                 </button>
               </div>
             )}
+
+            {/* Playing Bottom Ad Banner */}
+            <div className="mt-auto pt-2">
+              <AdBanner game="logicgate" onSelectGame={onSelectGame} />
+            </div>
           </div>
         )}
 

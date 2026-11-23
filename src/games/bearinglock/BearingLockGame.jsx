@@ -13,6 +13,7 @@ import { CompassDial } from './components/CompassDial';
 import { NavBar } from '../../shared/components/NavBar';
 import { ConfettiCanvas } from '../../shared/components/ConfettiCanvas';
 import { NextGameDrawer } from '../../shared/components/NextGameDrawer';
+import { AdBanner } from '../../shared/components/AdBanner';
 import { ReviewDrawer } from '../../shared/components/ReviewDrawer';
 import { soundEngine } from '../../shared/audio/soundEngine';
 import {
