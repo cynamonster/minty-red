@@ -1,0 +1,405 @@
+{
+  "type": "FeatureCollection",
+  "phenotype": "Micronesid",
+  "slug": "micronesid",
+  "regions": [
+    "austronesian"
+  ],
+  "centroid": {
+    "lat": 8.921,
+    "lng": 137.714
+  },
+  "bbox": [
+    137.714,
+    5.251,
+    154.408,
+    8.921
+  ],
+  "info": {
+    "name": " Micronesid ",
+    "description": "<td valign=\"top\" width=\"450\">\n<h3> Description:</h3>\r\nNorthwestern Polynesid subtype. Combines Nesiotid elements with Proto Malayid and some Melanesid influence. Typically found on the islands of Micronesia, Guam, and more mixed in Palau, Mariana, and other islands. Associated with Chuukese, Pohnpeian, Kosraean, Yapese, Chamorro, Palauans, and related people. <br/>\n<h3> Physical Traits:</h3>\r\nCoppery medium brown skin with straight to wavy, sometimes curly brown-black hair. Rather short, mesoskelic, endomorph. Dolicho- mesocephalic, hypsicranic with a mesorrhine, sometimes bulbous nose. Face relatively flat, sometimes fleshy. Lips rather thick. Eyes tend to be narrow, often slanting. <br/>\n<h3> Literature:</h3>\r\nOnly some authors placed the type in a distinct group. The first was  <a href=\"http://humanphenotypes.net/links.html#D26\" target=\"_blank\">Desmoulins (1826)</a>, who described it as Carolinese. Named Mikronesid by Eickstedt (<a href=\"http://humanphenotypes.net/links.html#E37\" target=\"_blank\">1937</a>, <a href=\"http://humanphenotypes.net/links.html#E52\" target=\"_blank\">1952</a>), who regarded it a Polynesid subtype like <a href=\"http://humanphenotypes.net/links.html#B67\" target=\"_blank\">Biasutti (1967)</a>. <a href=\"http://humanphenotypes.net/links.html#L67\" target=\"_blank\">Lundman (1967)</a>, among others, describes it as a special mixed type, but not as a subrace.  \n</td>"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Micronesid",
+        "slug": "micronesid",
+        "zone": "centroid",
+        "regions": [
+          "austronesian"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          137.714,
+          8.921
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Micronesid",
+        "slug": "micronesid",
+        "zone": "bright",
+        "is_circle": true,
+        "radius_km": 50,
+        "center": [
+          137.714,
+          8.921
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              138.169966,
+              8.921
+            ],
+            [
+              138.15443,
+              9.037585
+            ],
+            [
+              138.108878,
+              9.146225
+            ],
+            [
+              138.036417,
+              9.239517
+            ],
+            [
+              137.941983,
+              9.311102
+            ],
+            [
+              137.832013,
+              9.356102
+            ],
+            [
+              137.714,
+              9.37145
+            ],
+            [
+              137.595987,
+              9.356102
+            ],
+            [
+              137.486017,
+              9.311102
+            ],
+            [
+              137.391583,
+              9.239517
+            ],
+            [
+              137.319122,
+              9.146225
+            ],
+            [
+              137.27357,
+              9.037585
+            ],
+            [
+              137.258034,
+              8.921
+            ],
+            [
+              137.27357,
+              8.804415
+            ],
+            [
+              137.319122,
+              8.695775
+            ],
+            [
+              137.391583,
+              8.602483
+            ],
+            [
+              137.486017,
+              8.530898
+            ],
+            [
+              137.595987,
+              8.485898
+            ],
+            [
+              137.714,
+              8.47055
+            ],
+            [
+              137.832013,
+              8.485898
+            ],
+            [
+              137.941983,
+              8.530898
+            ],
+            [
+              138.036417,
+              8.602483
+            ],
+            [
+              138.108878,
+              8.695775
+            ],
+            [
+              138.15443,
+              8.804415
+            ],
+            [
+              138.169966,
+              8.921
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Micronesid",
+        "slug": "micronesid",
+        "zone": "bright",
+        "is_circle": true,
+        "radius_km": 50,
+        "center": [
+          150.903,
+          7.888
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.357753,
+              7.888
+            ],
+            [
+              151.342258,
+              8.004585
+            ],
+            [
+              151.296828,
+              8.113225
+            ],
+            [
+              151.224559,
+              8.206517
+            ],
+            [
+              151.130377,
+              8.278102
+            ],
+            [
+              151.020699,
+              8.323102
+            ],
+            [
+              150.903,
+              8.33845
+            ],
+            [
+              150.785301,
+              8.323102
+            ],
+            [
+              150.675623,
+              8.278102
+            ],
+            [
+              150.581441,
+              8.206517
+            ],
+            [
+              150.509172,
+              8.113225
+            ],
+            [
+              150.463742,
+              8.004585
+            ],
+            [
+              150.448247,
+              7.888
+            ],
+            [
+              150.463742,
+              7.771415
+            ],
+            [
+              150.509172,
+              7.662775
+            ],
+            [
+              150.581441,
+              7.569483
+            ],
+            [
+              150.675623,
+              7.497898
+            ],
+            [
+              150.785301,
+              7.452898
+            ],
+            [
+              150.903,
+              7.43755
+            ],
+            [
+              151.020699,
+              7.452898
+            ],
+            [
+              151.130377,
+              7.497898
+            ],
+            [
+              151.224559,
+              7.569483
+            ],
+            [
+              151.296828,
+              7.662775
+            ],
+            [
+              151.342258,
+              7.771415
+            ],
+            [
+              151.357753,
+              7.888
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Micronesid",
+        "slug": "micronesid",
+        "zone": "bright",
+        "is_circle": true,
+        "radius_km": 50,
+        "center": [
+          154.408,
+          5.251
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              154.860349,
+              5.251
+            ],
+            [
+              154.844935,
+              5.367585
+            ],
+            [
+              154.799746,
+              5.476225
+            ],
+            [
+              154.727859,
+              5.569517
+            ],
+            [
+              154.634174,
+              5.641102
+            ],
+            [
+              154.525076,
+              5.686102
+            ],
+            [
+              154.408,
+              5.70145
+            ],
+            [
+              154.290924,
+              5.686102
+            ],
+            [
+              154.181826,
+              5.641102
+            ],
+            [
+              154.088141,
+              5.569517
+            ],
+            [
+              154.016254,
+              5.476225
+            ],
+            [
+              153.971065,
+              5.367585
+            ],
+            [
+              153.955651,
+              5.251
+            ],
+            [
+              153.971065,
+              5.134415
+            ],
+            [
+              154.016254,
+              5.025775
+            ],
+            [
+              154.088141,
+              4.932483
+            ],
+            [
+              154.181826,
+              4.860898
+            ],
+            [
+              154.290924,
+              4.815898
+            ],
+            [
+              154.408,
+              4.80055
+            ],
+            [
+              154.525076,
+              4.815898
+            ],
+            [
+              154.634174,
+              4.860898
+            ],
+            [
+              154.727859,
+              4.932483
+            ],
+            [
+              154.799746,
+              5.025775
+            ],
+            [
+              154.844935,
+              5.134415
+            ],
+            [
+              154.860349,
+              5.251
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

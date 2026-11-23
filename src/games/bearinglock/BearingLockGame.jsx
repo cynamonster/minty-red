@@ -1,0 +1,740 @@
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  ENRICHED_WAYPOINTS,
+  ROUNDS_PER_DAILY,
+  getDailyWaypoints,
+  getRandomWaypoint,
+  calculateBearingDelta,
+  calculateBearingScore,
+  formatDegrees,
+  getCompassHeading,
+} from './datasets/waypoints';
+import { CompassDial } from './components/CompassDial';
+import { NavBar } from '../../shared/components/NavBar';
+import { ConfettiCanvas } from '../../shared/components/ConfettiCanvas';
+import { NextGameDrawer } from '../../shared/components/NextGameDrawer';
+import { ReviewDrawer } from '../../shared/components/ReviewDrawer';
+import { soundEngine } from '../../shared/audio/soundEngine';
+import {
+  getDailySeed,
+  saveGameScore,
+  getGameStats,
+} from '../../shared/storage/playerStorage';
+import { copyShareText } from '../../shared/share/shareService';
+import {
+  encodeChallenge,
+  decodeChallenge,
+} from '../../shared/challenge/challengeCodec';
+import {
+  Compass,
+  RotateCcw,
+  Share2,
+  Swords,
+  Calendar,
+  Flame,
+  Zap,
+  CheckCircle2,
+  ChevronRight,
+  Sparkles,
+  Trophy,
+  ArrowRight,
+  Plane,
+  Anchor,
+  Globe,
+  Clock,
+  Target,
+  Info,
+  HelpCircle,
+} from 'lucide-react';
+
+const BLITZ_START_TIME = 45; // 45s blitz timer
+const BLITZ_ACCURACY_BONUS = 8; // +8s bonus time for locks within 15°
+
+export function BearingLockGame({ onHome, onSelectGame, challengeCode }) {
+  const [mode, setMode] = useState('menu'); // 'menu' | 'daily' | 'blitz' | 'challenge'
+  const [stats, setStats] = useState(() => getGameStats('bearinglock'));
+  const [challengeData, setChallengeData] = useState(null);
+
+  // Active game session state
+  const [waypointsDeck, setWaypointsDeck] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentGuess, setCurrentGuess] = useState(0); // 0° to 359°
+  const [isLocked, setIsLocked] = useState(false);
+  const [roundResult, setRoundResult] = useState(null);
+  const [history, setHistory] = useState([]); // array of { waypoint, guess, target, delta, scoreResult, combo }
+  const [totalScore, setTotalScore] = useState(0);
+  const [combo, setCombo] = useState(1);
+  const [bullseyeCount, setBullseyeCount] = useState(0);
+  const [gameOver, setGameOver] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [copyFeedback, setCopyFeedback] = useState(null);
+
+  // Blitz mode timer
+  const [blitzTimeRemaining, setBlitzTimeRemaining] = useState(BLITZ_START_TIME);
+  const [blitzBonusNotice, setBlitzBonusNotice] = useState(null);
+  const blitzTimerRef = useRef(null);
+
+  const activeSeedRef = useRef(null);
+  const gameStartTimeRef = useRef(0);
+
+  // Check challenge link
+  useEffect(() => {
+    if (challengeCode) {
+      const decoded = decodeChallenge(challengeCode);
+      if (decoded && decoded.gameSlug === 'bearinglock') {
+        setChallengeData(decoded);
+        startChallenge(decoded);
+      }
+    }
+  }, [challengeCode]);
+
+  // Handle Blitz countdown
+  useEffect(() => {
+    if (mode === 'blitz' && !gameOver) {
+      blitzTimerRef.current = setInterval(() => {
+        setBlitzTimeRemaining((prev) => {
+          if (prev <= 1) {
+            clearInterval(blitzTimerRef.current);
+            finishGame();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(blitzTimerRef.current);
+  }, [mode, gameOver]);
+
+  // Start Daily Mode
+  const startDaily = () => {
+    soundEngine.playTap();
+    const seed = getDailySeed();
+    activeSeedRef.current = seed;
+    const deck = getDailyWaypoints(seed);
+    setWaypointsDeck(deck);
+    setCurrentIndex(0);
+    setCurrentGuess(0);
+    setIsLocked(false);
+    setRoundResult(null);
+    setHistory([]);
+    setTotalScore(0);
+    setCombo(1);
+    setBullseyeCount(0);
+    setGameOver(false);
+    setShowConfetti(false);
+    setMode('daily');
+    gameStartTimeRef.current = Date.now();
+  };
+
+  // Start Blitz Mode
+  const startBlitz = () => {
+    soundEngine.playTap();
+    const seed = Date.now();
+    activeSeedRef.current = seed;
+    // Pre-populate with first waypoint
+    const firstWp = getRandomWaypoint();
+    setWaypointsDeck([firstWp]);
+    setCurrentIndex(0);
+    setCurrentGuess(0);
+    setIsLocked(false);
+    setRoundResult(null);
+    setHistory([]);
+    setTotalScore(0);
+    setCombo(1);
+    setBullseyeCount(0);
+    setBlitzTimeRemaining(BLITZ_START_TIME);
+    setGameOver(false);
+    setShowConfetti(false);
+    setMode('blitz');
+    gameStartTimeRef.current = Date.now();
+  };
+
+  // Start 1v1 Challenge
+  const startChallenge = (decoded) => {
+    const seed = decoded.seed;
+    activeSeedRef.current = seed;
+    const deck = getDailyWaypoints(seed);
+    setWaypointsDeck(deck);
+    setCurrentIndex(0);
+    setCurrentGuess(0);
+    setIsLocked(false);
+    setRoundResult(null);
+    setHistory([]);
+    setTotalScore(0);
+    setCombo(1);
+    setBullseyeCount(0);
+    setGameOver(false);
+    setShowConfetti(false);
+    setMode('challenge');
+    gameStartTimeRef.current = Date.now();
+  };
+
+  const currentWaypoint = waypointsDeck[currentIndex];
+
+  // Handle Lock Bearing Action
+  const handleLockBearing = useCallback(() => {
+    if (isLocked || !currentWaypoint || gameOver) return;
+
+    soundEngine.playTap();
+    setIsLocked(true);
+
+    const target = currentWaypoint.trueBearing;
+    const delta = calculateBearingDelta(currentGuess, target);
+    const scoreResult = calculateBearingScore(delta);
+
+    // Combo multiplier: build on good locks (delta <= 15°)
+    let newCombo = combo;
+    if (delta <= 12) {
+      newCombo = Math.min(3, Math.round((combo + 0.5) * 10) / 10);
+      soundEngine.playCorrect();
+      if (scoreResult.isBullseye) {
+        soundEngine.playStreak();
+        setBullseyeCount((prev) => prev + 1);
+      }
+    } else if (delta <= 30) {
+      newCombo = 1;
+      soundEngine.playTap();
+    } else {
+      newCombo = 1;
+      soundEngine.playWrong();
+    }
+    setCombo(newCombo);
+
+    // Apply combo to score
+    const earnedScore = Math.round(scoreResult.score * newCombo);
+    setTotalScore((prev) => prev + earnedScore);
+
+    const record = {
+      waypoint: currentWaypoint,
+      guess: currentGuess,
+      target,
+      delta,
+      earnedScore,
+      scoreResult,
+      combo: newCombo,
+    };
+    setRoundResult(record);
+    setHistory((prev) => [...prev, record]);
+
+    // Blitz mode time bonus
+    if (mode === 'blitz' && delta <= 15) {
+      setBlitzTimeRemaining((prev) => prev + BLITZ_ACCURACY_BONUS);
+      setBlitzBonusNotice(`+${BLITZ_ACCURACY_BONUS}s TIME BONUS!`);
+      setTimeout(() => setBlitzBonusNotice(null), 1800);
+    }
+  }, [isLocked, currentWaypoint, gameOver, currentGuess, combo, mode]);
+
+  // Spacebar to lock bearing or proceed
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (mode === 'menu' || gameOver) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (!isLocked) {
+          handleLockBearing();
+        } else {
+          handleNextRound();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  });
+
+  // Advance to next leg
+  const handleNextRound = () => {
+    soundEngine.playTap();
+
+    if (mode === 'blitz') {
+      // In blitz mode, pick next random waypoint
+      const nextWp = getRandomWaypoint(currentWaypoint?.id);
+      setWaypointsDeck((prev) => [...prev, nextWp]);
+      setCurrentIndex((prev) => prev + 1);
+      setCurrentGuess(0);
+      setIsLocked(false);
+      setRoundResult(null);
+      return;
+    }
+
+    // Daily or Challenge mode: 5 rounds
+    if (currentIndex + 1 >= ROUNDS_PER_DAILY) {
+      finishGame();
+    } else {
+      setCurrentIndex((prev) => prev + 1);
+      setCurrentGuess(0);
+      setIsLocked(false);
+      setRoundResult(null);
+    }
+  };
+
+  // Finish session
+  const finishGame = () => {
+    clearInterval(blitzTimerRef.current);
+    setGameOver(true);
+    soundEngine.playCelebration();
+    setShowConfetti(true);
+
+    const correctCount = history.filter((h) => h.delta <= 15).length;
+    saveGameScore('bearinglock', totalScore, mode === 'daily', correctCount);
+    setStats(getGameStats('bearinglock'));
+  };
+
+  // Generate shareable Wordle-style summary
+  const handleShare = () => {
+    soundEngine.playTap();
+    const avgError =
+      history.length > 0
+        ? Math.round(
+            (history.reduce((acc, h) => acc + h.delta, 0) / history.length) * 10
+          ) / 10
+        : 0;
+
+    const emojiGrid = history
+      .map((h) => {
+        if (h.delta <= 3) return '🎯';
+        if (h.delta <= 12) return '🟢';
+        if (h.delta <= 25) return '🟡';
+        return '🔴';
+      })
+      .join('');
+
+    const modeLabel =
+      mode === 'daily'
+        ? 'Daily Flight'
+        : mode === 'blitz'
+        ? 'Radar Blitz'
+        : '1v1 Challenge';
+
+    const text = `🧭 BEARING LOCK (${modeLabel})
+Score: ${totalScore.toLocaleString()} pts | Avg Error: ±${avgError}°
+${emojiGrid}
+Bullseyes: ${bullseyeCount} 🎯
+Play now: ${window.location.origin}/bearinglock`;
+
+    copyShareText(text);
+    setCopyFeedback('Copied result to clipboard!');
+    setTimeout(() => setCopyFeedback(null), 2500);
+  };
+
+  // Generate 1v1 challenge URL
+  const handleCreateChallenge = () => {
+    soundEngine.playTap();
+    const seed = activeSeedRef.current || Date.now();
+    const totalTime = Math.round((Date.now() - gameStartTimeRef.current) / 1000);
+    const code = encodeChallenge('bearinglock', seed, totalScore, totalTime);
+    const url = `${window.location.origin}/bearinglock?c=${code}`;
+    copyShareText(url);
+    setCopyFeedback('Copied 1v1 Challenge link!');
+    setTimeout(() => setCopyFeedback(null), 2500);
+  };
+
+  // Average degree accuracy
+  const averageError =
+    history.length > 0
+      ? Math.round(
+          (history.reduce((acc, h) => acc + h.delta, 0) / history.length) * 10
+        ) / 10
+      : 0;
+
+  return (
+    <div className="w-full max-w-md mx-auto flex flex-col min-h-screen bg-[#070d18] text-slate-100 relative pb-10">
+      {showConfetti && <ConfettiCanvas duration={4000} />}
+
+      <NavBar
+        title="BEARING LOCK"
+        subtitle="Tactile Compass Blitz"
+        streak={combo > 1 ? `${combo}x` : 0}
+        onHome={onHome}
+      />
+
+      {/* ──────────────────────────────────────────────
+          SCREEN 1: MENU & MODE SELECT
+      ────────────────────────────────────────────── */}
+      {mode === 'menu' && (
+        <div className="flex-1 px-4 py-6 flex flex-col justify-between animate-fadeIn">
+          <div>
+            {/* Hero Header */}
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-tr from-sky-500/20 to-teal-500/20 border border-sky-500/40 flex items-center justify-center shadow-lg shadow-sky-500/10">
+                <Compass className="w-9 h-9 text-sky-400 animate-spin-slow" />
+              </div>
+              <h2 className="text-2xl font-black tracking-tight text-white uppercase">
+                Bearing Lock
+              </h2>
+              <p className="text-xs text-sky-400/90 font-medium tracking-wide mt-1">
+                Tactile 360° Compass Navigation Blitz
+              </p>
+            </div>
+
+            {/* Quick Stats Pill */}
+            <div className="grid grid-cols-3 gap-2 p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center mb-6">
+              <div>
+                <div className="text-[10px] text-slate-400 font-bold uppercase">High Score</div>
+                <div className="text-base font-black text-white font-mono">
+                  {stats.highScore.toLocaleString()}
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] text-slate-400 font-bold uppercase">Expeditions</div>
+                <div className="text-base font-black text-sky-400 font-mono">
+                  {stats.gamesPlayed}
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] text-slate-400 font-bold uppercase">Accuracy</div>
+                <div className="text-base font-black text-emerald-400 font-mono">
+                  {stats.totalCorrect || 0}
+                </div>
+              </div>
+            </div>
+
+            {/* Mode Buttons */}
+            <div className="flex flex-col gap-3">
+              {/* Daily Flight */}
+              <button
+                onClick={startDaily}
+                className="w-full p-4 rounded-2xl bg-gradient-to-r from-sky-500/20 via-slate-900 to-slate-900 border border-sky-500/40 hover:border-sky-400 flex items-center justify-between text-left group transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-sky-500/20 border border-sky-500/30 text-sky-400">
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-black text-white flex items-center gap-2">
+                      Daily Flight
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 font-semibold border border-sky-500/30">
+                        5 LEGS
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-400">
+                      Fixed daily worldwide waypoints. Compare scores globally.
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-sky-400 transition-colors" />
+              </button>
+
+              {/* Radar Blitz */}
+              <button
+                onClick={startBlitz}
+                className="w-full p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 via-slate-900 to-slate-900 border border-amber-500/40 hover:border-amber-400 flex items-center justify-between text-left group transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400">
+                    <Zap className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-black text-white flex items-center gap-2">
+                      Radar Blitz
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30">
+                        45s TIMER
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-400">
+                      Continuous rapid-fire locks. +8s bonus time for precision!
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-amber-400 transition-colors" />
+              </button>
+            </div>
+
+            {/* How to Play Card */}
+            <div className="mt-6 p-4 rounded-2xl bg-slate-950/60 border border-slate-800 text-xs text-slate-300">
+              <div className="flex items-center gap-1.5 font-bold text-sky-400 uppercase tracking-wide mb-2">
+                <Info className="w-4 h-4" />
+                Flight Instructions
+              </div>
+              <ul className="space-y-1.5 text-[11px] text-slate-400">
+                <li>• Drag the 360° compass ring to align your departure heading.</li>
+                <li>• Use fine adjustment buttons or arrow keys for pinpoint accuracy.</li>
+                <li>• Hit <strong className="text-white">LOCK BEARING</strong> to calibrate. Closest initial angle gets the highest score!</li>
+                <li>• <strong className="text-emerald-400">±1.5° Bullseye</strong> earns 1,000 points & streak boosts!</li>
+              </ul>
+            </div>
+          </div>
+
+          <NextGameDrawer currentGameSlug="bearinglock" onSelectGame={onSelectGame} />
+        </div>
+      )}
+
+      {/* ──────────────────────────────────────────────
+          SCREEN 2: ACTIVE FLIGHT NAVIGATION
+      ────────────────────────────────────────────── */}
+      {(mode === 'daily' || mode === 'blitz' || mode === 'challenge') && !gameOver && (
+        <div className="flex-1 px-4 py-3 flex flex-col justify-between animate-fadeIn">
+          {/* Top Mission HUD */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 text-xs font-mono font-bold text-slate-400">
+                {mode === 'blitz' ? (
+                  <span className="flex items-center gap-1.5 text-amber-400 font-bold px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30">
+                    <Clock className="w-3.5 h-3.5 animate-pulse" />
+                    {blitzTimeRemaining}s
+                  </span>
+                ) : (
+                  <span>
+                    LEG {currentIndex + 1} / {ROUNDS_PER_DAILY}
+                  </span>
+                )}
+                {blitzBonusNotice && (
+                  <span className="text-[10px] text-emerald-400 font-black animate-bounce">
+                    {blitzBonusNotice}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                {combo > 1 && (
+                  <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-mono font-bold">
+                    <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                    <span>{combo}x</span>
+                  </div>
+                )}
+                <div className="text-sm font-mono font-black text-sky-400">
+                  {totalScore.toLocaleString()} PTS
+                </div>
+              </div>
+            </div>
+
+            {/* Current Waypoint Flight Card */}
+            {currentWaypoint && (
+              <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-lg relative overflow-hidden mb-3">
+                <div className="flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">
+                  <span className="flex items-center gap-1 text-sky-400">
+                    <Plane className="w-3.5 h-3.5" />
+                    {currentWaypoint.category}
+                  </span>
+                  <span>{currentWaypoint.distanceKm.toLocaleString()} KM</span>
+                </div>
+
+                {/* Waypoint origin & dest */}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex-1">
+                    <div className="text-[10px] text-slate-400 uppercase font-semibold">Origin</div>
+                    <div className="text-sm font-black text-white flex items-center gap-1.5">
+                      <span>{currentWaypoint.origin.flag}</span>
+                      <span className="truncate">{currentWaypoint.origin.name}</span>
+                    </div>
+                    <div className="text-[10px] text-sky-400 font-mono font-bold">
+                      {currentWaypoint.origin.code}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-center px-2">
+                    <ArrowRight className="w-5 h-5 text-sky-400 animate-pulse" />
+                    <span className="text-[9px] text-slate-500 font-mono font-semibold">BEARING?</span>
+                  </div>
+
+                  <div className="flex-1 text-right">
+                    <div className="text-[10px] text-slate-400 uppercase font-semibold">Destination</div>
+                    <div className="text-sm font-black text-white flex items-center justify-end gap-1.5">
+                      <span className="truncate">{currentWaypoint.dest.name}</span>
+                      <span>{currentWaypoint.dest.flag}</span>
+                    </div>
+                    <div className="text-[10px] text-sky-400 font-mono font-bold">
+                      {currentWaypoint.dest.code}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Interactive Tactile Compass Dial */}
+          <div className="my-auto">
+            <CompassDial
+              currentBearing={currentGuess}
+              onChangeBearing={setCurrentGuess}
+              targetBearing={isLocked ? currentWaypoint?.trueBearing : null}
+              isLocked={isLocked}
+            />
+          </div>
+
+          {/* Action Area: Lock or Next */}
+          <div className="w-full mt-3">
+            {!isLocked ? (
+              <button
+                onClick={handleLockBearing}
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-sky-500 via-teal-500 to-sky-400 text-slate-950 font-black text-base uppercase tracking-wider shadow-lg shadow-sky-500/25 hover:opacity-95 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
+                <Compass className="w-5 h-5" />
+                <span>Lock Bearing</span>
+                <span className="text-xs font-mono font-bold bg-slate-950/20 px-2 py-0.5 rounded">
+                  {formatDegrees(currentGuess)}
+                </span>
+              </button>
+            ) : (
+              <div className="flex flex-col gap-2 animate-fadeIn">
+                {/* Result Pill */}
+                {roundResult && (
+                  <div className="p-3 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+                    <div>
+                      <div className={`text-xs font-black uppercase ${roundResult.scoreResult.color}`}>
+                        {roundResult.scoreResult.badge}
+                      </div>
+                      <div className="text-[11px] text-slate-400 font-mono">
+                        Target: <strong className="text-emerald-400">{formatDegrees(roundResult.target)}</strong> ({getCompassHeading(roundResult.target)}) | Delta: <strong className="text-white">±{roundResult.delta}°</strong>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-base font-black font-mono text-sky-400">
+                        +{roundResult.earnedScore}
+                      </div>
+                      {roundResult.combo > 1 && (
+                        <div className="text-[10px] font-bold text-amber-400 font-mono">
+                          {roundResult.combo}x BOOST
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Great Circle Navigation Trivia */}
+                {currentWaypoint?.trivia && (
+                  <p className="text-[11px] text-slate-400 px-2 italic">
+                    💡 {currentWaypoint.trivia}
+                  </p>
+                )}
+
+                {/* Continue Button */}
+                <button
+                  onClick={handleNextRound}
+                  className="w-full py-3.5 rounded-2xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-sm uppercase tracking-wider active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <span>
+                    {mode === 'blitz'
+                      ? 'Next Waypoint'
+                      : currentIndex + 1 >= ROUNDS_PER_DAILY
+                      ? 'View Expedition Report'
+                      : 'Next Waypoint'}
+                  </span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ──────────────────────────────────────────────
+          SCREEN 3: EXPEDITION GAME OVER / SUMMARY
+      ────────────────────────────────────────────── */}
+      {gameOver && (
+        <div className="flex-1 px-4 py-6 flex flex-col justify-between animate-fadeIn">
+          <div>
+            {/* Header */}
+            <div className="text-center mb-5">
+              <div className="w-16 h-16 mx-auto mb-2 rounded-2xl bg-gradient-to-tr from-sky-500/20 to-teal-500/20 border border-sky-500/40 flex items-center justify-center shadow-lg shadow-sky-500/10">
+                <Trophy className="w-9 h-9 text-amber-400" />
+              </div>
+              <h2 className="text-2xl font-black uppercase text-white tracking-tight">
+                Flight Logged
+              </h2>
+              <p className="text-xs text-sky-400 font-mono">
+                {mode === 'daily'
+                  ? 'Daily Waypoint Expedition'
+                  : mode === 'blitz'
+                  ? 'Radar Blitz Run'
+                  : '1v1 Match Result'}
+              </p>
+            </div>
+
+            {/* Total Score Badge */}
+            <div className="p-4 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 text-center mb-4">
+              <div className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">
+                Total Flight Score
+              </div>
+              <div className="text-4xl font-black font-mono text-white tracking-tight">
+                {totalScore.toLocaleString()}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-800/80 text-left">
+                <div>
+                  <div className="text-[10px] text-slate-400 uppercase font-semibold">Average Error</div>
+                  <div className="text-sm font-black font-mono text-emerald-400">
+                    ±{averageError}°
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] text-slate-400 uppercase font-semibold">Bullseyes (🎯)</div>
+                  <div className="text-sm font-black font-mono text-sky-400">
+                    {bullseyeCount} Perfect
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* History Breakdown */}
+            <div className="mb-4">
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                Leg Breakdown
+              </div>
+              <div className="space-y-1.5">
+                {history.map((h, i) => (
+                  <div
+                    key={i}
+                    className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between text-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-slate-500 text-[11px]">#{i + 1}</span>
+                      <span className="font-bold text-white">
+                        {h.waypoint.origin.code} → {h.waypoint.dest.code}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-[11px] text-slate-400">
+                        Target {formatDegrees(h.target)} (Δ{h.delta}°)
+                      </span>
+                      <span className="font-mono font-bold text-sky-400">
+                        +{h.earnedScore}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Share & 1v1 Challenge Buttons */}
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleShare}
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 via-teal-500 to-sky-400 text-slate-950 font-black text-sm uppercase tracking-wider shadow-lg shadow-sky-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
+                <Share2 className="w-4 h-4" />
+                <span>Share Flight Log</span>
+              </button>
+
+              <button
+                onClick={handleCreateChallenge}
+                className="w-full py-3 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-white font-bold text-xs uppercase tracking-wider active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
+                <Swords className="w-4 h-4 text-sky-400" />
+                <span>Challenge A Friend (1v1)</span>
+              </button>
+
+              {copyFeedback && (
+                <div className="text-center text-xs font-bold text-emerald-400 animate-fadeIn">
+                  {copyFeedback}
+                </div>
+              )}
+
+              <button
+                onClick={() => setMode('menu')}
+                className="w-full py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white font-semibold text-xs active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-1"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Back to Mode Select</span>
+              </button>
+            </div>
+          </div>
+
+          <NextGameDrawer currentGameSlug="bearinglock" onSelectGame={onSelectGame} />
+        </div>
+      )}
+
+      {/* Studio Review Drawer (dash.minty.red / ?review=true) */}
+      <ReviewDrawer gameSlug="bearinglock" />
+    </div>
+  );
+}

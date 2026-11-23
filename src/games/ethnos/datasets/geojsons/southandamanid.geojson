@@ -1,0 +1,284 @@
+{
+  "type": "FeatureCollection",
+  "phenotype": "SouthAndamanid",
+  "slug": "southandamanid",
+  "regions": [
+    "austronesian"
+  ],
+  "centroid": {
+    "lat": 12.171,
+    "lng": 93.024
+  },
+  "bbox": [
+    93.024,
+    11.18,
+    93.024,
+    12.171
+  ],
+  "info": {
+    "name": "South Andamanid ",
+    "description": "<td valign=\"top\" width=\"450\">\n<h3> Description:</h3>\r\nIsolated type typical for the Little Andamanese people (Onge, Jarawa, Sentilese). After contact with Europeans in the 19th century populations collapsed, mostly due to disease. A few hundred remain today with Jarawa being the most populous, and Sentilese one of the last Stone Age tribes without closer contact to the modern world.\r\n<h3> Physical Traits:</h3>\r\nBluish brown-black skin, kinky or peppercorn hair. Very short, ectomorph to endomorph, mesoskelic. Body proportions show no sign of pygmyism. Females often steatopygic. Brachycephalic, mildly hypsicranic, small-headed. Mildly platyrrhine nose. Chin weak, prognathy mild. Compared to North Andamanid, more robust with a rounder face, wider nose, and shorter head. \r\n<h3> Literature:</h3>\n<a href=\"http://humanphenotypes.net/links.html#E28\" target=\"_blank\">Eickstedt (1928) </a> found Little Andanamese to be anthropometrically distinct from the Great Andamanese. Biasutti followed in recognising them as the Onghi subvariety (<a href=\"http://humanphenotypes.net/links.html#B67\" target=\"_blank\">Biasutti, 1967</a>). Detailed investigations by <a href=\"http://humanphenotypes.net/links.html#C56\" target=\"_blank\">Cipriani (1956)</a>. Modern research confirms the genealogical distinctiveness of the two groups <a href=\"http://humanphenotypes.net/links.html#A08\" target=\"_blank\"> (Abbi, 2008)</a>. Often simply regarded as Andamanid (<a href=\"http://humanphenotypes.net/links.html#L67\" target=\"_blank\">Lundman, 1967</a>; <a href=\"http://humanphenotypes.net/links.html#A79\" target=\"_blank\">Alexeev, 1979</a>; <a href=\"http://humanphenotypes.net/links.html#K96\" target=\"_blank\">Knussmann, 1996</a>).\r\n\n</td>"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "SouthAndamanid",
+        "slug": "southandamanid",
+        "zone": "centroid",
+        "regions": [
+          "austronesian"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          93.024,
+          12.171
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "SouthAndamanid",
+        "slug": "southandamanid",
+        "zone": "bright",
+        "is_circle": true,
+        "radius_km": 50,
+        "center": [
+          93.024,
+          12.171
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              93.484808,
+              12.171
+            ],
+            [
+              93.469107,
+              12.287585
+            ],
+            [
+              93.423072,
+              12.396225
+            ],
+            [
+              93.349841,
+              12.489517
+            ],
+            [
+              93.254404,
+              12.561102
+            ],
+            [
+              93.143266,
+              12.606102
+            ],
+            [
+              93.024,
+              12.62145
+            ],
+            [
+              92.904734,
+              12.606102
+            ],
+            [
+              92.793596,
+              12.561102
+            ],
+            [
+              92.698159,
+              12.489517
+            ],
+            [
+              92.624928,
+              12.396225
+            ],
+            [
+              92.578893,
+              12.287585
+            ],
+            [
+              92.563192,
+              12.171
+            ],
+            [
+              92.578893,
+              12.054415
+            ],
+            [
+              92.624928,
+              11.945775
+            ],
+            [
+              92.698159,
+              11.852483
+            ],
+            [
+              92.793596,
+              11.780898
+            ],
+            [
+              92.904734,
+              11.735898
+            ],
+            [
+              93.024,
+              11.72055
+            ],
+            [
+              93.143266,
+              11.735898
+            ],
+            [
+              93.254404,
+              11.780898
+            ],
+            [
+              93.349841,
+              11.852483
+            ],
+            [
+              93.423072,
+              11.945775
+            ],
+            [
+              93.469107,
+              12.054415
+            ],
+            [
+              93.484808,
+              12.171
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "SouthAndamanid",
+        "slug": "southandamanid",
+        "zone": "bright",
+        "is_circle": true,
+        "radius_km": 50,
+        "center": [
+          93.024,
+          11.18
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              93.483164,
+              11.18
+            ],
+            [
+              93.467518,
+              11.296585
+            ],
+            [
+              93.421648,
+              11.405225
+            ],
+            [
+              93.348678,
+              11.498517
+            ],
+            [
+              93.253582,
+              11.570102
+            ],
+            [
+              93.14284,
+              11.615102
+            ],
+            [
+              93.024,
+              11.63045
+            ],
+            [
+              92.90516,
+              11.615102
+            ],
+            [
+              92.794418,
+              11.570102
+            ],
+            [
+              92.699322,
+              11.498517
+            ],
+            [
+              92.626352,
+              11.405225
+            ],
+            [
+              92.580482,
+              11.296585
+            ],
+            [
+              92.564836,
+              11.18
+            ],
+            [
+              92.580482,
+              11.063415
+            ],
+            [
+              92.626352,
+              10.954775
+            ],
+            [
+              92.699322,
+              10.861483
+            ],
+            [
+              92.794418,
+              10.789898
+            ],
+            [
+              92.90516,
+              10.744898
+            ],
+            [
+              93.024,
+              10.72955
+            ],
+            [
+              93.14284,
+              10.744898
+            ],
+            [
+              93.253582,
+              10.789898
+            ],
+            [
+              93.348678,
+              10.861483
+            ],
+            [
+              93.421648,
+              10.954775
+            ],
+            [
+              93.467518,
+              11.063415
+            ],
+            [
+              93.483164,
+              11.18
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

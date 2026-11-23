@@ -1,0 +1,608 @@
+{
+  "type": "FeatureCollection",
+  "phenotype": "Keralid",
+  "slug": "keralid",
+  "regions": [
+    "indian"
+  ],
+  "centroid": {
+    "lat": 12.662,
+    "lng": 75.987
+  },
+  "bbox": [
+    73.355,
+    3.63,
+    78.947,
+    18.849
+  ],
+  "info": {
+    "name": "Keralid ",
+    "description": "<td valign=\"top\" width=\"450\">\n<h3> Description:</h3>\r\nIndid subtype, with a position intermediate between North Indid and Gracile Indid, mainly found in the plains of Malabar. Typical for Tiyer / Ezhava, Mukkaver, Kammalan, Nairs, and similar medium ranked castes of Kerala. The special features of this type have usually not been regarded as a result of mixture, but as a local variety.\r\n<h3> Physical Traits:</h3>\r\nMedium brown skin, strait or wavy hair. Rather short, mesoskelic, ectomorph. Dolicho-mesocephalic, mildly hypsicranic. Mildly leptorrhine, prominent, straight, and long nose. Overall coarse, angular facial features, but gracile bodies. Faces are long with the lower face appearing short, especially in women.<br/>\n<h3> Literature:</h3>\r\nEickstedt (<a href=\"http://humanphenotypes.net/links.html#E29\" target=\"_blank\">1929</a>,<a href=\"http://humanphenotypes.net/links.html#E34\" target=\"_blank\">1934</a>,<a href=\"http://humanphenotypes.net/links.html#E37\" target=\"_blank\">1937</a>) identified this variety after he had traveled India for three years and measured thousands of individuals, he placed it between North and Gracile Indid. Usually part of Gracile Indid (<a href=\"http://humanphenotypes.net/links.html#B83\" target=\"_blank\">Bernhard, 1983</a>) or Peninsular Indid (<a href=\"http://humanphenotypes.net/links.html#B67\" target=\"_blank\">Biasutti, 1967</a>).\r\n\n</td>"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Keralid",
+        "slug": "keralid",
+        "zone": "centroid",
+        "regions": [
+          "indian"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.987,
+          12.662
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Keralid",
+        "slug": "keralid",
+        "zone": "bright",
+        "polygon_index": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              75.072,
+              14.115
+            ],
+            [
+              75.652,
+              13.634
+            ],
+            [
+              75.409,
+              13.15
+            ],
+            [
+              75.409,
+              12.662
+            ],
+            [
+              75.168,
+              12.171
+            ],
+            [
+              75.744,
+              11.677
+            ],
+            [
+              75.744,
+              11.18
+            ],
+            [
+              76.32,
+              11.18
+            ],
+            [
+              76.896,
+              10.68
+            ],
+            [
+              76.651,
+              10.176
+            ],
+            [
+              76.896,
+              10.68
+            ],
+            [
+              76.896,
+              11.18
+            ],
+            [
+              76.896,
+              11.677
+            ],
+            [
+              76.896,
+              12.171
+            ],
+            [
+              77.143,
+              12.662
+            ],
+            [
+              77.143,
+              13.15
+            ],
+            [
+              76.812,
+              13.634
+            ],
+            [
+              76.232,
+              13.634
+            ],
+            [
+              75.652,
+              14.115
+            ],
+            [
+              75.072,
+              14.115
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Keralid",
+        "slug": "keralid",
+        "zone": "dull",
+        "polygon_index": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.355,
+              18.849
+            ],
+            [
+              73.703,
+              18.34
+            ],
+            [
+              74.29,
+              17.849
+            ],
+            [
+              74.049,
+              17.393
+            ],
+            [
+              73.636,
+              16.935
+            ],
+            [
+              74.392,
+              16.473
+            ],
+            [
+              74.392,
+              16.008
+            ],
+            [
+              74.152,
+              15.539
+            ],
+            [
+              74.733,
+              15.068
+            ],
+            [
+              75.072,
+              14.115
+            ],
+            [
+              75.652,
+              14.115
+            ],
+            [
+              75.652,
+              13.634
+            ],
+            [
+              76.812,
+              13.634
+            ],
+            [
+              76.565,
+              13.15
+            ],
+            [
+              77.143,
+              13.15
+            ],
+            [
+              77.143,
+              12.662
+            ],
+            [
+              76.896,
+              12.171
+            ],
+            [
+              76.896,
+              11.677
+            ],
+            [
+              76.896,
+              11.18
+            ],
+            [
+              76.896,
+              10.68
+            ],
+            [
+              76.651,
+              10.176
+            ],
+            [
+              77.225,
+              10.237
+            ],
+            [
+              76.979,
+              9.731
+            ],
+            [
+              77.552,
+              9.221
+            ],
+            [
+              77.143,
+              8.708
+            ],
+            [
+              77.714,
+              8.708
+            ],
+            [
+              78.124,
+              9.221
+            ],
+            [
+              78.696,
+              9.731
+            ],
+            [
+              78.947,
+              10.237
+            ],
+            [
+              78.373,
+              9.67
+            ],
+            [
+              78.373,
+              10.176
+            ],
+            [
+              78.624,
+              10.68
+            ],
+            [
+              78.624,
+              11.18
+            ],
+            [
+              78.624,
+              11.677
+            ],
+            [
+              78.624,
+              12.171
+            ],
+            [
+              78.876,
+              12.662
+            ],
+            [
+              78.876,
+              13.15
+            ],
+            [
+              78.551,
+              13.634
+            ],
+            [
+              78.551,
+              14.115
+            ],
+            [
+              78.551,
+              14.593
+            ],
+            [
+              78.805,
+              15.068
+            ],
+            [
+              78.223,
+              15.539
+            ],
+            [
+              78.476,
+              16.008
+            ],
+            [
+              77.893,
+              16.473
+            ],
+            [
+              77.143,
+              16.935
+            ],
+            [
+              76.976,
+              17.393
+            ],
+            [
+              76.639,
+              17.849
+            ],
+            [
+              76.052,
+              18.34
+            ],
+            [
+              75.465,
+              18.34
+            ],
+            [
+              75.123,
+              18.849
+            ],
+            [
+              74.534,
+              18.849
+            ],
+            [
+              73.944,
+              18.849
+            ],
+            [
+              73.355,
+              18.849
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Keralid",
+        "slug": "keralid",
+        "zone": "dull",
+        "is_circle": true,
+        "radius_km": 50,
+        "center": [
+          75.594,
+          5.785
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              76.046756,
+              5.785
+            ],
+            [
+              76.031329,
+              5.901585
+            ],
+            [
+              75.986098,
+              6.010225
+            ],
+            [
+              75.914147,
+              6.103517
+            ],
+            [
+              75.820378,
+              6.175102
+            ],
+            [
+              75.711182,
+              6.220102
+            ],
+            [
+              75.594,
+              6.23545
+            ],
+            [
+              75.476818,
+              6.220102
+            ],
+            [
+              75.367622,
+              6.175102
+            ],
+            [
+              75.273853,
+              6.103517
+            ],
+            [
+              75.201902,
+              6.010225
+            ],
+            [
+              75.156671,
+              5.901585
+            ],
+            [
+              75.141244,
+              5.785
+            ],
+            [
+              75.156671,
+              5.668415
+            ],
+            [
+              75.201902,
+              5.559775
+            ],
+            [
+              75.273853,
+              5.466483
+            ],
+            [
+              75.367622,
+              5.394898
+            ],
+            [
+              75.476818,
+              5.349898
+            ],
+            [
+              75.594,
+              5.33455
+            ],
+            [
+              75.711182,
+              5.349898
+            ],
+            [
+              75.820378,
+              5.394898
+            ],
+            [
+              75.914147,
+              5.466483
+            ],
+            [
+              75.986098,
+              5.559775
+            ],
+            [
+              76.031329,
+              5.668415
+            ],
+            [
+              76.046756,
+              5.785
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Keralid",
+        "slug": "keralid",
+        "zone": "dull",
+        "is_circle": true,
+        "radius_km": 50,
+        "center": [
+          75.355,
+          3.63
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              75.806356,
+              3.63
+            ],
+            [
+              75.790976,
+              3.746585
+            ],
+            [
+              75.745886,
+              3.855225
+            ],
+            [
+              75.674157,
+              3.948517
+            ],
+            [
+              75.580678,
+              4.020102
+            ],
+            [
+              75.47182,
+              4.065102
+            ],
+            [
+              75.355,
+              4.08045
+            ],
+            [
+              75.23818,
+              4.065102
+            ],
+            [
+              75.129322,
+              4.020102
+            ],
+            [
+              75.035843,
+              3.948517
+            ],
+            [
+              74.964114,
+              3.855225
+            ],
+            [
+              74.919024,
+              3.746585
+            ],
+            [
+              74.903644,
+              3.63
+            ],
+            [
+              74.919024,
+              3.513415
+            ],
+            [
+              74.964114,
+              3.404775
+            ],
+            [
+              75.035843,
+              3.311483
+            ],
+            [
+              75.129322,
+              3.239898
+            ],
+            [
+              75.23818,
+              3.194898
+            ],
+            [
+              75.355,
+              3.17955
+            ],
+            [
+              75.47182,
+              3.194898
+            ],
+            [
+              75.580678,
+              3.239898
+            ],
+            [
+              75.674157,
+              3.311483
+            ],
+            [
+              75.745886,
+              3.404775
+            ],
+            [
+              75.790976,
+              3.513415
+            ],
+            [
+              75.806356,
+              3.63
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

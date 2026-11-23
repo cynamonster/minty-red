@@ -1,0 +1,206 @@
+{
+  "type": "FeatureCollection",
+  "phenotype": "JahaiSemangid",
+  "slug": "jahaisemangid",
+  "regions": [
+    "austronesian"
+  ],
+  "centroid": {
+    "lat": 6.315,
+    "lng": 101.838
+  },
+  "bbox": [
+    100.0,
+    1.424,
+    104.031,
+    8.921
+  ],
+  "info": {
+    "name": "Jahai Semangid ",
+    "description": "<td valign=\"top\" width=\"450\">\n<h3> Description:</h3>\r\nSemangid variety, a Paleolithic relict of the original Malaysian forest population. Shows more Veddoid/Australoid features and is similar to Tapirid. Very rare with a few hundred individuals remaining. Typified by the Jahai tribe of the Semang, but also in Bateq and occasionally other Semang groups and even Jakudn. Loss of culture and forest destruction may wipe out this unique type soon.\r\n<h3> Physical Traits:</h3>\r\nDark (copper) brown skin and kinky hair. Short, but taller than Semangids, mesoskelic. Mesomorph to ectomorph, mesocephalic, hypsicranic, small-headed. Mesorrhine, funnel-shaped nose. The face is relatively short, but longer than in Semangid. Features are more robust, especially the brow ridges. The forehead is often shield-shaped. Prognathism is often absent. \r\n<h3> Literature:</h3>\r\nDetailed investigations were made by <a href=\"http://humanphenotypes.net/links.html#S06\" target=\"_blank\">Skeat and Blagden (1906)</a> and <a href=\"http://humanphenotypes.net/links.html#S27\" target=\"_blank\">Schebesta (1927)</a>, who called it  australoid Semang type. This was adopted by <a href=\"http://humanphenotypes.net/links.html#B67\" target=\"_blank\">Biasutti (1967)</a>, who separated it out from the Semang-Aeta group as a distinct Jahai subrace. \n</td>"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "JahaiSemangid",
+        "slug": "jahaisemangid",
+        "zone": "centroid",
+        "regions": [
+          "austronesian"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          101.838,
+          6.315
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "JahaiSemangid",
+        "slug": "jahaisemangid",
+        "zone": "bright",
+        "polygon_index": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              101.838,
+              6.843
+            ],
+            [
+              101.838,
+              6.315
+            ],
+            [
+              102.409,
+              5.785
+            ],
+            [
+              101.838,
+              6.315
+            ],
+            [
+              101.838,
+              6.843
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "JahaiSemangid",
+        "slug": "jahaisemangid",
+        "zone": "dull",
+        "polygon_index": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              100.571,
+              8.921
+            ],
+            [
+              100.0,
+              8.406
+            ],
+            [
+              100.127,
+              7.888
+            ],
+            [
+              100.127,
+              7.367
+            ],
+            [
+              100.697,
+              7.367
+            ],
+            [
+              101.838,
+              6.315
+            ],
+            [
+              101.838,
+              6.843
+            ],
+            [
+              100.948,
+              5.251
+            ],
+            [
+              100.948,
+              4.714
+            ],
+            [
+              101.517,
+              4.173
+            ],
+            [
+              102.085,
+              3.63
+            ],
+            [
+              102.085,
+              3.083
+            ],
+            [
+              102.208,
+              2.533
+            ],
+            [
+              102.898,
+              1.98
+            ],
+            [
+              103.465,
+              1.98
+            ],
+            [
+              104.031,
+              1.424
+            ],
+            [
+              104.031,
+              1.98
+            ],
+            [
+              103.912,
+              2.533
+            ],
+            [
+              103.791,
+              3.083
+            ],
+            [
+              103.791,
+              3.63
+            ],
+            [
+              103.223,
+              4.173
+            ],
+            [
+              103.223,
+              4.714
+            ],
+            [
+              103.223,
+              5.251
+            ],
+            [
+              103.55,
+              5.785
+            ],
+            [
+              102.409,
+              5.785
+            ],
+            [
+              100.697,
+              7.888
+            ],
+            [
+              100.571,
+              8.406
+            ],
+            [
+              100.571,
+              8.921
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

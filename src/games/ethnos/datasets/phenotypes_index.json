@@ -1,0 +1,2339 @@
+[
+  {
+    "name": "Aetid",
+    "slug": "aetid",
+    "regions": [
+      "austronesian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 16.473,
+      "lng": 122.237
+    }
+  },
+  {
+    "name": "AfricanAlpinoid",
+    "slug": "africanalpinoid",
+    "regions": [
+      "mena"
+    ],
+    "centroid": {
+      "lat": 35.66,
+      "lng": 2.898
+    }
+  },
+  {
+    "name": "AistoNordid",
+    "slug": "aistonordid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 57.057,
+      "lng": 24.871
+    }
+  },
+  {
+    "name": "Alfoeld",
+    "slug": "alfoeld",
+    "regions": [
+      "central_asian"
+    ],
+    "centroid": {
+      "lat": 47.887,
+      "lng": 21.455
+    }
+  },
+  {
+    "name": "AmurSakhalin",
+    "slug": "amursakhalin",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 51.453,
+      "lng": 141.019
+    }
+  },
+  {
+    "name": "Anatolid",
+    "slug": "anatolid",
+    "regions": [
+      "mena"
+    ],
+    "centroid": {
+      "lat": 40.245,
+      "lng": 37.877
+    }
+  },
+  {
+    "name": "AndronovoTuranid",
+    "slug": "andronovoturanid",
+    "regions": [
+      "central_asian"
+    ],
+    "centroid": {
+      "lat": 49.415,
+      "lng": 64.206
+    }
+  },
+  {
+    "name": "AngloSaxon",
+    "slug": "anglosaxon",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 52.981,
+      "lng": 1.558
+    }
+  },
+  {
+    "name": "Annamid",
+    "slug": "annamid",
+    "regions": [
+      "eastasian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 14.115,
+      "lng": 107.536
+    }
+  },
+  {
+    "name": "Aoshima",
+    "slug": "aoshima",
+    "regions": [
+      "central_asian"
+    ],
+    "centroid": {
+      "lat": 44.321,
+      "lng": 143.791
+    }
+  },
+  {
+    "name": "Appalacid",
+    "slug": "appalacid",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": 41.264,
+      "lng": -79.362
+    }
+  },
+  {
+    "name": "ArabianVeddoid",
+    "slug": "arabianveddoid",
+    "regions": [
+      "mena"
+    ],
+    "centroid": {
+      "lat": 16.008,
+      "lng": 49.887
+    }
+  },
+  {
+    "name": "Arabid",
+    "slug": "arabid",
+    "regions": [
+      "mena"
+    ],
+    "centroid": {
+      "lat": 27.0,
+      "lng": 43.553
+    }
+  },
+  {
+    "name": "Aralid",
+    "slug": "aralid",
+    "regions": [
+      "central_asian"
+    ],
+    "centroid": {
+      "lat": 47.887,
+      "lng": 70.182
+    }
+  },
+  {
+    "name": "Arizonid",
+    "slug": "arizonid",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": 34.642,
+      "lng": -105.826
+    }
+  },
+  {
+    "name": "Armenid",
+    "slug": "armenid",
+    "regions": [
+      "mena"
+    ],
+    "centroid": {
+      "lat": 37.698,
+      "lng": 40.835
+    }
+  },
+  {
+    "name": "Assyroid",
+    "slug": "assyroid",
+    "regions": [
+      "mena"
+    ],
+    "centroid": {
+      "lat": 34.642,
+      "lng": 45.719
+    }
+  },
+  {
+    "name": "Athabaskid",
+    "slug": "athabaskid",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": 58.354,
+      "lng": -129.333
+    }
+  },
+  {
+    "name": "Barrinean",
+    "slug": "barrinean",
+    "regions": [
+      "austronesian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": -33.832,
+      "lng": 116.92
+    }
+  },
+  {
+    "name": "Baskid",
+    "slug": "baskid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 44.321,
+      "lng": -1.044
+    }
+  },
+  {
+    "name": "Baykal",
+    "slug": "baykal",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 57.67,
+      "lng": 121.907
+    }
+  },
+  {
+    "name": "Berberid",
+    "slug": "berberid",
+    "regions": [
+      "mena"
+    ],
+    "centroid": {
+      "lat": 29.038,
+      "lng": 4.014
+    }
+  },
+  {
+    "name": "BeringSea",
+    "slug": "beringsea",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": 61.125,
+      "lng": -163.169
+    }
+  },
+  {
+    "name": "Bobo",
+    "slug": "bobo",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 10.176,
+      "lng": -4.306
+    }
+  },
+  {
+    "name": "Bororo",
+    "slug": "bororo",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": -15.708,
+      "lng": -55.362
+    }
+  },
+  {
+    "name": "Borreby",
+    "slug": "borreby",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 53.491,
+      "lng": 12.21
+    }
+  },
+  {
+    "name": "Botocudo",
+    "slug": "botocudo",
+    "regions": [
+      "amerindian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": -21.651,
+      "lng": -45.371
+    }
+  },
+  {
+    "name": "BrachioMelanesid",
+    "slug": "brachiomelanesid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": -5.392,
+      "lng": 145.198
+    }
+  },
+  {
+    "name": "Bukaid",
+    "slug": "bukaid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": -3.17,
+      "lng": 151.564
+    }
+  },
+  {
+    "name": "CaliforniaPacifid",
+    "slug": "californiapacifid",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": 42.792,
+      "lng": -123.086
+    }
+  },
+  {
+    "name": "Californid",
+    "slug": "californid",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": 39.736,
+      "lng": -123.438
+    }
+  },
+  {
+    "name": "Canarid",
+    "slug": "canarid",
+    "regions": [
+      "mena",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 35.151,
+      "lng": -4.171
+    }
+  },
+  {
+    "name": "Carpathid",
+    "slug": "carpathid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 48.396,
+      "lng": 22.363
+    }
+  },
+  {
+    "name": "Casamance",
+    "slug": "casamance",
+    "regions": [
+      "subsaharan",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 12.171,
+      "lng": -14.688
+    }
+  },
+  {
+    "name": "CentralAndid",
+    "slug": "centralandid",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": -20.377,
+      "lng": -66.502
+    }
+  },
+  {
+    "name": "CentralBantuid",
+    "slug": "centralbantuid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": -15.283,
+      "lng": 26.377
+    }
+  },
+  {
+    "name": "CentralBrachid",
+    "slug": "centralbrachid",
+    "regions": [
+      "indian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 26.491,
+      "lng": 79.224
+    }
+  },
+  {
+    "name": "CentralEthiopid",
+    "slug": "centralethiopid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 7.888,
+      "lng": 37.94
+    }
+  },
+  {
+    "name": "CentralPamirid",
+    "slug": "centralpamirid",
+    "regions": [
+      "central_asian"
+    ],
+    "centroid": {
+      "lat": 38.208,
+      "lng": 77.989
+    }
+  },
+  {
+    "name": "Changkiangid",
+    "slug": "changkiangid",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 30.057,
+      "lng": 108.0
+    }
+  },
+  {
+    "name": "Chikuzen",
+    "slug": "chikuzen",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 34.642,
+      "lng": 132.043
+    }
+  },
+  {
+    "name": "ChocoMotilon",
+    "slug": "chocomotilon",
+    "regions": [
+      "amerindian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 8.708,
+      "lng": -72.0
+    }
+  },
+  {
+    "name": "ChopiTswana",
+    "slug": "chopitswana",
+    "regions": [
+      "subsaharan",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": -23.924,
+      "lng": 28.548
+    }
+  },
+  {
+    "name": "Choshiu",
+    "slug": "choshiu",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 37.698,
+      "lng": 138.185
+    }
+  },
+  {
+    "name": "Chukchid",
+    "slug": "chukchid",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 61.825,
+      "lng": 163.979
+    }
+  },
+  {
+    "name": "Chukiangid",
+    "slug": "chukiangid",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 23.943,
+      "lng": 113.289
+    }
+  },
+  {
+    "name": "Congolesid",
+    "slug": "congolesid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": -0.623,
+      "lng": 22.961
+    }
+  },
+  {
+    "name": "Dalofaelid",
+    "slug": "dalofaelid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 55.019,
+      "lng": 11.73
+    }
+  },
+  {
+    "name": "Danakil",
+    "slug": "danakil",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 12.171,
+      "lng": 40.608
+    }
+  },
+  {
+    "name": "Dayakid",
+    "slug": "dayakid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": 0.864,
+      "lng": 114.236
+    }
+  },
+  {
+    "name": "DesertAustralid",
+    "slug": "desertaustralid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": -25.365,
+      "lng": 129.176
+    }
+  },
+  {
+    "name": "DeuteroMalayid",
+    "slug": "deuteromalayid",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 1.98,
+      "lng": 114.236
+    }
+  },
+  {
+    "name": "Dinarid",
+    "slug": "dinarid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 47.887,
+      "lng": 18.545
+    }
+  },
+  {
+    "name": "Dinkaid",
+    "slug": "dinkaid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 8.921,
+      "lng": 31.429
+    }
+  },
+  {
+    "name": "EastAlpinid",
+    "slug": "eastalpinid",
+    "regions": [
+      "central_asian"
+    ],
+    "centroid": {
+      "lat": 38.717,
+      "lng": 38.242
+    }
+  },
+  {
+    "name": "EastBambutid",
+    "slug": "eastbambutid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 2.533,
+      "lng": 26.688
+    }
+  },
+  {
+    "name": "EastBrachid",
+    "slug": "eastbrachid",
+    "regions": [
+      "indian"
+    ],
+    "centroid": {
+      "lat": 25.981,
+      "lng": 86.509
+    }
+  },
+  {
+    "name": "EastEthiopid",
+    "slug": "eastethiopid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 8.406,
+      "lng": 42.857
+    }
+  },
+  {
+    "name": "EastPalaungid",
+    "slug": "eastpalaungid",
+    "regions": [
+      "eastasian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 24.962,
+      "lng": 105.226
+    }
+  },
+  {
+    "name": "EastPamirid",
+    "slug": "eastpamirid",
+    "regions": [
+      "central_asian"
+    ],
+    "centroid": {
+      "lat": 38.208,
+      "lng": 81.938
+    }
+  },
+  {
+    "name": "EastShanid",
+    "slug": "eastshanid",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 16.935,
+      "lng": 102.273
+    }
+  },
+  {
+    "name": "EastSudanid",
+    "slug": "eastsudanid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 11.677,
+      "lng": 26.784
+    }
+  },
+  {
+    "name": "Egyptid",
+    "slug": "egyptid",
+    "regions": [
+      "mena",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 28.019,
+      "lng": 29.388
+    }
+  },
+  {
+    "name": "EquatorialSudanid",
+    "slug": "equatorialsudanid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 8.921,
+      "lng": 21.714
+    }
+  },
+  {
+    "name": "Eurafricanid",
+    "slug": "eurafricanid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 36.679,
+      "lng": 4.216
+    }
+  },
+  {
+    "name": "FenguPondo",
+    "slug": "fengupondo",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": -28.294,
+      "lng": 29.744
+    }
+  },
+  {
+    "name": "FennoNordid",
+    "slug": "fennonordid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 57.057,
+      "lng": 50.164
+    }
+  },
+  {
+    "name": "Fezzanid",
+    "slug": "fezzanid",
+    "regions": [
+      "mena"
+    ],
+    "centroid": {
+      "lat": 21.906,
+      "lng": 3.273
+    }
+  },
+  {
+    "name": "Fijid",
+    "slug": "fijid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": -17.83,
+      "lng": 177.662
+    }
+  },
+  {
+    "name": "Gobid",
+    "slug": "gobid",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 46.358,
+      "lng": 104.286
+    }
+  },
+  {
+    "name": "Gorid",
+    "slug": "gorid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 49.925,
+      "lng": 25.073
+    }
+  },
+  {
+    "name": "GracileIndid",
+    "slug": "gracileindid",
+    "regions": [
+      "indian"
+    ],
+    "centroid": {
+      "lat": 22.925,
+      "lng": 81.329
+    }
+  },
+  {
+    "name": "GracileMediterranid",
+    "slug": "gracilemediterranid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 42.792,
+      "lng": -3.086
+    }
+  },
+  {
+    "name": "GuineoCamerunian",
+    "slug": "guineocamerunian",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 8.406,
+      "lng": -0.571
+    }
+  },
+  {
+    "name": "Guinesid",
+    "slug": "guinesid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 8.406,
+      "lng": -2.286
+    }
+  },
+  {
+    "name": "Hadza",
+    "slug": "hadza",
+    "regions": [
+      "subsaharan",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": -2.745,
+      "lng": 34.069
+    }
+  },
+  {
+    "name": "Hallstatt",
+    "slug": "hallstatt",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 58.354,
+      "lng": 12.889
+    }
+  },
+  {
+    "name": "Huanghoid",
+    "slug": "huanghoid",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 40.245,
+      "lng": 116.313
+    }
+  },
+  {
+    "name": "Huarpid",
+    "slug": "huarpid",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": -28.294,
+      "lng": -64.089
+    }
+  },
+  {
+    "name": "IndoBrachid",
+    "slug": "indobrachid",
+    "regions": [
+      "indian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 22.925,
+      "lng": 71.761
+    }
+  },
+  {
+    "name": "IndoIranid",
+    "slug": "indoiranid",
+    "regions": [
+      "indian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 32.604,
+      "lng": 65.254
+    }
+  },
+  {
+    "name": "IndoNordic",
+    "slug": "indonordic",
+    "regions": [
+      "indian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 36.17,
+      "lng": 78.528
+    }
+  },
+  {
+    "name": "InsularMelanesid",
+    "slug": "insularmelanesid",
+    "regions": [
+      "austronesian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": -4.967,
+      "lng": 144.057
+    }
+  },
+  {
+    "name": "Inuid",
+    "slug": "inuid",
+    "regions": [
+      "amerindian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 67.545,
+      "lng": -104.551
+    }
+  },
+  {
+    "name": "Iranid",
+    "slug": "iranid",
+    "regions": [
+      "mena"
+    ],
+    "centroid": {
+      "lat": 34.642,
+      "lng": 54.032
+    }
+  },
+  {
+    "name": "Ishikawa",
+    "slug": "ishikawa",
+    "regions": [
+      "eastasian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 39.226,
+      "lng": 140.739
+    }
+  },
+  {
+    "name": "Isthmid",
+    "slug": "isthmid",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": 10.237,
+      "lng": -80.67
+    }
+  },
+  {
+    "name": "JahaiSemangid",
+    "slug": "jahaisemangid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": 6.315,
+      "lng": 101.838
+    }
+  },
+  {
+    "name": "Kachinid",
+    "slug": "kachinid",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 25.472,
+      "lng": 98.319
+    }
+  },
+  {
+    "name": "Kalaharid",
+    "slug": "kalaharid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": -19.953,
+      "lng": 20.917
+    }
+  },
+  {
+    "name": "Karnatid",
+    "slug": "karnatid",
+    "regions": [
+      "indian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 12.171,
+      "lng": 79.2
+    }
+  },
+  {
+    "name": "Karroid",
+    "slug": "karroid",
+    "regions": [
+      "subsaharan",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": -27.801,
+      "lng": 21.429
+    }
+  },
+  {
+    "name": "Katanga",
+    "slug": "katanga",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 60.427,
+      "lng": 92.532
+    }
+  },
+  {
+    "name": "Katangid",
+    "slug": "katangid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": -27.31,
+      "lng": 23.265
+    }
+  },
+  {
+    "name": "Keralid",
+    "slug": "keralid",
+    "regions": [
+      "indian"
+    ],
+    "centroid": {
+      "lat": 12.662,
+      "lng": 75.987
+    }
+  },
+  {
+    "name": "Kham",
+    "slug": "kham",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 30.566,
+      "lng": 97.306
+    }
+  },
+  {
+    "name": "Khmerid",
+    "slug": "khmerid",
+    "regions": [
+      "austronesian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 13.15,
+      "lng": 104.88
+    }
+  },
+  {
+    "name": "Khoid",
+    "slug": "khoid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": -27.31,
+      "lng": 20.816
+    }
+  },
+  {
+    "name": "Kolid",
+    "slug": "kolid",
+    "regions": [
+      "indian"
+    ],
+    "centroid": {
+      "lat": 23.943,
+      "lng": 84.441
+    }
+  },
+  {
+    "name": "Ladogan",
+    "slug": "ladogan",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 57.67,
+      "lng": 51.491
+    }
+  },
+  {
+    "name": "LagoaSanta",
+    "slug": "lagoasanta",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": -15.708,
+      "lng": -47.246
+    }
+  },
+  {
+    "name": "Libyid",
+    "slug": "libyid",
+    "regions": [
+      "mena"
+    ],
+    "centroid": {
+      "lat": 31.075,
+      "lng": 15.286
+    }
+  },
+  {
+    "name": "Litorid",
+    "slug": "litorid",
+    "regions": [
+      "european",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 42.792,
+      "lng": 5.143
+    }
+  },
+  {
+    "name": "Maasai",
+    "slug": "maasai",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 4.173,
+      "lng": 32.701
+    }
+  },
+  {
+    "name": "Malabarese",
+    "slug": "malabarese",
+    "regions": [
+      "indian"
+    ],
+    "centroid": {
+      "lat": 11.18,
+      "lng": 76.896
+    }
+  },
+  {
+    "name": "Malagasid",
+    "slug": "malagasid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": -18.679,
+      "lng": 47.707
+    }
+  },
+  {
+    "name": "Malid",
+    "slug": "malid",
+    "regions": [
+      "indian"
+    ],
+    "centroid": {
+      "lat": 12.662,
+      "lng": 77.721
+    }
+  },
+  {
+    "name": "ManchuKorean",
+    "slug": "manchukorean",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 44.321,
+      "lng": 128.472
+    }
+  },
+  {
+    "name": "Maya",
+    "slug": "maya",
+    "regions": [
+      "amerindian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 17.393,
+      "lng": -92.78
+    }
+  },
+  {
+    "name": "Mexicid",
+    "slug": "mexicid",
+    "regions": [
+      "amerindian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 25.472,
+      "lng": -104.37
+    }
+  },
+  {
+    "name": "Micronesid",
+    "slug": "micronesid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": 8.921,
+      "lng": 137.714
+    }
+  },
+  {
+    "name": "MiddleNile",
+    "slug": "middlenile",
+    "regions": [
+      "mena"
+    ],
+    "centroid": {
+      "lat": 16.008,
+      "lng": 28.298
+    }
+  },
+  {
+    "name": "Moorish",
+    "slug": "moorish",
+    "regions": [
+      "mena",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 18.849,
+      "lng": -9.722
+    }
+  },
+  {
+    "name": "MountainAralid",
+    "slug": "mountainaralid",
+    "regions": [
+      "central_asian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 42.792,
+      "lng": 83.314
+    }
+  },
+  {
+    "name": "MountainDama",
+    "slug": "mountaindama",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": -20.377,
+      "lng": 16.256
+    }
+  },
+  {
+    "name": "MountainIndid",
+    "slug": "mountainindid",
+    "regions": [
+      "indian"
+    ],
+    "centroid": {
+      "lat": 31.075,
+      "lng": 79.549
+    }
+  },
+  {
+    "name": "MountainMelanesid",
+    "slug": "mountainmelanesid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": -4.118,
+      "lng": 141.896
+    }
+  },
+  {
+    "name": "Mtebid",
+    "slug": "mtebid",
+    "regions": [
+      "central_asian"
+    ],
+    "centroid": {
+      "lat": 43.811,
+      "lng": 44.046
+    }
+  },
+  {
+    "name": "MunduMangbeto",
+    "slug": "mundumangbeto",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 4.173,
+      "lng": 28.152
+    }
+  },
+  {
+    "name": "NeoDanubian",
+    "slug": "neodanubian",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 54.509,
+      "lng": 34.554
+    }
+  },
+  {
+    "name": "NeoMelanesid",
+    "slug": "neomelanesid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": -4.118,
+      "lng": 139.621
+    }
+  },
+  {
+    "name": "Nesiotid",
+    "slug": "nesiotid",
+    "regions": [
+      "austronesian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": -35.9,
+      "lng": 174.183
+    }
+  },
+  {
+    "name": "NiloHamitic",
+    "slug": "nilohamitic",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 4.173,
+      "lng": 34.976
+    }
+  },
+  {
+    "name": "Norid",
+    "slug": "norid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 49.415,
+      "lng": 18.928
+    }
+  },
+  {
+    "name": "NorthAmazonid",
+    "slug": "northamazonid",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": 3.083,
+      "lng": -58.863
+    }
+  },
+  {
+    "name": "NorthAndamanid",
+    "slug": "northandamanid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": 12.662,
+      "lng": 93.323
+    }
+  },
+  {
+    "name": "NorthAndid",
+    "slug": "northandid",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": -10.136,
+      "lng": -73.545
+    }
+  },
+  {
+    "name": "NorthAtlantid",
+    "slug": "northatlantid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 51.962,
+      "lng": -0.385
+    }
+  },
+  {
+    "name": "NorthAustralid",
+    "slug": "northaustralid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": -21.226,
+      "lng": 134.926
+    }
+  },
+  {
+    "name": "NorthBantuid",
+    "slug": "northbantuid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": -5.816,
+      "lng": 31.664
+    }
+  },
+  {
+    "name": "NorthEthiopid",
+    "slug": "northethiopid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 17.849,
+      "lng": 33.768
+    }
+  },
+  {
+    "name": "NorthGondid",
+    "slug": "northgondid",
+    "regions": [
+      "indian"
+    ],
+    "centroid": {
+      "lat": 24.453,
+      "lng": 80.503
+    }
+  },
+  {
+    "name": "NorthIndid",
+    "slug": "northindid",
+    "regions": [
+      "indian"
+    ],
+    "centroid": {
+      "lat": 30.057,
+      "lng": 73.241
+    }
+  },
+  {
+    "name": "NorthLappid",
+    "slug": "northlappid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 66.819,
+      "lng": 30.088
+    }
+  },
+  {
+    "name": "NorthPontid",
+    "slug": "northpontid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 51.453,
+      "lng": 30.191
+    }
+  },
+  {
+    "name": "Omotic",
+    "slug": "omotic",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 7.367,
+      "lng": 35.658
+    }
+  },
+  {
+    "name": "Pacifid",
+    "slug": "pacifid",
+    "regions": [
+      "amerindian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 51.453,
+      "lng": -126.497
+    }
+  },
+  {
+    "name": "Palaungid",
+    "slug": "palaungid",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 24.453,
+      "lng": 95.578
+    }
+  },
+  {
+    "name": "PaleoAtlantid",
+    "slug": "paleoatlantid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 60.427,
+      "lng": 11.509
+    }
+  },
+  {
+    "name": "PaleoMelanesid",
+    "slug": "paleomelanesid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": -21.651,
+      "lng": 166.359
+    }
+  },
+  {
+    "name": "PaleoSaharid",
+    "slug": "paleosaharid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 21.906,
+      "lng": 16.959
+    }
+  },
+  {
+    "name": "PaleoSardinian",
+    "slug": "paleosardinian",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 40.755,
+      "lng": 9.05
+    }
+  },
+  {
+    "name": "Pampid",
+    "slug": "pampid",
+    "regions": [
+      "amerindian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": -27.31,
+      "lng": -59.388
+    }
+  },
+  {
+    "name": "Patagonid",
+    "slug": "patagonid",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": -44.458,
+      "lng": -67.892
+    }
+  },
+  {
+    "name": "PlainsPamirid",
+    "slug": "plainspamirid",
+    "regions": [
+      "central_asian"
+    ],
+    "centroid": {
+      "lat": 42.792,
+      "lng": 93.6
+    }
+  },
+  {
+    "name": "Planid",
+    "slug": "planid",
+    "regions": [
+      "amerindian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 50.434,
+      "lng": -96.576
+    }
+  },
+  {
+    "name": "Pontid",
+    "slug": "pontid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 43.811,
+      "lng": 30.867
+    }
+  },
+  {
+    "name": "PreNilotid",
+    "slug": "prenilotid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 9.67,
+      "lng": 34.163
+    }
+  },
+  {
+    "name": "PreSlavic",
+    "slug": "preslavic",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 50.943,
+      "lng": 21.6
+    }
+  },
+  {
+    "name": "ProtoEthiopid",
+    "slug": "protoethiopid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 11.677,
+      "lng": 37.728
+    }
+  },
+  {
+    "name": "ProtoIranid",
+    "slug": "protoiranid",
+    "regions": [
+      "mena"
+    ],
+    "centroid": {
+      "lat": 37.189,
+      "lng": 46.304
+    }
+  },
+  {
+    "name": "ProtoMalayid",
+    "slug": "protomalayid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": -9.393,
+      "lng": 125.056
+    }
+  },
+  {
+    "name": "ProtoNordid",
+    "slug": "protonordid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 54.509,
+      "lng": 44.196
+    }
+  },
+  {
+    "name": "Pueblid",
+    "slug": "pueblid",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": 32.604,
+      "lng": -97.408
+    }
+  },
+  {
+    "name": "RobustPolynesid",
+    "slug": "robustpolynesid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": -21.226,
+      "lng": -176.442
+    }
+  },
+  {
+    "name": "SaharanEthiopid",
+    "slug": "saharanethiopid",
+    "regions": [
+      "subsaharan",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 17.393,
+      "lng": 16.098
+    }
+  },
+  {
+    "name": "Samoyedic",
+    "slug": "samoyedic",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 67.545,
+      "lng": 70.06
+    }
+  },
+  {
+    "name": "Sandawe",
+    "slug": "sandawe",
+    "regions": [
+      "subsaharan",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": -4.118,
+      "lng": 33.839
+    }
+  },
+  {
+    "name": "Satsuma",
+    "slug": "satsuma",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 36.17,
+      "lng": 136.697
+    }
+  },
+  {
+    "name": "Savolaxid",
+    "slug": "savolaxid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 59.733,
+      "lng": 32.893
+    }
+  },
+  {
+    "name": "ScandoLappid",
+    "slug": "scandolappid",
+    "regions": [
+      "european",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 66.096,
+      "lng": 20.231
+    }
+  },
+  {
+    "name": "Semangid",
+    "slug": "semangid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": 5.785,
+      "lng": 102.409
+    }
+  },
+  {
+    "name": "Senegalid",
+    "slug": "senegalid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 13.634,
+      "lng": -13.043
+    }
+  },
+  {
+    "name": "Senoid",
+    "slug": "senoid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": 5.251,
+      "lng": 102.085
+    }
+  },
+  {
+    "name": "Shanid",
+    "slug": "shanid",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 24.962,
+      "lng": 96.784
+    }
+  },
+  {
+    "name": "Shari",
+    "slug": "shari",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 11.677,
+      "lng": 19.872
+    }
+  },
+  {
+    "name": "Shillukid",
+    "slug": "shillukid",
+    "regions": [
+      "subsaharan",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 9.731,
+      "lng": 32.909
+    }
+  },
+  {
+    "name": "Sinhalesid",
+    "slug": "sinhalesid",
+    "regions": [
+      "indian"
+    ],
+    "centroid": {
+      "lat": 8.406,
+      "lng": 80.571
+    }
+  },
+  {
+    "name": "Siwa",
+    "slug": "siwa",
+    "regions": [
+      "mena"
+    ],
+    "centroid": {
+      "lat": 28.528,
+      "lng": 20.615
+    }
+  },
+  {
+    "name": "Sonorid",
+    "slug": "sonorid",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": 30.057,
+      "lng": -111.724
+    }
+  },
+  {
+    "name": "SouthAmazonid",
+    "slug": "southamazonid",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": -13.585,
+      "lng": -51.552
+    }
+  },
+  {
+    "name": "SouthAndamanid",
+    "slug": "southandamanid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": 12.171,
+      "lng": 93.024
+    }
+  },
+  {
+    "name": "SouthAndid",
+    "slug": "southandid",
+    "regions": [
+      "amerindian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": -33.32,
+      "lng": -68.889
+    }
+  },
+  {
+    "name": "SouthAustralid",
+    "slug": "southaustralid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": -30.283,
+      "lng": 136.477
+    }
+  },
+  {
+    "name": "SouthBantuid",
+    "slug": "southbantuid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": -23.448,
+      "lng": 23.062
+    }
+  },
+  {
+    "name": "SouthEthiopid",
+    "slug": "southethiopid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": -1.047,
+      "lng": 33.165
+    }
+  },
+  {
+    "name": "SouthFuegid",
+    "slug": "southfuegid",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": -51.75,
+      "lng": -73.361
+    }
+  },
+  {
+    "name": "SouthGondid",
+    "slug": "southgondid",
+    "regions": [
+      "indian"
+    ],
+    "centroid": {
+      "lat": 21.396,
+      "lng": 81.818
+    }
+  },
+  {
+    "name": "SouthNilotid",
+    "slug": "southnilotid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 4.714,
+      "lng": 32.133
+    }
+  },
+  {
+    "name": "SouthPalaungid",
+    "slug": "southpalaungid",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 16.473,
+      "lng": 103.566
+    }
+  },
+  {
+    "name": "SouthPolynesid",
+    "slug": "southpolynesid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": -44.458,
+      "lng": 170.948
+    }
+  },
+  {
+    "name": "Strandid",
+    "slug": "strandid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 59.733,
+      "lng": 7.31
+    }
+  },
+  {
+    "name": "Strandlooper",
+    "slug": "strandlooper",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": -30.283,
+      "lng": 18.964
+    }
+  },
+  {
+    "name": "Sudanid",
+    "slug": "sudanid",
+    "regions": [
+      "subsaharan",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 12.171,
+      "lng": -2.592
+    }
+  },
+  {
+    "name": "SudanoGuinesid",
+    "slug": "sudanoguinesid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 9.67,
+      "lng": -2.01
+    }
+  },
+  {
+    "name": "Tapirid",
+    "slug": "tapirid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": -4.019,
+      "lng": 139.621
+    }
+  },
+  {
+    "name": "Targid",
+    "slug": "targid",
+    "regions": [
+      "mena"
+    ],
+    "centroid": {
+      "lat": 22.925,
+      "lng": 5.98
+    }
+  },
+  {
+    "name": "Tasmanid",
+    "slug": "tasmanid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": -42.275,
+      "lng": 146.528
+    }
+  },
+  {
+    "name": "Tavastid",
+    "slug": "tavastid",
+    "regions": [
+      "european",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 56.988,
+      "lng": 22.988
+    }
+  },
+  {
+    "name": "Tibetid",
+    "slug": "tibetid",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 31.585,
+      "lng": 91.096
+    }
+  },
+  {
+    "name": "Toalid",
+    "slug": "toalid",
+    "regions": [
+      "austronesian"
+    ],
+    "centroid": {
+      "lat": -2.745,
+      "lng": 120.946
+    }
+  },
+  {
+    "name": "Toda",
+    "slug": "toda",
+    "regions": [
+      "indian"
+    ],
+    "centroid": {
+      "lat": 12.171,
+      "lng": 76.32
+    }
+  },
+  {
+    "name": "Tonkinesid",
+    "slug": "tonkinesid",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 21.396,
+      "lng": 106.215
+    }
+  },
+  {
+    "name": "TransMediterranid",
+    "slug": "transmediterranid",
+    "regions": [
+      "mena"
+    ],
+    "centroid": {
+      "lat": 33.113,
+      "lng": 13.603
+    }
+  },
+  {
+    "name": "Transcaspian",
+    "slug": "transcaspian",
+    "regions": [
+      "central_asian"
+    ],
+    "centroid": {
+      "lat": 40.245,
+      "lng": 62.011
+    }
+  },
+  {
+    "name": "Tronder",
+    "slug": "tronder",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 62.529,
+      "lng": 13.92
+    }
+  },
+  {
+    "name": "TwaCwa",
+    "slug": "twacwa",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": -2.745,
+      "lng": 18.738
+    }
+  },
+  {
+    "name": "Uralid",
+    "slug": "uralid",
+    "regions": [
+      "central_asian"
+    ],
+    "centroid": {
+      "lat": 58.075,
+      "lng": 70.36
+    }
+  },
+  {
+    "name": "Vedda",
+    "slug": "vedda",
+    "regions": [
+      "indian"
+    ],
+    "centroid": {
+      "lat": 8.406,
+      "lng": 80.571
+    }
+  },
+  {
+    "name": "Volgid",
+    "slug": "volgid",
+    "regions": [
+      "central_asian",
+      "challenge"
+    ],
+    "centroid": {
+      "lat": 55.528,
+      "lng": 54.533
+    }
+  },
+  {
+    "name": "WestAlpinid",
+    "slug": "westalpinid",
+    "regions": [
+      "european"
+    ],
+    "centroid": {
+      "lat": 47.377,
+      "lng": 6.132
+    }
+  },
+  {
+    "name": "WestAmazonid",
+    "slug": "westamazonid",
+    "regions": [
+      "amerindian"
+    ],
+    "centroid": {
+      "lat": -3.17,
+      "lng": -67.962
+    }
+  },
+  {
+    "name": "WestBambutid",
+    "slug": "westbambutid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 2.533,
+      "lng": 14.196
+    }
+  },
+  {
+    "name": "WestCongolesid",
+    "slug": "westcongolesid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 2.533,
+      "lng": 14.763
+    }
+  },
+  {
+    "name": "WestEthiopid",
+    "slug": "westethiopid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": 16.473,
+      "lng": -11.961
+    }
+  },
+  {
+    "name": "Xhosaid",
+    "slug": "xhosaid",
+    "regions": [
+      "subsaharan"
+    ],
+    "centroid": {
+      "lat": -27.801,
+      "lng": 26.327
+    }
+  },
+  {
+    "name": "Yakonin",
+    "slug": "yakonin",
+    "regions": [
+      "eastasian"
+    ],
+    "centroid": {
+      "lat": 36.679,
+      "lng": 137.838
+    }
+  },
+  {
+    "name": "Yemenid",
+    "slug": "yemenid",
+    "regions": [
+      "mena"
+    ],
+    "centroid": {
+      "lat": 18.34,
+      "lng": 49.038
+    }
+  },
+  {
+    "name": "Yenisey",
+    "slug": "yenisey",
+    "regions": [
+      "central_asian"
+    ],
+    "centroid": {
+      "lat": 59.733,
+      "lng": 84.061
+    }
+  }
+]

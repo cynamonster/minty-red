@@ -1,0 +1,232 @@
+{
+  "type": "FeatureCollection",
+  "phenotype": "Hadza",
+  "slug": "hadza",
+  "regions": [
+    "subsaharan",
+    "challenge"
+  ],
+  "centroid": {
+    "lat": -2.745,
+    "lng": 34.069
+  },
+  "bbox": [
+    32.366,
+    -4.118,
+    38.044,
+    -0.623
+  ],
+  "info": {
+    "name": "Hadza ",
+    "description": "<td valign=\"top\" width=\"450\">\n<h3> Description:</h3>\r\n Ancient type of the Tanzanian Bushmen, living close to Lake Eyasi. Very distinct from any other type in the world and has probably long been isolated. Distant relationships exist to Khoisanids. Basically restricted to the Hadza people, who number no more than 800. Loss of culture might cause this unique type to vanish forever soon.\r\n<h3> Physical Traits:</h3>\r\nDark brown to black skin with kinky hair. (Rather) short, ectomorph to mesomorph, meso- brachyskelic. In a few cases steatopygic, especially men. Dolichocephalic, broad-faced, small-headed with a mildly platyrrhine button nose and big lips. Prognathous. Body hair weak. <br/>\n<h3> Literature:</h3>\r\nEarly descriptions by <a href=\"http://humanphenotypes.net/links.html#O12\" target=\"_blank\">Obst (1912)</a> and <a href=\"http://humanphenotypes.net/links.html#B31\" target=\"_blank\"> Bleek (1931)</a>, who put them close to Hottentots. <a href=\"http://humanphenotypes.net/links.html#C65\" target=\"_blank\">Cole (1965)</a> emphasised differences to Khoisan. Modern studies confirm them to be a distinct genetic outlier (<a href=\"http://humanphenotypes.net/links.html#T09\" target=\"_blank\">Tishkoff et al., 2009</a>; <a href=\"http://humanphenotypes.net/links.html#S12\" target=\"_blank\">Schlebusch et al., 2012</a>). Detailed anthropometric studies by <a href=\"http://humanphenotypes.net/links.html#H80\" target=\"_blank\">Hiernaux and Boedhi Hartono (1980)</a>.\r\n</td>"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Hadza",
+        "slug": "hadza",
+        "zone": "centroid",
+        "regions": [
+          "subsaharan",
+          "challenge"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          34.069,
+          -2.745
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Hadza",
+        "slug": "hadza",
+        "zone": "bright",
+        "polygon_index": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              34.299,
+              -2.321
+            ],
+            [
+              34.069,
+              -2.745
+            ],
+            [
+              34.408,
+              -3.17
+            ],
+            [
+              34.976,
+              -3.17
+            ],
+            [
+              35.545,
+              -3.17
+            ],
+            [
+              35.205,
+              -2.745
+            ],
+            [
+              34.637,
+              -2.745
+            ],
+            [
+              34.299,
+              -2.321
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Hadza",
+        "slug": "hadza",
+        "zone": "dull",
+        "polygon_index": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              33.165,
+              -0.623
+            ],
+            [
+              33.165,
+              -1.047
+            ],
+            [
+              33.165,
+              -1.472
+            ],
+            [
+              32.598,
+              -1.896
+            ],
+            [
+              32.598,
+              -2.321
+            ],
+            [
+              32.366,
+              -2.745
+            ],
+            [
+              32.701,
+              -3.17
+            ],
+            [
+              32.701,
+              -3.594
+            ],
+            [
+              32.701,
+              -4.019
+            ],
+            [
+              32.701,
+              -3.693
+            ],
+            [
+              33.27,
+              -3.693
+            ],
+            [
+              33.839,
+              -3.693
+            ],
+            [
+              34.408,
+              -4.118
+            ],
+            [
+              34.976,
+              -4.118
+            ],
+            [
+              35.545,
+              -4.118
+            ],
+            [
+              36.114,
+              -4.118
+            ],
+            [
+              36.682,
+              -4.118
+            ],
+            [
+              37.251,
+              -3.693
+            ],
+            [
+              37.251,
+              -4.019
+            ],
+            [
+              37.82,
+              -3.594
+            ],
+            [
+              37.82,
+              -3.17
+            ],
+            [
+              38.044,
+              -2.745
+            ],
+            [
+              37.701,
+              -2.321
+            ],
+            [
+              37.134,
+              -1.896
+            ],
+            [
+              36.567,
+              -1.472
+            ],
+            [
+              36.0,
+              -1.472
+            ],
+            [
+              35.433,
+              -1.047
+            ],
+            [
+              34.866,
+              -1.047
+            ],
+            [
+              34.299,
+              -1.047
+            ],
+            [
+              33.732,
+              -0.623
+            ],
+            [
+              33.165,
+              -0.623
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

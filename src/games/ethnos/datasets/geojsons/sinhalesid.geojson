@@ -1,0 +1,384 @@
+{
+  "type": "FeatureCollection",
+  "phenotype": "Sinhalesid",
+  "slug": "sinhalesid",
+  "regions": [
+    "indian"
+  ],
+  "centroid": {
+    "lat": 8.406,
+    "lng": 80.571
+  },
+  "bbox": [
+    75.355,
+    3.63,
+    81.87,
+    9.731
+  ],
+  "info": {
+    "name": "Sinhalesid ",
+    "description": "<td valign=\"top\" width=\"450\">\n<h3> Description:</h3>\r\nIndid subtype, similar to Gracile Indid, mainly found in South-West and Central Sri Lanka. Typical for Sinhalese and related people. This type's main component is the Indid, who migrated to Sri Lanka early and was later modified by admixture of Arabs, Europeans, and Malays, who have been trading with the island for centuries. Further altered by processes of local adaption. Blends with the Karnatid cohabitants and other Indid subtypes are frequent.\r\n<h3> Physical Traits:</h3>\r\nBrown skin that variety from light to very dark brown, straight or wavy hair. Rather short, brachyskelic, ectomorph. Dolicho-mesocephalic, ortho- hypsicranic. Mildly leptorrhine, triangular nose. Overall soft and gracile, often European looking features. <br/>\n<h3> Literature:</h3>\r\nEickstedt (<a href=\"http://humanphenotypes.net/links.html#E34\" target=\"_blank\">1934</a>, <a href=\"http://humanphenotypes.net/links.html#E37\" target=\"_blank\">1937</a>) defined the Sinhalesid subtype of Indid after he had studied India and Sri Lanka for three years. It was usually regarded as the result of admixture or part of Gracile Indid (<a href=\"http://humanphenotypes.net/links.html#B83\" target=\"_blank\">Bernhard, 1983</a>) or Peninsular Indid (<a href=\"http://humanphenotypes.net/links.html#B67\" target=\"_blank\">Biasutti, 1967</a>).\r\n\r\n\n</td>"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Sinhalesid",
+        "slug": "sinhalesid",
+        "zone": "centroid",
+        "regions": [
+          "indian"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.571,
+          8.406
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Sinhalesid",
+        "slug": "sinhalesid",
+        "zone": "bright",
+        "polygon_index": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              80.571,
+              8.921
+            ],
+            [
+              80.571,
+              8.406
+            ],
+            [
+              80.729,
+              7.888
+            ],
+            [
+              80.729,
+              7.367
+            ],
+            [
+              81.3,
+              6.843
+            ],
+            [
+              81.87,
+              7.367
+            ],
+            [
+              81.87,
+              7.888
+            ],
+            [
+              81.714,
+              8.406
+            ],
+            [
+              81.143,
+              8.921
+            ],
+            [
+              80.571,
+              8.921
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Sinhalesid",
+        "slug": "sinhalesid",
+        "zone": "bright",
+        "is_circle": true,
+        "radius_km": 50,
+        "center": [
+          75.594,
+          5.785
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              76.046756,
+              5.785
+            ],
+            [
+              76.031329,
+              5.901585
+            ],
+            [
+              75.986098,
+              6.010225
+            ],
+            [
+              75.914147,
+              6.103517
+            ],
+            [
+              75.820378,
+              6.175102
+            ],
+            [
+              75.711182,
+              6.220102
+            ],
+            [
+              75.594,
+              6.23545
+            ],
+            [
+              75.476818,
+              6.220102
+            ],
+            [
+              75.367622,
+              6.175102
+            ],
+            [
+              75.273853,
+              6.103517
+            ],
+            [
+              75.201902,
+              6.010225
+            ],
+            [
+              75.156671,
+              5.901585
+            ],
+            [
+              75.141244,
+              5.785
+            ],
+            [
+              75.156671,
+              5.668415
+            ],
+            [
+              75.201902,
+              5.559775
+            ],
+            [
+              75.273853,
+              5.466483
+            ],
+            [
+              75.367622,
+              5.394898
+            ],
+            [
+              75.476818,
+              5.349898
+            ],
+            [
+              75.594,
+              5.33455
+            ],
+            [
+              75.711182,
+              5.349898
+            ],
+            [
+              75.820378,
+              5.394898
+            ],
+            [
+              75.914147,
+              5.466483
+            ],
+            [
+              75.986098,
+              5.559775
+            ],
+            [
+              76.031329,
+              5.668415
+            ],
+            [
+              76.046756,
+              5.785
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Sinhalesid",
+        "slug": "sinhalesid",
+        "zone": "bright",
+        "is_circle": true,
+        "radius_km": 50,
+        "center": [
+          75.355,
+          3.63
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              75.806356,
+              3.63
+            ],
+            [
+              75.790976,
+              3.746585
+            ],
+            [
+              75.745886,
+              3.855225
+            ],
+            [
+              75.674157,
+              3.948517
+            ],
+            [
+              75.580678,
+              4.020102
+            ],
+            [
+              75.47182,
+              4.065102
+            ],
+            [
+              75.355,
+              4.08045
+            ],
+            [
+              75.23818,
+              4.065102
+            ],
+            [
+              75.129322,
+              4.020102
+            ],
+            [
+              75.035843,
+              3.948517
+            ],
+            [
+              74.964114,
+              3.855225
+            ],
+            [
+              74.919024,
+              3.746585
+            ],
+            [
+              74.903644,
+              3.63
+            ],
+            [
+              74.919024,
+              3.513415
+            ],
+            [
+              74.964114,
+              3.404775
+            ],
+            [
+              75.035843,
+              3.311483
+            ],
+            [
+              75.129322,
+              3.239898
+            ],
+            [
+              75.23818,
+              3.194898
+            ],
+            [
+              75.355,
+              3.17955
+            ],
+            [
+              75.47182,
+              3.194898
+            ],
+            [
+              75.580678,
+              3.239898
+            ],
+            [
+              75.674157,
+              3.311483
+            ],
+            [
+              75.745886,
+              3.404775
+            ],
+            [
+              75.790976,
+              3.513415
+            ],
+            [
+              75.806356,
+              3.63
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Sinhalesid",
+        "slug": "sinhalesid",
+        "zone": "dull",
+        "polygon_index": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              80.986,
+              9.731
+            ],
+            [
+              80.413,
+              9.221
+            ],
+            [
+              80.571,
+              8.921
+            ],
+            [
+              80.571,
+              8.406
+            ],
+            [
+              81.143,
+              8.921
+            ],
+            [
+              80.986,
+              9.221
+            ],
+            [
+              80.986,
+              9.731
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

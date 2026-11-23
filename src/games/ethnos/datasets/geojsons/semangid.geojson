@@ -1,0 +1,318 @@
+{
+  "type": "FeatureCollection",
+  "phenotype": "Semangid",
+  "slug": "semangid",
+  "regions": [
+    "austronesian"
+  ],
+  "centroid": {
+    "lat": 5.785,
+    "lng": 102.409
+  },
+  "bbox": [
+    98.857,
+    1.424,
+    105.696,
+    12.171
+  ],
+  "info": {
+    "name": "Semangid ",
+    "description": "<td valign=\"top\" width=\"450\">\n<h3> Description:</h3>\r\nPaleolithic, Negriform phenotype found in the forests of the Malay Peninsula, similar to Aetid. Even older and rarer than the cohabitant Senoids with ~1000 unmixed individuals remaining in relict populations. Typified by the Semang, especially Kensiu/Mani, Kenta, Menri, and Sabubn tribes, but also Bateq, Jahai, who often show a more Australoid type. More mixed in Porr. Loss of culture and forest destruction may wipe out this unique type soon.\r\n<h3> Physical Traits:</h3>\r\nDark (copper) brown skin and kinky hair. (Very) short, mesoskelic, mesomorph to ectomorph. Mildly brachycephalic, hypsicranic, small-headed. Mesorrhine or mildly platyrrhine nose, infantile. The face is low and broad, the chin weak, lips thick, cheekbones prominent, and the forehead convex. Prognathism is usually absent. \r\n<h3> Literature:</h3>\r\nDetailed investigation by <a href=\"http://humanphenotypes.net/links.html#S06\" target=\"_blank\">Skeat and Blagden (1906)</a> and <a href=\"http://humanphenotypes.net/links.html#S27\" target=\"_blank\">Schebesta (1927)</a>, who called it Kensieu type and separated it from Jahai. This was adopted by <a href=\"http://humanphenotypes.net/links.html#B67\" target=\"_blank\">Biasutti (1967)</a> who united it with Aetids. <a href=\"http://humanphenotypes.net/links.html#E34\" target=\"_blank\">Eickstedt (1934)</a> and <a href=\"http://humanphenotypes.net/links.html#K96\" target=\"_blank\">Knussmann (1996)</a> called them Semangid, <a href=\"http://humanphenotypes.net/links.html#L67\" target=\"_blank\">Lundman (1967)</a> Negritid, <a href=\"http://humanphenotypes.net/links.html#A79\" target=\"_blank\">Alexeev (1979)</a> Negrito Continental. \n</td>"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Semangid",
+        "slug": "semangid",
+        "zone": "centroid",
+        "regions": [
+          "austronesian"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          102.409,
+          5.785
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Semangid",
+        "slug": "semangid",
+        "zone": "bright",
+        "polygon_index": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              101.838,
+              6.843
+            ],
+            [
+              101.838,
+              6.315
+            ],
+            [
+              101.838,
+              5.785
+            ],
+            [
+              102.085,
+              5.251
+            ],
+            [
+              102.654,
+              4.714
+            ],
+            [
+              102.654,
+              4.173
+            ],
+            [
+              102.654,
+              4.714
+            ],
+            [
+              102.654,
+              5.251
+            ],
+            [
+              102.409,
+              5.785
+            ],
+            [
+              101.838,
+              6.315
+            ],
+            [
+              101.838,
+              6.843
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Semangid",
+        "slug": "semangid",
+        "zone": "dull",
+        "polygon_index": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.968,
+              12.171
+            ],
+            [
+              103.968,
+              11.677
+            ],
+            [
+              103.392,
+              11.18
+            ],
+            [
+              103.968,
+              10.68
+            ],
+            [
+              104.544,
+              10.68
+            ],
+            [
+              104.785,
+              10.176
+            ],
+            [
+              105.696,
+              10.68
+            ],
+            [
+              105.696,
+              11.18
+            ],
+            [
+              105.696,
+              11.677
+            ],
+            [
+              105.12,
+              11.677
+            ],
+            [
+              104.544,
+              12.171
+            ],
+            [
+              103.968,
+              12.171
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Semangid",
+        "slug": "semangid",
+        "zone": "dull",
+        "polygon_index": 1
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              99.3,
+              9.731
+            ],
+            [
+              99.3,
+              9.221
+            ],
+            [
+              98.857,
+              8.708
+            ],
+            [
+              99.429,
+              8.921
+            ],
+            [
+              100.0,
+              8.406
+            ],
+            [
+              100.127,
+              7.888
+            ],
+            [
+              100.127,
+              7.367
+            ],
+            [
+              100.697,
+              7.367
+            ],
+            [
+              101.838,
+              6.315
+            ],
+            [
+              101.838,
+              5.785
+            ],
+            [
+              100.948,
+              4.714
+            ],
+            [
+              101.517,
+              4.173
+            ],
+            [
+              102.654,
+              4.173
+            ],
+            [
+              102.085,
+              3.083
+            ],
+            [
+              102.208,
+              2.533
+            ],
+            [
+              102.898,
+              1.98
+            ],
+            [
+              103.465,
+              1.98
+            ],
+            [
+              104.031,
+              1.424
+            ],
+            [
+              104.031,
+              1.98
+            ],
+            [
+              103.912,
+              2.533
+            ],
+            [
+              103.791,
+              3.083
+            ],
+            [
+              103.791,
+              3.63
+            ],
+            [
+              102.654,
+              4.714
+            ],
+            [
+              102.654,
+              5.251
+            ],
+            [
+              102.409,
+              5.785
+            ],
+            [
+              101.838,
+              6.843
+            ],
+            [
+              100.697,
+              7.888
+            ],
+            [
+              100.571,
+              8.406
+            ],
+            [
+              100.571,
+              8.921
+            ],
+            [
+              100.0,
+              8.921
+            ],
+            [
+              99.429,
+              8.708
+            ],
+            [
+              99.873,
+              9.221
+            ],
+            [
+              99.873,
+              9.731
+            ],
+            [
+              99.3,
+              9.731
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

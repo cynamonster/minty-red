@@ -1,0 +1,163 @@
+{
+  "type": "FeatureCollection",
+  "phenotype": "NorthAndamanid",
+  "slug": "northandamanid",
+  "regions": [
+    "austronesian"
+  ],
+  "centroid": {
+    "lat": 12.662,
+    "lng": 93.323
+  },
+  "bbox": [
+    93.323,
+    12.662,
+    93.323,
+    12.662
+  ],
+  "info": {
+    "name": "North Andamanid ",
+    "description": "<td valign=\"top\" width=\"450\">\n<h3> Description:</h3>\r\nAlmost extinct, isolated type endemic to the Andaman Islands. Particularly in Great Andamanese groups, rarer in other Andamanese. After contact with Europeans in the 19th century the population collapsed, mostly due to disease. Only about a dozen Great Andamanese remain today, several of them are mixed.\r\n<h3> Physical Traits:</h3>\r\nBrown-blackish skin, kinky or peppercorn hair, very short (males 147 cm), mesoskelic, ectomorph, body proportions show no sign of pygmyism. Mildly brachycephalic, mildly hypsicranic, small-headed. Mesorrhine. Similar to the South Andamanid, but more gracile with a longer face, thinner nose, and a lower cephalic index. Face shows several Caucasiform traits. Chin weak, prognathy mild.\r\n<h3> Literature:</h3>\r\nDuring his expeditions, <a href=\"http://humanphenotypes.net/links.html#E28\" target=\"_blank\">Eickstedt (1928) </a> found the Great Andanamese variety to be anthropometrically distinct from Little Andamanese. Biasutti followed in recognising an Onghi subvariety of Andamasese (<a href=\"http://humanphenotypes.net/links.html#B67\" target=\"_blank\">Biasutti (1967)</a>). Modern research has confirmed the genealogical distinctiveness <a href=\"http://humanphenotypes.net/links.html#A08\" target=\"_blank\"> (Abbi, 2008)</a>. Often simply regarded as Andamanid (<a href=\"http://humanphenotypes.net/links.html#L67\" target=\"_blank\">Lundman, 1967</a>; <a href=\"http://humanphenotypes.net/links.html#A79\" target=\"_blank\">Alexeev, 1979</a>; <a href=\"http://humanphenotypes.net/links.html#K96\" target=\"_blank\">Knussmann, 1996</a>)\r\n\n</td>"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "NorthAndamanid",
+        "slug": "northandamanid",
+        "zone": "centroid",
+        "regions": [
+          "austronesian"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          93.323,
+          12.662
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "NorthAndamanid",
+        "slug": "northandamanid",
+        "zone": "bright",
+        "is_circle": true,
+        "radius_km": 50,
+        "center": [
+          93.323,
+          12.662
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              93.784678,
+              12.662
+            ],
+            [
+              93.768947,
+              12.778585
+            ],
+            [
+              93.722825,
+              12.887225
+            ],
+            [
+              93.649456,
+              12.980517
+            ],
+            [
+              93.553839,
+              13.052102
+            ],
+            [
+              93.442491,
+              13.097102
+            ],
+            [
+              93.323,
+              13.11245
+            ],
+            [
+              93.203509,
+              13.097102
+            ],
+            [
+              93.092161,
+              13.052102
+            ],
+            [
+              92.996544,
+              12.980517
+            ],
+            [
+              92.923175,
+              12.887225
+            ],
+            [
+              92.877053,
+              12.778585
+            ],
+            [
+              92.861322,
+              12.662
+            ],
+            [
+              92.877053,
+              12.545415
+            ],
+            [
+              92.923175,
+              12.436775
+            ],
+            [
+              92.996544,
+              12.343483
+            ],
+            [
+              93.092161,
+              12.271898
+            ],
+            [
+              93.203509,
+              12.226898
+            ],
+            [
+              93.323,
+              12.21155
+            ],
+            [
+              93.442491,
+              12.226898
+            ],
+            [
+              93.553839,
+              12.271898
+            ],
+            [
+              93.649456,
+              12.343483
+            ],
+            [
+              93.722825,
+              12.436775
+            ],
+            [
+              93.768947,
+              12.545415
+            ],
+            [
+              93.784678,
+              12.662
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

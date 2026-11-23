@@ -1,0 +1,510 @@
+{
+  "type": "FeatureCollection",
+  "phenotype": "Baskid",
+  "slug": "baskid",
+  "regions": [
+    "european"
+  ],
+  "centroid": {
+    "lat": 44.321,
+    "lng": -1.044
+  },
+  "bbox": [
+    -8.671,
+    41.264,
+    4.652,
+    52.981
+  ],
+  "info": {
+    "name": "Baskid  ",
+    "description": "<td valign=\"top\" width=\"450\">\n<h3> Description:</h3>\r\nAncient European type associated with the Basques. Found in its purest form in the Pyr\u00e9n\u00e9es-Atlantiques region of Southwestern France, although many modern French Basques are West Alpinid. Also present in Northern Spain, where it is rather mixed with Mediterranid and thus less brachycephalic. Sometimes along the French Atlantic coast and in Wales. Linked to North Atlantid.\r\n<h3> Physical Traits:</h3>\r\nFair skin. Straight or wavy, often brown, sometimes red or blonde hair. Mixed eyes. Medium height, mesoskelic, mesomorph to ectomorph. Brachycephalic, chamae- orthocranic with a round occiput. Skull appears triangular as it is particularly wide near the temples. Nose (hyper)leptorrhine, large and long, face narrow, chin pointed. <br/>\n<h3> Literature:</h3>\r\nEarly recognised as a distinctive type by <a href=\"http://humanphenotypes.net/links.html#C84\" target=\"_blank\">Collignon (1894)</a>, <a href=\"http://humanphenotypes.net/links.html#M33\" target=\"_blank\">Montandon (1933)</a>, and <a href=\"http://humanphenotypes.net/links.html#A89\" target=\"_blank\">Aranzadi (1889)</a>, who named it \"West Pyrenean race\", <a href=\"http://humanphenotypes.net/links.html#C65\" target=\"_blank\">Cole (1965)</a>  as the Early Mediterranean type, <a href=\"http://humanphenotypes.net/links.html#K96\" target=\"_blank\">Knussmann (1996)</a> as an Alpinid subrace. <a href=\"http://humanphenotypes.net/links.html#L67\" target=\"_blank\">Lundman (1967)</a> named it Baskid. Studies indicate genetic distinctiveness (<a href=\"http://humanphenotypes.net/links.html#H99\" target=\"_blank\">Hurles et al., 1999</a>).\r\n </td>"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Baskid",
+        "slug": "baskid",
+        "zone": "centroid",
+        "regions": [
+          "european"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.044,
+          44.321
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Baskid",
+        "slug": "baskid",
+        "zone": "bright",
+        "polygon_index": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -0.352,
+              45.34
+            ],
+            [
+              -0.351,
+              44.83
+            ],
+            [
+              -1.044,
+              44.321
+            ],
+            [
+              -1.734,
+              43.811
+            ],
+            [
+              -2.428,
+              43.811
+            ],
+            [
+              -3.121,
+              43.811
+            ],
+            [
+              -3.098,
+              43.302
+            ],
+            [
+              -2.409,
+              43.302
+            ],
+            [
+              -1.721,
+              43.302
+            ],
+            [
+              -1.029,
+              42.792
+            ],
+            [
+              -0.343,
+              42.792
+            ],
+            [
+              0.344,
+              43.302
+            ],
+            [
+              1.04,
+              43.811
+            ],
+            [
+              1.741,
+              44.321
+            ],
+            [
+              1.754,
+              44.83
+            ],
+            [
+              1.053,
+              44.83
+            ],
+            [
+              0.352,
+              45.34
+            ],
+            [
+              -0.352,
+              45.34
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Baskid",
+        "slug": "baskid",
+        "zone": "dull",
+        "polygon_index": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -3.896,
+              52.981
+            ],
+            [
+              -3.499,
+              52.472
+            ],
+            [
+              -4.24,
+              51.962
+            ],
+            [
+              -5.011,
+              51.962
+            ],
+            [
+              -4.24,
+              51.962
+            ],
+            [
+              -3.439,
+              51.453
+            ],
+            [
+              -3.411,
+              50.943
+            ],
+            [
+              -2.653,
+              50.943
+            ],
+            [
+              -2.675,
+              51.453
+            ],
+            [
+              -2.698,
+              51.962
+            ],
+            [
+              -2.721,
+              52.472
+            ],
+            [
+              -3.117,
+              52.981
+            ],
+            [
+              -3.896,
+              52.981
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Baskid",
+        "slug": "baskid",
+        "zone": "dull",
+        "polygon_index": 1
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -1.871,
+              49.925
+            ],
+            [
+              -1.113,
+              49.415
+            ],
+            [
+              -1.84,
+              48.906
+            ],
+            [
+              -2.577,
+              48.906
+            ],
+            [
+              -3.34,
+              49.415
+            ],
+            [
+              -4.049,
+              48.906
+            ],
+            [
+              -4.033,
+              48.396
+            ],
+            [
+              -3.299,
+              48.396
+            ],
+            [
+              -2.566,
+              48.396
+            ],
+            [
+              -1.818,
+              47.887
+            ],
+            [
+              -1.804,
+              47.377
+            ],
+            [
+              -1.082,
+              47.377
+            ],
+            [
+              -0.358,
+              46.868
+            ],
+            [
+              -0.714,
+              46.358
+            ],
+            [
+              -0.352,
+              45.34
+            ],
+            [
+              0.352,
+              45.34
+            ],
+            [
+              0.351,
+              44.83
+            ],
+            [
+              1.754,
+              44.83
+            ],
+            [
+              1.741,
+              44.321
+            ],
+            [
+              1.044,
+              44.321
+            ],
+            [
+              1.04,
+              43.811
+            ],
+            [
+              0.344,
+              43.302
+            ],
+            [
+              -0.343,
+              42.792
+            ],
+            [
+              -1.029,
+              42.792
+            ],
+            [
+              -1.033,
+              43.302
+            ],
+            [
+              -2.409,
+              43.302
+            ],
+            [
+              -3.098,
+              43.302
+            ],
+            [
+              -3.121,
+              43.811
+            ],
+            [
+              -4.509,
+              43.811
+            ],
+            [
+              -5.202,
+              43.811
+            ],
+            [
+              -5.896,
+              43.811
+            ],
+            [
+              -6.59,
+              43.811
+            ],
+            [
+              -7.283,
+              43.811
+            ],
+            [
+              -7.977,
+              43.811
+            ],
+            [
+              -8.671,
+              43.811
+            ],
+            [
+              -7.916,
+              43.302
+            ],
+            [
+              -7.886,
+              42.792
+            ],
+            [
+              -8.539,
+              42.283
+            ],
+            [
+              -7.797,
+              41.774
+            ],
+            [
+              -7.767,
+              41.264
+            ],
+            [
+              -7.092,
+              41.264
+            ],
+            [
+              -6.417,
+              41.264
+            ],
+            [
+              -5.741,
+              41.264
+            ],
+            [
+              -5.085,
+              41.774
+            ],
+            [
+              -4.407,
+              41.774
+            ],
+            [
+              -3.729,
+              41.774
+            ],
+            [
+              -3.051,
+              41.774
+            ],
+            [
+              -2.373,
+              41.774
+            ],
+            [
+              -1.695,
+              41.774
+            ],
+            [
+              -1.013,
+              41.264
+            ],
+            [
+              -0.338,
+              41.264
+            ],
+            [
+              0.338,
+              41.264
+            ],
+            [
+              1.017,
+              41.774
+            ],
+            [
+              1.695,
+              41.774
+            ],
+            [
+              2.391,
+              42.283
+            ],
+            [
+              3.086,
+              42.792
+            ],
+            [
+              2.409,
+              43.302
+            ],
+            [
+              3.121,
+              43.811
+            ],
+            [
+              3.815,
+              43.811
+            ],
+            [
+              4.526,
+              44.321
+            ],
+            [
+              4.561,
+              44.83
+            ],
+            [
+              4.579,
+              45.34
+            ],
+            [
+              4.597,
+              45.849
+            ],
+            [
+              4.286,
+              46.358
+            ],
+            [
+              4.652,
+              46.868
+            ],
+            [
+              3.968,
+              47.377
+            ],
+            [
+              3.273,
+              47.887
+            ],
+            [
+              2.566,
+              48.396
+            ],
+            [
+              1.84,
+              48.906
+            ],
+            [
+              1.113,
+              49.415
+            ],
+            [
+              0.374,
+              49.925
+            ],
+            [
+              -0.371,
+              49.415
+            ],
+            [
+              -1.123,
+              49.925
+            ],
+            [
+              -1.871,
+              49.925
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

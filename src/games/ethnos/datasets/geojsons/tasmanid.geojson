@@ -1,0 +1,130 @@
+{
+  "type": "FeatureCollection",
+  "phenotype": "Tasmanid",
+  "slug": "tasmanid",
+  "regions": [
+    "austronesian"
+  ],
+  "centroid": {
+    "lat": -42.275,
+    "lng": 146.528
+  },
+  "bbox": [
+    145.424,
+    -43.91,
+    149.26,
+    -41.734
+  ],
+  "info": {
+    "name": " Tasmanid ",
+    "description": "<td valign=\"top\" width=\"450\">\n<h3> Description:</h3>\r\nInsular, slightly gracilised Australid subtype of Tasmania. Similar to Barrinean, sometimes also associated with Melanesid or Negritid. Most likely developed due to isolation after Tasmania split off Australia. Extinct today, the last full-blooded male / female died in 1869 / 1876. European colonists had wiped out the type within a few decades by war, displacement, and most importantly introduced diseases. However, a few descendants of mixed ancestry remain. <br/>\n<h3> Physical Traits:</h3>\r\nDark brown, sometimes black skin with kinky hair. Rather short, brachyskelic, mesomorph. Mesocephalic sometimes dolichocephalic, chamae- orthocranic. The nose is hyperplatyrrhine, very short, medium-high with a thick tip. Faces are broad and short, mouth large, convex upper lip, prognathy mild. Supraorbital arches and body hair strong. <br/>\n<h3> Literature:</h3>\r\nSome regarded it as a Melanesid subtype (<a href=\"http://humanphenotypes.net/links.html#E34\" target=\"_blank\">Eickstedt, 1934</a>; <a href=\"http://humanphenotypes.net/links.html#A58\" target=\"_blank\">Abbie, 1958</a>). Others believed it to be an Australid-Negritid Tasmanian subrace (<a href=\"http://humanphenotypes.net/links.html#H46\" target=\"_blank\">Hooton, 1946</a>; <a href=\"http://humanphenotypes.net/links.html#C50\" target=\"_blank\">Coon et al., 1950</a>). <a href=\"http://humanphenotypes.net/links.html#L67\" target=\"_blank\">Ludman (1967</a> who called it Tasmanid and <a href=\"http://humanphenotypes.net/links.html#B67\" target=\"_blank\">Biasutti (1967)</a> regard it as an Australid subrace. Anthropometric analysis seem to support this (<a href=\"http://humanphenotypes.net/links.html#P05\" target=\"_blank\">Pietrusewsky, 2005</a>). \n</td>"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Tasmanid",
+        "slug": "tasmanid",
+        "zone": "centroid",
+        "regions": [
+          "austronesian"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          146.528,
+          -42.275
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Tasmanid",
+        "slug": "tasmanid",
+        "zone": "bright",
+        "polygon_index": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              145.424,
+              -41.734
+            ],
+            [
+              146.528,
+              -42.275
+            ],
+            [
+              146.528,
+              -42.818
+            ],
+            [
+              146.96,
+              -43.363
+            ],
+            [
+              146.272,
+              -43.363
+            ],
+            [
+              146.833,
+              -43.91
+            ],
+            [
+              147.524,
+              -43.91
+            ],
+            [
+              148.215,
+              -43.91
+            ],
+            [
+              148.906,
+              -43.91
+            ],
+            [
+              148.337,
+              -43.363
+            ],
+            [
+              147.894,
+              -42.818
+            ],
+            [
+              148.577,
+              -42.275
+            ],
+            [
+              149.26,
+              -42.275
+            ],
+            [
+              148.136,
+              -41.734
+            ],
+            [
+              147.458,
+              -41.734
+            ],
+            [
+              146.78,
+              -41.734
+            ],
+            [
+              146.102,
+              -41.734
+            ],
+            [
+              145.424,
+              -41.734
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

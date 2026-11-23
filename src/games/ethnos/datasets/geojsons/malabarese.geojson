@@ -1,0 +1,700 @@
+{
+  "type": "FeatureCollection",
+  "phenotype": "Malabarese",
+  "slug": "malabarese",
+  "regions": [
+    "indian"
+  ],
+  "centroid": {
+    "lat": 11.18,
+    "lng": 76.896
+  },
+  "bbox": [
+    74.152,
+    3.63,
+    81.394,
+    18.849
+  ],
+  "info": {
+    "name": "Malabarese ",
+    "description": "<td valign=\"top\" width=\"450\">\n<h3> Description:</h3>\r\nIndid-Veddid influenced type of Southwestern India, found in its most typical form in Kerala, e.g. in Malabarese and related people. Common with a large population. It is similar to the Indo Melanids further East, often mixed with Keralids and sometimes with Malids. In Southwestern Dekkan, there exists a more brachimorph variety, the Canarese.\r\n<h3> Physical Traits:</h3>\r\nDark brown skin, black, often wavy hair. Medium height, mesoskelic, ectomorph. Small-headed, dolichocephalic, orthocranic or mildly hypsicranic. Mesorrhine nose, significantly wider than in Indids. The face is short with a mildly prominent chin and full lips. The features overall are less robust and more slender than in the Melanids farther east.<br/>\n<h3> Literature:</h3>\r\nBiasutti described this type together with its Canarese subvariety and grouped them into Paleo Indid together with Tamils (<a href=\"http://humanphenotypes.net/links.html#B67\" target=\"_blank\">Biasutti, 1967)</a>. Eickstedt (<a href=\"http://humanphenotypes.net/links.html#E29\" target=\"_blank\">1929</a>,<a href=\"http://humanphenotypes.net/links.html#E34\" target=\"_blank\">1934</a>,<a href=\"http://humanphenotypes.net/links.html#E37\" target=\"_blank\">1937</a>)  considered it an Indid-Veddoid blend.\r\n\n</td>"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Malabarese",
+        "slug": "malabarese",
+        "zone": "centroid",
+        "regions": [
+          "indian"
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.896,
+          11.18
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Malabarese",
+        "slug": "malabarese",
+        "zone": "bright",
+        "polygon_index": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              76.812,
+              14.115
+            ],
+            [
+              76.812,
+              13.634
+            ],
+            [
+              75.987,
+              13.15
+            ],
+            [
+              75.409,
+              12.662
+            ],
+            [
+              75.168,
+              12.171
+            ],
+            [
+              75.744,
+              11.677
+            ],
+            [
+              75.744,
+              11.18
+            ],
+            [
+              76.32,
+              11.18
+            ],
+            [
+              76.896,
+              10.68
+            ],
+            [
+              76.651,
+              10.176
+            ],
+            [
+              77.225,
+              9.67
+            ],
+            [
+              77.225,
+              10.237
+            ],
+            [
+              76.979,
+              9.731
+            ],
+            [
+              77.552,
+              9.221
+            ],
+            [
+              77.143,
+              8.708
+            ],
+            [
+              77.714,
+              8.708
+            ],
+            [
+              78.124,
+              9.221
+            ],
+            [
+              78.696,
+              9.731
+            ],
+            [
+              78.947,
+              10.237
+            ],
+            [
+              78.373,
+              10.237
+            ],
+            [
+              77.799,
+              9.67
+            ],
+            [
+              77.799,
+              10.176
+            ],
+            [
+              78.048,
+              10.68
+            ],
+            [
+              78.048,
+              11.18
+            ],
+            [
+              77.472,
+              11.677
+            ],
+            [
+              77.472,
+              12.171
+            ],
+            [
+              77.721,
+              12.662
+            ],
+            [
+              77.721,
+              13.15
+            ],
+            [
+              77.391,
+              13.634
+            ],
+            [
+              77.391,
+              14.115
+            ],
+            [
+              76.812,
+              14.115
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Malabarese",
+        "slug": "malabarese",
+        "zone": "dull",
+        "polygon_index": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              76.89,
+              18.849
+            ],
+            [
+              76.052,
+              18.34
+            ],
+            [
+              76.052,
+              17.849
+            ],
+            [
+              75.22,
+              17.393
+            ],
+            [
+              74.221,
+              16.935
+            ],
+            [
+              74.392,
+              16.473
+            ],
+            [
+              74.392,
+              16.008
+            ],
+            [
+              74.152,
+              15.539
+            ],
+            [
+              74.733,
+              15.068
+            ],
+            [
+              74.493,
+              14.593
+            ],
+            [
+              75.072,
+              14.115
+            ],
+            [
+              75.987,
+              13.15
+            ],
+            [
+              75.409,
+              12.662
+            ],
+            [
+              76.565,
+              13.15
+            ],
+            [
+              76.812,
+              14.115
+            ],
+            [
+              77.391,
+              14.115
+            ],
+            [
+              77.391,
+              13.634
+            ],
+            [
+              77.143,
+              13.15
+            ],
+            [
+              77.721,
+              13.15
+            ],
+            [
+              77.721,
+              12.662
+            ],
+            [
+              77.472,
+              12.171
+            ],
+            [
+              77.472,
+              11.677
+            ],
+            [
+              78.048,
+              11.18
+            ],
+            [
+              78.048,
+              10.68
+            ],
+            [
+              77.799,
+              10.176
+            ],
+            [
+              77.799,
+              9.67
+            ],
+            [
+              78.947,
+              10.237
+            ],
+            [
+              78.696,
+              9.731
+            ],
+            [
+              80.096,
+              10.176
+            ],
+            [
+              80.352,
+              10.68
+            ],
+            [
+              80.352,
+              11.18
+            ],
+            [
+              80.352,
+              11.677
+            ],
+            [
+              80.352,
+              12.171
+            ],
+            [
+              80.61,
+              12.662
+            ],
+            [
+              80.032,
+              13.15
+            ],
+            [
+              80.87,
+              13.634
+            ],
+            [
+              80.87,
+              14.115
+            ],
+            [
+              80.29,
+              14.593
+            ],
+            [
+              80.549,
+              15.068
+            ],
+            [
+              81.131,
+              15.539
+            ],
+            [
+              81.394,
+              16.008
+            ],
+            [
+              81.394,
+              16.473
+            ],
+            [
+              81.234,
+              16.935
+            ],
+            [
+              81.073,
+              17.393
+            ],
+            [
+              80.75,
+              17.849
+            ],
+            [
+              80.163,
+              17.849
+            ],
+            [
+              79.576,
+              18.34
+            ],
+            [
+              79.247,
+              18.849
+            ],
+            [
+              78.658,
+              18.849
+            ],
+            [
+              78.069,
+              18.849
+            ],
+            [
+              77.48,
+              18.849
+            ],
+            [
+              76.89,
+              18.849
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Malabarese",
+        "slug": "malabarese",
+        "zone": "dull",
+        "polygon_index": 1
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              80.986,
+              9.731
+            ],
+            [
+              80.413,
+              9.221
+            ],
+            [
+              80.0,
+              8.708
+            ],
+            [
+              80.0,
+              8.921
+            ],
+            [
+              80.571,
+              8.406
+            ],
+            [
+              81.143,
+              8.921
+            ],
+            [
+              80.571,
+              8.708
+            ],
+            [
+              80.986,
+              9.221
+            ],
+            [
+              80.986,
+              9.731
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Malabarese",
+        "slug": "malabarese",
+        "zone": "dull",
+        "is_circle": true,
+        "radius_km": 50,
+        "center": [
+          76.165,
+          5.785
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              76.617756,
+              5.785
+            ],
+            [
+              76.602329,
+              5.901585
+            ],
+            [
+              76.557098,
+              6.010225
+            ],
+            [
+              76.485147,
+              6.103517
+            ],
+            [
+              76.391378,
+              6.175102
+            ],
+            [
+              76.282182,
+              6.220102
+            ],
+            [
+              76.165,
+              6.23545
+            ],
+            [
+              76.047818,
+              6.220102
+            ],
+            [
+              75.938622,
+              6.175102
+            ],
+            [
+              75.844853,
+              6.103517
+            ],
+            [
+              75.772902,
+              6.010225
+            ],
+            [
+              75.727671,
+              5.901585
+            ],
+            [
+              75.712244,
+              5.785
+            ],
+            [
+              75.727671,
+              5.668415
+            ],
+            [
+              75.772902,
+              5.559775
+            ],
+            [
+              75.844853,
+              5.466483
+            ],
+            [
+              75.938622,
+              5.394898
+            ],
+            [
+              76.047818,
+              5.349898
+            ],
+            [
+              76.165,
+              5.33455
+            ],
+            [
+              76.282182,
+              5.349898
+            ],
+            [
+              76.391378,
+              5.394898
+            ],
+            [
+              76.485147,
+              5.466483
+            ],
+            [
+              76.557098,
+              5.559775
+            ],
+            [
+              76.602329,
+              5.668415
+            ],
+            [
+              76.617756,
+              5.785
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "phenotype": "Malabarese",
+        "slug": "malabarese",
+        "zone": "dull",
+        "is_circle": true,
+        "radius_km": 50,
+        "center": [
+          75.924,
+          3.63
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              76.375356,
+              3.63
+            ],
+            [
+              76.359976,
+              3.746585
+            ],
+            [
+              76.314886,
+              3.855225
+            ],
+            [
+              76.243157,
+              3.948517
+            ],
+            [
+              76.149678,
+              4.020102
+            ],
+            [
+              76.04082,
+              4.065102
+            ],
+            [
+              75.924,
+              4.08045
+            ],
+            [
+              75.80718,
+              4.065102
+            ],
+            [
+              75.698322,
+              4.020102
+            ],
+            [
+              75.604843,
+              3.948517
+            ],
+            [
+              75.533114,
+              3.855225
+            ],
+            [
+              75.488024,
+              3.746585
+            ],
+            [
+              75.472644,
+              3.63
+            ],
+            [
+              75.488024,
+              3.513415
+            ],
+            [
+              75.533114,
+              3.404775
+            ],
+            [
+              75.604843,
+              3.311483
+            ],
+            [
+              75.698322,
+              3.239898
+            ],
+            [
+              75.80718,
+              3.194898
+            ],
+            [
+              75.924,
+              3.17955
+            ],
+            [
+              76.04082,
+              3.194898
+            ],
+            [
+              76.149678,
+              3.239898
+            ],
+            [
+              76.243157,
+              3.311483
+            ],
+            [
+              76.314886,
+              3.404775
+            ],
+            [
+              76.359976,
+              3.513415
+            ],
+            [
+              76.375356,
+              3.63
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
