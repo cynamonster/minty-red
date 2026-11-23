@@ -455,6 +455,10 @@ Play now: ${window.location.origin}/bearinglock`;
             </div>
           </div>
 
+          <div className="w-full pt-2">
+            <AdBanner game="bearinglock" onSelectGame={onSelectGame} />
+          </div>
+
           <NextGameDrawer currentGameSlug="bearinglock" onSelectGame={onSelectGame} />
         </div>
       )}
@@ -615,6 +619,10 @@ Play now: ${window.location.origin}/bearinglock`;
               </div>
             )}
           </div>
+
+          <div className="mt-auto pt-2">
+            <AdBanner game="bearinglock" onSelectGame={onSelectGame} />
+          </div>
         </div>
       )}
 
@@ -728,6 +736,10 @@ Play now: ${window.location.origin}/bearinglock`;
                 <span>Back to Mode Select</span>
               </button>
             </div>
+          </div>
+
+          <div className="w-full pt-2">
+            <AdBanner game="bearinglock" onSelectGame={onSelectGame} />
           </div>
 
           <NextGameDrawer currentGameSlug="bearinglock" onSelectGame={onSelectGame} />
