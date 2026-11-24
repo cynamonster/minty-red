@@ -1,7 +1,8 @@
 // Ad Configuration & Monetization Settings for Minty.red Arcade Games
 
 export const ADSENSE_CLIENT_ID =
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ADSENSE_CLIENT_ID) || '';
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ADSENSE_CLIENT_ID) ||
+  'ca-pub-3700914218529429';
 
 /**
  * Google AdSense Slot IDs mapped by game slug.
