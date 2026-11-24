@@ -16,7 +16,7 @@ export function NavBar({ title, onHome, streak = 0, subtitle }) {
   const hasStreak = typeof streak === 'number' ? streak > 0 : Boolean(streak && streak !== '0' && streak !== '0x');
 
   return (
-    <header className="w-full max-w-md mx-auto px-4 py-3 flex items-center justify-between border-b border-slate-800/80 bg-slate-950/40 backdrop-blur z-30">
+    <header className="w-full max-w-md mx-auto px-4 py-3 flex items-center justify-between border-b border-slate-800/80 bg-slate-950/40 backdrop-blur z-30 font-sans">
       <div className="flex items-center gap-2">
         <button
           onClick={() => {

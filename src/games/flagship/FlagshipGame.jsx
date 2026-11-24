@@ -335,30 +335,42 @@ function BourdonSteamTube({ timeLeft, maxTime }) {
 // 3. TARGET SWATCH PRESENTATION (ENSIGN vs SPYGLASS)
 // ============================================================================
 
-// Flag image graphic with fallback
+// Flag image graphic with fallback, rotated 90° for vertical naval ensign presentation
 function FlagGraphic({ flag }) {
   if (!flag) return null;
   const imageSrc = flag.image || `/images/flags/${flag.id}.svg`;
   const fallbackSrc = `https://flagcdn.com/${flag.id}.svg`;
 
   return (
-    <div className="w-full h-full flex items-center justify-center p-2">
-      <img
-        src={imageSrc}
-        alt={`Flag of ${flag.country}`}
-        onError={(e) => {
-          if (e.currentTarget.src !== fallbackSrc) {
-            e.currentTarget.src = fallbackSrc;
-          }
-        }}
-        className="max-h-full max-w-full rounded-xl shadow-2xl object-contain border-2 border-amber-400/80 drop-shadow-xl"
-        loading="eager"
-      />
+    <div className="w-full h-full flex flex-col items-center justify-center p-1 relative overflow-hidden">
+      {/* Top yardarm halyard rigging wire */}
+      <div className="w-full max-w-[64px] sm:max-w-[76px] h-[2px] bg-gradient-to-r from-amber-700 via-amber-400 to-amber-700 rounded-full mb-1 shrink-0 relative">
+        <div className="absolute -top-0.5 left-1 w-1.5 h-1.5 rounded-full bg-amber-300 border border-black shadow" />
+        <div className="absolute -top-0.5 right-1 w-1.5 h-1.5 rounded-full bg-amber-300 border border-black shadow" />
+      </div>
+
+      {/* Flag rotated 90° */}
+      <div
+        className="rotate-90 shrink-0 flex items-center justify-center my-auto"
+        style={{ width: '104px', height: '68px' }}
+      >
+        <img
+          src={imageSrc}
+          alt={`Flag of ${flag.country}`}
+          onError={(e) => {
+            if (e.currentTarget.src !== fallbackSrc) {
+              e.currentTarget.src = fallbackSrc;
+            }
+          }}
+          className="w-full h-full object-contain rounded-md shadow-2xl border-2 border-amber-400/80 drop-shadow-xl"
+          loading="eager"
+        />
+      </div>
     </div>
   );
 }
 
-// Option A: Optical Signal Ensign (Canvas with brass grommets & halyard line)
+// Option A: Optical Signal Ensign (Canvas with brass grommets & halyard line, rotated 90°)
 function SignalEnsignDisplay({ target }) {
   const colors = target.colors || ['#38bdf8'];
   const proportions = target.proportions || [1];
@@ -366,17 +378,18 @@ function SignalEnsignDisplay({ target }) {
 
   return (
     <div className="w-full h-full flex flex-col justify-between items-center py-1">
-      {/* Hoisted Canvas Ensign Frame */}
-      <div className="w-full flex-1 flex items-center justify-center relative pl-5 pr-1">
-        {/* Left Halyard Lanyard Cord */}
-        <div className="absolute left-2.5 top-1 bottom-1 w-[2px] bg-gradient-to-b from-amber-700 via-amber-400 to-amber-700" />
-        {/* Brass clip grommets */}
-        <div className="absolute left-1.5 top-3 w-2.5 h-2.5 rounded-full bg-amber-400 border border-black shadow" />
-        <div className="absolute left-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-amber-400 border border-black shadow" />
-        <div className="absolute left-1.5 bottom-3 w-2.5 h-2.5 rounded-full bg-amber-400 border border-black shadow" />
+      {/* Top Halyard Rigging Wire */}
+      <div className="w-full max-w-[64px] sm:max-w-[76px] h-[2px] bg-gradient-to-r from-amber-700 via-amber-400 to-amber-700 rounded-full shrink-0 relative mb-0.5">
+        <div className="absolute -top-0.5 left-1 w-1.5 h-1.5 rounded-full bg-amber-400 border border-black shadow" />
+        <div className="absolute -top-0.5 right-1 w-1.5 h-1.5 rounded-full bg-amber-400 border border-black shadow" />
+      </div>
 
-        {/* The Proportional Swatch Flag */}
-        <div className="w-full h-24 sm:h-28 rounded-xl overflow-hidden flex border-2 border-amber-400/80 shadow-2xl relative canvas-texture">
+      {/* Hoisted Canvas Ensign Swatch (Rotated 90°) */}
+      <div className="flex-1 w-full flex items-center justify-center relative my-auto">
+        <div
+          className="rotate-90 shrink-0 flex border-2 border-amber-400/80 rounded-md overflow-hidden shadow-2xl relative canvas-texture"
+          style={{ width: '90px', height: '56px' }}
+        >
           {colors.map((color, idx) => {
             const widthPct = (proportions[idx] / total) * 100;
             return (
@@ -393,21 +406,18 @@ function SignalEnsignDisplay({ target }) {
         </div>
       </div>
 
-      {/* Brass Hex Callout Plaques */}
-      <div className="flex items-center justify-center gap-1 sm:gap-1.5 flex-wrap pt-1.5 w-full">
+      {/* Brass Hex Callout Plaques (Upright & readable) */}
+      <div className="flex items-center justify-center gap-1 flex-wrap pt-1 w-full shrink-0">
         {colors.map((hex, i) => (
           <div
             key={i}
-            className="px-1.5 sm:px-2 py-0.5 rounded-md bg-[#050a14] border border-amber-900/60 text-[8px] sm:text-[9px] font-mono-code font-bold text-amber-200 flex items-center gap-1 shadow shrink-0"
+            className="px-1.5 py-0.5 rounded bg-[#050a14] border border-amber-900/60 text-[7px] font-mono-code font-bold text-amber-200 flex items-center gap-1 shadow shrink-0"
           >
             <span
-              className="w-2 h-2 rounded-full border border-black/50 inline-block shadow-sm"
+              className="w-1.5 h-1.5 rounded-full border border-black/50 inline-block shadow-sm"
               style={{ backgroundColor: hex }}
             />
             <span>{hex}</span>
-            <span className="text-[7px] sm:text-[8px] text-slate-400 font-normal">
-              ({getColorName(hex)})
-            </span>
           </div>
         ))}
       </div>
@@ -448,17 +458,17 @@ function SpyglassLensDisplay({ target }) {
   return (
     <div className="w-full h-full flex flex-col justify-between items-center py-1">
       {/* Spyglass Viewport Dial */}
-      <div className="relative w-32 h-32 sm:w-36 sm:h-36 mx-auto flex items-center justify-center">
+      <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto flex items-center justify-center my-auto">
         {/* Brass Bezel Ring with Degree Markings */}
-        <div className="absolute inset-0 rounded-full border-4 border-amber-500 shadow-2xl bg-[#060e18] flex items-center justify-center">
-          <div className="absolute top-1 text-[7px] font-mono-code text-amber-400 font-bold">000°</div>
-          <div className="absolute right-1 text-[7px] font-mono-code text-amber-400 font-bold">090°</div>
-          <div className="absolute bottom-1 text-[7px] font-mono-code text-amber-400 font-bold">180°</div>
-          <div className="absolute left-1 text-[7px] font-mono-code text-amber-400 font-bold">270°</div>
+        <div className="absolute inset-0 rounded-full border-2 border-amber-500 shadow-2xl bg-[#060e18] flex items-center justify-center">
+          <div className="absolute top-0.5 text-[6px] font-mono-code text-amber-400 font-bold">000°</div>
+          <div className="absolute right-0.5 text-[6px] font-mono-code text-amber-400 font-bold">090°</div>
+          <div className="absolute bottom-0.5 text-[6px] font-mono-code text-amber-400 font-bold">180°</div>
+          <div className="absolute left-0.5 text-[6px] font-mono-code text-amber-400 font-bold">270°</div>
         </div>
 
         {/* Glass Lens with Color Arc Sectors */}
-        <div className="relative w-28 h-28 rounded-full overflow-hidden border-2 border-amber-600/80 shadow-inner flex items-center justify-center">
+        <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border border-amber-600/80 shadow-inner flex items-center justify-center">
           <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow">
             {slices.map((slice, idx) => (
               <path key={idx} d={slice.d} fill={slice.color} stroke="#050a14" strokeWidth="1" />
@@ -468,26 +478,26 @@ function SpyglassLensDisplay({ target }) {
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
             <div className="w-full h-[1px] bg-black/40" />
             <div className="absolute h-full w-[1px] bg-black/40" />
-            <div className="w-6 h-6 rounded-full border border-black/40" />
+            <div className="w-4 h-4 rounded-full border border-black/40" />
           </div>
           {/* Lens Glare */}
           <div className="absolute inset-0 lens-glare pointer-events-none" />
           {/* Center Brass Hub */}
-          <div className="absolute w-4 h-4 rounded-full bg-amber-500 border border-amber-900 shadow flex items-center justify-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-white" />
+          <div className="absolute w-2.5 h-2.5 rounded-full bg-amber-500 border border-amber-900 shadow flex items-center justify-center">
+            <div className="w-1 h-1 rounded-full bg-white" />
           </div>
         </div>
       </div>
 
       {/* Brass Hex Callout Plaques */}
-      <div className="flex items-center justify-center gap-1.5 flex-wrap pt-1 w-full">
+      <div className="flex items-center justify-center gap-1 flex-wrap pt-0.5 w-full shrink-0">
         {colors.map((hex, i) => (
           <div
             key={i}
-            className="px-2 py-0.5 rounded-md bg-[#050a14] border border-amber-900/60 text-[9px] font-mono-code font-bold text-amber-200 flex items-center gap-1 shadow"
+            className="px-1.5 py-0.5 rounded bg-[#050a14] border border-amber-900/60 text-[8px] font-mono-code font-bold text-amber-200 flex items-center gap-1 shadow"
           >
             <span
-              className="w-2.5 h-2.5 rounded-full border border-black/50 inline-block shadow-sm"
+              className="w-1.5 h-1.5 rounded-full border border-black/50 inline-block shadow-sm"
               style={{ backgroundColor: hex }}
             />
             <span>{hex}</span>
@@ -800,7 +810,8 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
       streak={stats.currentStreak}
       onHome={onHome}
       showConfetti={showConfetti}
-      className="bg-[#040810] selection:bg-amber-500 selection:text-black font-naval"
+      className="bg-[#040810] selection:bg-amber-500 selection:text-black"
+      viewboxClassName="font-naval"
     >
       {/* ============================================================ */}
       {/* --- MENU SCREEN: COMMANDER'S BRIDGE TERMINAL --- */}
@@ -969,37 +980,90 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
               history={history}
             />
 
-            {/* 3. Central Mystery Swatch Frame / Sovereign Ensign Reveal */}
-            <div className="relative w-full aspect-[16/10] max-h-48 sm:max-h-52 mx-auto rounded-3xl bg-[#060c16] border-2 border-amber-900/60 p-2.5 sm:p-3 shadow-2xl flex items-center justify-center overflow-hidden">
-              {!isRevealed ? (
-                // UNREVEALED: Dual Mode Optical Signal Swatch
-                displayStyle === 'spyglass' ? (
-                  <SpyglassLensDisplay target={currentQ.target} />
+            {/* 3. Central Arena: Rotated Flag (90°) & Four Telegraph Keys (On the same line) */}
+            <div className="flex gap-2 sm:gap-2.5 items-stretch w-full min-h-[148px] sm:min-h-[160px]">
+              {/* Left Column: Sovereign Flag / Signal Ensign Frame (Rotated 90°) */}
+              <div className="w-24 sm:w-28 md:w-32 shrink-0 rounded-2xl bg-[#060c16] border-2 border-amber-900/60 p-1.5 sm:p-2 shadow-2xl flex flex-col items-center justify-between overflow-hidden relative">
+                {!isRevealed ? (
+                  // UNREVEALED: Dual Mode Optical Signal Swatch (Rotated 90°)
+                  displayStyle === 'spyglass' ? (
+                    <SpyglassLensDisplay target={currentQ.target} />
+                  ) : (
+                    <SignalEnsignDisplay target={currentQ.target} />
+                  )
                 ) : (
-                  <SignalEnsignDisplay target={currentQ.target} />
-                )
-              ) : (
-                // REVEALED: Full High-Res Sovereign Ensign
-                <div className="w-full h-full animate-in zoom-in-95 duration-200 flex flex-col items-center justify-center">
-                  <FlagGraphic flag={currentQ.target} />
-                </div>
-              )}
+                  // REVEALED: Full High-Res Sovereign Ensign (Rotated 90°)
+                  <div className="w-full h-full animate-in zoom-in-95 duration-200 flex flex-col items-center justify-center">
+                    <FlagGraphic flag={currentQ.target} />
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column: 4 Country Answer Choices on the same line */}
+              <div className="flex-1 grid grid-cols-2 gap-1.5 sm:gap-2">
+                {currentQ.options.map((option, idx) => {
+                  let btnStyle = 'bg-gradient-to-b from-[#14263e] to-[#0a1626] border-2 border-amber-500/80 text-white';
+
+                  if (isRevealed) {
+                    if (option.id === currentQ.target.id) {
+                      btnStyle = 'bg-gradient-to-b from-emerald-800 to-emerald-950 border-2 border-emerald-400 text-emerald-100 font-bold telegraph-btn-correct';
+                    } else if (selectedAnswer && selectedAnswer.id === option.id) {
+                      btnStyle = 'bg-rose-950/80 border-2 border-rose-500 text-rose-200 telegraph-btn-wrong opacity-80';
+                    } else {
+                      btnStyle = 'bg-[#060c16]/50 border-slate-800/50 text-slate-600 opacity-30';
+                    }
+                  }
+
+                  return (
+                    <button
+                      key={option.id}
+                      disabled={isRevealed}
+                      onClick={() => {
+                        soundEngine.playTap();
+                        handleChoice(option);
+                      }}
+                      className={`telegraph-btn p-1.5 sm:p-2 rounded-xl text-left transition-all active:scale-[0.98] flex flex-col justify-between overflow-hidden ${btnStyle}`}
+                    >
+                      <div className="flex items-center justify-between w-full text-[8px] sm:text-[9px] font-mono-code text-amber-400/90 pb-0.5 border-b border-amber-900/30">
+                        <span className="font-bold flex items-center gap-1">
+                          <span>⚓</span>
+                          0{idx + 1}
+                        </span>
+                        <span className="tracking-widest font-mono-code text-[7px] sm:text-[8px] text-amber-300/60">
+                          {MORSE_KEYS[idx % MORSE_KEYS.length]}
+                        </span>
+                      </div>
+
+                      <div className="font-bold text-xs leading-tight line-clamp-2 my-auto py-1 text-slate-100">
+                        {option.country}
+                      </div>
+
+                      <div className="text-[8px] sm:text-[9px] font-mono-code text-slate-400 flex items-center justify-between min-w-0">
+                        <span className="truncate">{option.continent}</span>
+                        {isRevealed && option.id === currentQ.target.id && (
+                          <Check className="w-3 h-3 text-emerald-400 stroke-[3] shrink-0 ml-1" />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* 4. Post-Reveal Admiralty Deck Log Feedback Entry */}
             {isRevealed && (
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[#08121f] border-2 border-amber-900/70 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                <div className="flex items-center justify-between pb-1.5 border-b border-amber-900/40">
-                  <div className="flex items-center gap-2">
+              <div className="p-2.5 sm:p-3 rounded-2xl bg-[#08121f] border-2 border-amber-900/70 space-y-1.5 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                <div className="flex items-center justify-between pb-1 border-b border-amber-900/40">
+                  <div className="flex items-center gap-1.5">
                     {selectedAnswer && selectedAnswer.id === currentQ.target.id ? (
-                      <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                         ENSIGN VERIFIED! +{roundDeltaScore} PTS
                       </span>
                     ) : (
-                      <span className="text-xs font-bold text-rose-400 flex items-center gap-1.5">
-                        <XCircle className="w-4 h-4 text-rose-400" />
-                        {selectedAnswer ? 'SIGNAL FOUL (MISIDENTIFIED)' : 'STEAM DEPLETED (TIME OUT)'}
+                      <span className="text-xs font-bold text-rose-400 flex items-center gap-1">
+                        <XCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                        {selectedAnswer ? 'SIGNAL FOUL' : 'TIME OUT'}
                       </span>
                     )}
                     <span className="text-[10px] text-amber-400/80 font-mono-code">
@@ -1009,7 +1073,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
 
                   <button
                     onClick={handleNextRound}
-                    className="px-3 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1 transition-all active:scale-95 shadow"
+                    className="px-3 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1 transition-all active:scale-95 shadow shrink-0"
                   >
                     <span>NEXT</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -1021,62 +1085,12 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                     <span className="font-bold text-white uppercase">{currentQ.target.country}</span>
                     <span className="text-amber-400 font-semibold">{currentQ.target.continent} Basin</span>
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1 italic leading-relaxed font-sans border-t border-slate-900/80 pt-1">
+                  <p className="text-[10px] text-slate-400 mt-0.5 italic leading-snug font-sans border-t border-slate-900/80 pt-0.5">
                     "{currentQ.target.trivia}"
                   </p>
                 </div>
               </div>
             )}
-
-            {/* 5. Mechanical Naval Telegraph Keys (4 Country Answer Choices) */}
-            <div className="grid grid-cols-2 gap-2 sm:gap-2.5 pt-0.5">
-              {currentQ.options.map((option, idx) => {
-                let btnStyle = 'bg-gradient-to-b from-[#14263e] to-[#0a1626] border-2 border-amber-500/80 text-white';
-
-                if (isRevealed) {
-                  if (option.id === currentQ.target.id) {
-                    btnStyle = 'bg-gradient-to-b from-emerald-800 to-emerald-950 border-2 border-emerald-400 text-emerald-100 font-bold telegraph-btn-correct';
-                  } else if (selectedAnswer && selectedAnswer.id === option.id) {
-                    btnStyle = 'bg-rose-950/80 border-2 border-rose-500 text-rose-200 telegraph-btn-wrong opacity-80';
-                  } else {
-                    btnStyle = 'bg-[#060c16]/50 border-slate-800/50 text-slate-600 opacity-30';
-                  }
-                }
-
-                return (
-                  <button
-                    key={option.id}
-                    disabled={isRevealed}
-                    onClick={() => {
-                      soundEngine.playTap();
-                      handleChoice(option);
-                    }}
-                    className={`telegraph-btn p-2.5 sm:p-3 rounded-2xl text-left transition-all active:scale-[0.98] flex flex-col justify-between min-h-[68px] sm:min-h-[72px] overflow-hidden ${btnStyle}`}
-                  >
-                    <div className="flex items-center justify-between w-full text-[9px] font-mono-code text-amber-400/90 pb-0.5 border-b border-amber-900/30">
-                      <span className="font-bold flex items-center gap-1">
-                        <span>⚓</span>
-                        KEY 0{idx + 1}
-                      </span>
-                      <span className="tracking-widest font-mono-code text-[8px] text-amber-300/60">
-                        {MORSE_KEYS[idx % MORSE_KEYS.length]}
-                      </span>
-                    </div>
-
-                    <div className="font-bold text-xs sm:text-sm leading-snug truncate mt-1 text-slate-100">
-                      {option.country}
-                    </div>
-
-                    <div className="text-[9px] font-mono-code text-slate-400 mt-0.5 flex items-center justify-between min-w-0">
-                      <span className="truncate">{option.continent}</span>
-                      {isRevealed && option.id === currentQ.target.id && (
-                        <Check className="w-3 h-3 text-emerald-400 stroke-[3] shrink-0 ml-1" />
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
 
             {/* Gameplay Bottom Ad Banner */}
             <div className="pt-1">
