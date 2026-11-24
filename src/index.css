@@ -67,3 +67,56 @@
 .neon-world-map-svg .subxx {
   vector-effect: non-scaling-stroke;
 }
+
+/* Naval Admiralty & Maritime Rigging Styles for Flag Hex */
+.font-naval {
+  font-family: 'Cinzel', Georgia, serif;
+}
+
+.font-mono-code {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.canvas-texture {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.15) 15%, transparent 16%),
+                    radial-gradient(rgba(255, 255, 255, 0.08) 15%, transparent 16%);
+  background-size: 4px 4px;
+  background-position: 0 0, 2px 2px;
+}
+
+.tube-glass-sheen {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.08) 40%, transparent 60%, rgba(0, 0, 0, 0.5) 100%);
+}
+
+.lens-glare {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.05) 35%, transparent 55%, rgba(56, 189, 248, 0.1) 100%);
+}
+
+@keyframes pennantFlutter {
+  0%, 100% { transform: rotate(0deg) skewY(0deg); }
+  50% { transform: rotate(3deg) skewY(2deg); }
+}
+
+.pennant-flutter {
+  animation: pennantFlutter 2.4s ease-in-out infinite;
+  transform-origin: left center;
+}
+
+.telegraph-btn {
+  box-shadow: 0 4px 0 #78350f, 0 6px 10px rgba(0, 0, 0, 0.6);
+  transform: translateY(0);
+  transition: all 0.08s ease;
+}
+
+.telegraph-btn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #78350f, 0 2px 5px rgba(0, 0, 0, 0.6);
+}
+
+.telegraph-btn-correct {
+  box-shadow: 0 4px 0 #065f46, 0 8px 16px rgba(16, 185, 129, 0.3) !important;
+}
+
+.telegraph-btn-wrong {
+  box-shadow: 0 3px 0 #881337, 0 4px 8px rgba(244, 63, 94, 0.2) !important;
+}

@@ -1,6 +1,7 @@
 // Environment and game availability utilities
 
 export const ALL_GAMES = [
+  'relic',
   'metro',
   'orbitdrop',
   'bearinglock',

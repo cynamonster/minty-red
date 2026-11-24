@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, ArrowRight, Gamepad2, Compass, Shield, Clock, Scale, Palette, Layers, Orbit, Cpu } from 'lucide-react';
+import { Sparkles, ArrowRight, Gamepad2, Compass, Shield, Clock, Scale, Palette, Layers, Orbit, Cpu, Anchor } from 'lucide-react';
 import { soundEngine } from '../audio/soundEngine';
 import { getAvailableGames } from '../utils/environment';
 import { trackNextGameClick } from '../analytics/analyticsService';
@@ -38,12 +38,12 @@ const ALL_GAMES = [
     accent: 'from-cyan-500/20 to-teal-500/20 border-cyan-500/30 text-cyan-400',
   },
   {
-    slug: 'flaghex',
-    title: 'Flag Hex',
-    subtitle: 'Palette Reflex Blitz',
+    slug: 'flagship',
+    title: 'Flagship',
+    subtitle: 'Admiralty Signal Reflex',
     badge: 'Popular',
-    icon: Palette,
-    accent: 'from-sky-500/20 to-indigo-500/20 border-sky-500/30 text-sky-400',
+    icon: Anchor,
+    accent: 'from-amber-500/20 to-sky-500/20 border-amber-500/30 text-amber-400',
   },
   {
     slug: 'scalecraft',

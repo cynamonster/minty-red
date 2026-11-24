@@ -1,6 +1,19 @@
 {
   "games": [
     {
+      "slug": "relic",
+      "title": "RELIC: Temporal Restitution Protocol",
+      "version": "1.0.0",
+      "status": "ready_for_review",
+      "rating": null,
+      "tagline": "Orbital Salvage & Chronological Calibration",
+      "description": "Viktor Vane looted history's greatest treasures into an automated orbital vault. Calibrate exact calendar years and geographic origin coordinates on an interactive vector map before the 45-second quantum decoherence decay destroys the atomic matrix.",
+      "category": "Chronology / Cartography / Reflex",
+      "targetSessionSeconds": 45,
+      "updatedAt": "2026-11-24T18:00:00Z",
+      "feedbackHistory": []
+    },
+    {
       "slug": "metro",
       "title": "METRO: Transit Topology Reflex",
       "version": "1.0.0",
@@ -66,16 +79,16 @@
       "feedbackHistory": []
     },
     {
-      "slug": "flaghex",
-      "title": "Flag Hex Reflex",
-      "version": "1.0.0",
+      "slug": "flagship",
+      "title": "Flagship: Admiralty Signal Reflex",
+      "version": "2.0.0",
       "status": "ready_for_review",
       "rating": null,
-      "tagline": "Palette Blitz",
-      "description": "Rapid-fire 3-second visual country identification from minimalist abstract color swatches.",
-      "category": "Geography / Reflex",
+      "tagline": "Admiralty Signal Reflex",
+      "description": "Identify sovereign naval ensigns from abstract optical color signals before boiler steam pressure vents! Features rigged yardarm halyard, Bourdon steam tube timer, and telegraph keys.",
+      "category": "Naval / Geography / Reflex",
       "targetSessionSeconds": 30,
-      "updatedAt": "2026-11-19T10:35:00Z",
+      "updatedAt": "2026-11-24T14:40:00Z",
       "feedbackHistory": []
     },
     {

@@ -6,12 +6,13 @@ import { RootsGame } from './games/roots/RootsGame';
 import { EthnosGame } from './games/ethnos/EthnosGame';
 import { CyberShinobiGame } from './games/shinobi/CyberShinobiGame';
 import { ScaleCraftGame } from './games/scalecraft/ScaleCraftGame';
-import { FlagHexGame } from './games/flaghex/FlagHexGame';
+import { FlagshipGame, FlagHexGame } from './games/flagship/FlagshipGame';
 import { CityGridGame } from './games/citygrid/CityGridGame';
 import { OrbitDropGame } from './games/orbitdrop/OrbitDropGame';
 import { LogicGateGame } from './games/logicgate/LogicGateGame';
 import { BearingLockGame } from './games/bearinglock/BearingLockGame';
 import { MetroGame } from './games/metro/MetroGame';
+import { RelicGame } from './games/relic/RelicGame';
 import { ReviewDrawer } from './shared/components/ReviewDrawer';
 import { ALL_GAMES, getAvailableGames, isDevSite } from './shared/utils/environment';
 import { initAnalytics, trackPageView, trackGameView } from './shared/analytics/analyticsService';
@@ -160,12 +161,13 @@ export function App() {
     if (slug === 'ethnos') return 'Ethnos: Micro Ethnoguesser';
     if (slug === 'shinobi') return 'Cyber-Shinobi';
     if (slug === 'scalecraft') return 'ScaleCraft: Macro vs Micro';
-    if (slug === 'flaghex') return 'Flag Hex Reflex: Palette Blitz';
+    if (slug === 'flagship' || slug === 'flaghex') return 'Flagship: Admiralty Signal Reflex';
     if (slug === 'citygrid') return 'CityGrid: Street Geometry';
     if (slug === 'orbitdrop') return 'OrbitDrop: Micro-Gravity Slingshot';
     if (slug === 'logicgate') return 'LogicGate: Silicon Circuit Academy';
     if (slug === 'bearinglock') return 'Bearing Lock: Compass Blitz';
     if (slug === 'metro') return 'METRO: Transit Topology Reflex';
+    if (slug === 'relic') return 'RELIC: Temporal Restitution Protocol';
     return slug;
   };
 
@@ -231,9 +233,9 @@ export function App() {
         />
       )}
 
-      {/* 8. Game 6: Flag Hex Reflex */}
-      {activeGame === 'flaghex' && (
-        <FlagHexGame
+      {/* 8. Game 6: Flagship (formerly Flag Hex) */}
+      {(activeGame === 'flagship' || activeGame === 'flaghex') && (
+        <FlagshipGame
           onHome={handleHome}
           onSelectGame={(slug) => handleSelectGame(slug, isReviewMode)}
           challengeCode={challengeCode}
@@ -285,8 +287,17 @@ export function App() {
         />
       )}
 
+      {/* 14. Game 12: RELIC */}
+      {activeGame === 'relic' && (
+        <RelicGame
+          onHome={handleHome}
+          onSelectGame={(slug) => handleSelectGame(slug, isReviewMode)}
+          challengeCode={challengeCode}
+        />
+      )}
+
       {/* Universal In-Game Review Drawer (Active when in review mode or launched from dash) */}
-      {['chronos', 'roots', 'ethnos', 'shinobi', 'scalecraft', 'flaghex', 'citygrid', 'orbitdrop', 'logicgate', 'bearinglock', 'metro'].includes(activeGame) && isReviewMode && (
+      {['chronos', 'roots', 'ethnos', 'shinobi', 'scalecraft', 'flagship', 'flaghex', 'citygrid', 'orbitdrop', 'logicgate', 'bearinglock', 'metro', 'relic'].includes(activeGame) && isReviewMode && (
         <ReviewDrawer
           gameSlug={activeGame}
           gameTitle={getGameTitle(activeGame)}

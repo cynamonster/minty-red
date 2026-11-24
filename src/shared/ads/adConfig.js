@@ -28,6 +28,9 @@ export const AD_SLOTS = {
   scalecraft:
     (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ADSENSE_SLOT_SCALECRAFT) ||
     '1000000006',
+  flagship:
+    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ADSENSE_SLOT_FLAGSHIP) ||
+    '1000000007',
   flaghex:
     (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ADSENSE_SLOT_FLAGHEX) ||
     '1000000007',
@@ -63,15 +66,15 @@ export const HOUSE_ADS = [
     borderColor: 'border-sky-500/30',
   },
   {
-    id: 'flaghex-reflex',
-    gameSlug: 'flaghex',
-    title: 'Flag Hex Reflex',
-    tagline: 'Speed-identify nations from high-saturation palette hexes',
-    cta: 'Test Reflexes',
-    icon: 'Zap',
-    accentColor: '#10b981',
-    bgGradient: 'from-emerald-950/40 via-teal-950/30 to-slate-900/60',
-    borderColor: 'border-emerald-500/30',
+    id: 'flagship-reflex',
+    gameSlug: 'flagship',
+    title: 'Flagship: Admiralty Reflex',
+    tagline: 'Speed-identify sovereign naval ensigns before steam vents',
+    cta: 'Board Flagship',
+    icon: 'Anchor',
+    accentColor: '#f59e0b',
+    bgGradient: 'from-amber-950/40 via-sky-950/30 to-slate-900/60',
+    borderColor: 'border-amber-500/30',
   },
   {
     id: 'arcade-hub',

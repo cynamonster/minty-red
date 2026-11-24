@@ -16,6 +16,8 @@ import {
   Orbit,
   Cpu,
   Lock,
+  Zap,
+  Anchor,
 } from 'lucide-react';
 import { soundEngine } from '../shared/audio/soundEngine';
 import { getGameStats } from '../shared/storage/playerStorage';
@@ -31,12 +33,16 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
   const ethnosStats = getGameStats('ethnos');
   const shinobiStats = getGameStats('cyber-shinobi');
   const scalecraftStats = getGameStats('scalecraft');
-  const flaghexStats = getGameStats('flaghex');
+  const flagshipRaw = getGameStats('flagship');
+  const legacyFlaghex = getGameStats('flaghex');
+  const flagshipStats = (flagshipRaw && flagshipRaw.gamesPlayed > 0) ? flagshipRaw : legacyFlaghex;
+  const flaghexStats = flagshipStats;
   const citygridStats = getGameStats('citygrid');
   const orbitdropStats = getGameStats('orbitdrop');
   const logicgateStats = getGameStats('logicgate');
   const bearinglockStats = getGameStats('bearinglock');
   const metroStats = getGameStats('metro');
+  const relicStats = getGameStats('relic');
 
   const handleToggleSound = () => {
     const isMutedNow = soundEngine.toggleMute();
@@ -45,6 +51,17 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
   };
 
   const allGames = [
+    {
+      slug: 'relic',
+      title: 'R.E.L.I.C.',
+      displayTitle: 'RELIC',
+      tagline: 'Temporal Restitution Protocol',
+      description: 'The automated Vane Vault is decaying in orbit. Crack vacuum stasis pods, calibrate year and map coordinates, and beam relics to history in 45s.',
+      stats: relicStats,
+      badge: 'NEW',
+      badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+      icon: Zap,
+    },
     {
       slug: 'metro',
       title: 'METRO',
@@ -79,15 +96,15 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       icon: Sparkles,
     },
     {
-      slug: 'flaghex',
-      title: 'FLAG_HEX',
-      displayTitle: 'Flag Hex Reflex',
-      tagline: 'Palette Reflex Blitz',
-      description: 'Rapid-fire visual country identification from minimalist abstract color swatches.',
-      stats: flaghexStats,
-      badge: 'REFLEX',
-      badgeColor: 'bg-sky-500/20 text-sky-300 border-sky-500/30',
-      icon: Palette,
+      slug: 'flagship',
+      title: 'FLAGSHIP',
+      displayTitle: 'Flagship',
+      tagline: 'Admiralty Signal Reflex',
+      description: 'Identify sovereign naval ensigns from abstract optical color signals before boiler steam pressure vents!',
+      stats: flagshipStats,
+      badge: 'NAVAL',
+      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+      icon: Anchor,
     },
     {
       slug: 'roots',
@@ -160,6 +177,14 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
   // Selected upcoming teaser games for production shelf
   const upcomingTeasers = [
     {
+      slug: 'relic',
+      title: 'R.E.L.I.C.',
+      tagline: 'Temporal Restitution Protocol',
+      badge: 'STASIS PROTOCOL',
+      badgeColor: 'bg-cyan-500/10 border-cyan-500/30 text-cyan-300',
+      icon: Zap,
+    },
+    {
       slug: 'bearinglock',
       title: 'BEARING_LOCK',
       tagline: 'Tactile 360° Compass Blitz',
@@ -176,12 +201,12 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       icon: Sparkles,
     },
     {
-      slug: 'flaghex',
-      title: 'FLAG_HEX',
-      tagline: 'Palette Reflex Blitz',
-      badge: 'REFLEX',
-      badgeColor: 'bg-sky-500/10 border-sky-500/30 text-sky-300',
-      icon: Palette,
+      slug: 'flagship',
+      title: 'FLAGSHIP',
+      tagline: 'Admiralty Signal Reflex',
+      badge: 'NAVAL',
+      badgeColor: 'bg-amber-500/10 border-amber-500/30 text-amber-300',
+      icon: Anchor,
     },
     {
       slug: 'roots',
@@ -193,9 +218,10 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
     },
   ];
 
-  // Visible playable games (OrbitDrop on prod, all games on dev)
+  // Visible playable games
   const totalStreak = isDev
-    ? orbitdropStats.currentStreak +
+    ? relicStats.currentStreak +
+      orbitdropStats.currentStreak +
       chronosStats.currentStreak +
       rootsStats.currentStreak +
       ethnosStats.currentStreak +
@@ -203,11 +229,13 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       flaghexStats.currentStreak +
       citygridStats.currentStreak +
       logicgateStats.currentStreak +
-      bearinglockStats.currentStreak
-    : orbitdropStats.currentStreak || 0;
+      bearinglockStats.currentStreak +
+      metroStats.currentStreak
+    : (metroStats.currentStreak || 0) + (orbitdropStats.currentStreak || 0);
 
   const totalPlayed = isDev
-    ? orbitdropStats.gamesPlayed +
+    ? relicStats.gamesPlayed +
+      orbitdropStats.gamesPlayed +
       chronosStats.gamesPlayed +
       rootsStats.gamesPlayed +
       ethnosStats.gamesPlayed +
@@ -217,8 +245,9 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       citygridStats.gamesPlayed +
       orbitdropStats.gamesPlayed +
       logicgateStats.gamesPlayed +
-      bearinglockStats.gamesPlayed
-    : orbitdropStats.gamesPlayed || 0;
+      bearinglockStats.gamesPlayed +
+      metroStats.gamesPlayed
+    : (metroStats.gamesPlayed || 0) + (orbitdropStats.gamesPlayed || 0);
 
   return (
     <div className="min-h-[100dvh] w-full flex flex-col bg-[#07090e] text-slate-100 select-none">
