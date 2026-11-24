@@ -663,8 +663,8 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
 
     const accuracyBonus = isBullseye ? 1000 : attempts === 2 ? 500 : attempts === 3 ? 250 : 100;
 
-    // Slingshot assist bonus (awarded if probe threaded around 2 or more distinct planets)
-    const assists = (probe?.slingshotPlanets && probe.slingshotPlanets.length >= 2) ? probe.slingshotPlanets.length : 0;
+    // Orbit bonus (awarded for full orbits completed around celestial bodies)
+    const assists = probe?.slingshotPlanets ? probe.slingshotPlanets.length : 0;
     const slingshotBonus = assists * 250;
     const missionScore = (mission.parScore || 1000) + accuracyBonus + slingshotBonus;
 
@@ -986,6 +986,15 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
     return `${hours}h ${mins}m`;
   };
 
+  // Helper to compute local time for next daily reset (at 00:00 UTC)
+  const getLocalDailyResetTime = () => {
+    const now = new Date();
+    const midnight = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0)
+    );
+    return midnight.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  };
+
   // Rating and Rank calculation based on efficiency and mode
   const getRating = () => {
     const successCount = missionHistory.filter((h) => h.success).length;
@@ -1250,7 +1259,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                 <div className="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300">
                   <span className="text-emerald-400 font-bold">✓ Daily Expedition complete!</span>
                   <div className="text-slate-400 text-[11px] mt-0.5">
-                    Next daily resets at 00:00 UTC (in {getTimeUntilMidnightUTC()}).
+                    Next daily resets at {getLocalDailyResetTime()} (in {getTimeUntilMidnightUTC()}).
                   </div>
                 </div>
                 <button
@@ -1492,7 +1501,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                   </div>
                   {missionHistory.some((m) => m.slingshotBonus > 0) && (
                     <div className="flex justify-between text-cyan-400">
-                      <span>Slingshot Gravity Assists:</span>
+                      <span>Orbit Bonuses:</span>
                       <span>
                         +
                         {missionHistory

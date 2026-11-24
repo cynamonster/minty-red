@@ -290,21 +290,61 @@ export function stepPhysics(probe, planets, target, dt = 1.0, bounds = DEFAULT_P
   const nextPos = { x: nextX, y: nextY };
   const collision = checkCollisions(nextPos, probe.radius || 4, planets, target, bounds, { x: nextVx, y: nextVy });
 
-  // Track distinct planets gravitationally slingshotted during this flight
+  // Track full orbits completed around celestial bodies during this flight
   const slingshotPlanets = new Set(probe.slingshotPlanets || []);
+  const orbitTracking = probe.orbitTracking ? { ...probe.orbitTracking } : {};
   const newAssists = [];
+
   for (let i = 0; i < planets.length; i++) {
     const p = planets[i];
-    const dist = Math.hypot(nextPos.x - p.x, nextPos.y - p.y);
-    if (dist <= p.radius * 2.6) {
-      const pKey = p.name || `planet-${i}`;
-      if (!slingshotPlanets.has(pKey)) {
+    const pKey = p.name || `planet-${i}`;
+    const dx = nextPos.x - p.x;
+    const dy = nextPos.y - p.y;
+    const dist = Math.hypot(dx, dy);
+    const currentAngle = Math.atan2(dy, dx);
+
+    const prevTrack = orbitTracking[pKey];
+    if (!prevTrack) {
+      orbitTracking[pKey] = {
+        lastAngle: currentAngle,
+        accumulatedAngle: 0,
+        completed: false,
+        minDist: dist,
+      };
+    } else if (!prevTrack.completed) {
+      let dAngle = currentAngle - prevTrack.lastAngle;
+      while (dAngle > Math.PI) dAngle -= 2 * Math.PI;
+      while (dAngle < -Math.PI) dAngle += 2 * Math.PI;
+
+      const nextAccum = prevTrack.accumulatedAngle + dAngle;
+      const nextMinDist = Math.min(prevTrack.minDist, dist);
+
+      // A full orbit requires sweeping 360 degrees (2*PI rad) while staying within
+      // the celestial body's gravitational sphere of influence.
+      const isFullOrbit =
+        Math.abs(nextAccum) >= 2 * Math.PI &&
+        nextMinDist <= Math.max(p.radius * 4.0, 150);
+
+      if (isFullOrbit) {
+        orbitTracking[pKey] = {
+          lastAngle: currentAngle,
+          accumulatedAngle: nextAccum,
+          completed: true,
+          minDist: nextMinDist,
+        };
         slingshotPlanets.add(pKey);
         newAssists.push({
           planetName: p.name || `Planet ${i + 1}`,
           x: nextPos.x,
           y: nextPos.y,
         });
+      } else {
+        orbitTracking[pKey] = {
+          lastAngle: currentAngle,
+          accumulatedAngle: nextAccum,
+          completed: false,
+          minDist: nextMinDist,
+        };
       }
     }
   }
@@ -332,6 +372,7 @@ export function stepPhysics(probe, planets, target, dt = 1.0, bounds = DEFAULT_P
     vel: { x: nextVx, y: nextVy },
     trail: newTrail,
     slingshotPlanets: Array.from(slingshotPlanets),
+    orbitTracking,
     newAssists,
     status,
     collision,
