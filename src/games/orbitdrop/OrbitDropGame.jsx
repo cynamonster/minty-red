@@ -34,6 +34,7 @@ import {
   saveGameScore,
   getGameStats,
 } from '../../shared/storage/playerStorage';
+import { isDevSite } from '../../shared/utils/environment';
 import {
   shareResult,
   copyShareText,
@@ -86,24 +87,21 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
   // Game Modes: 'daily' | 'infinite'
   const [mode, setMode] = useState('daily');
 
-  // Dev Mode: enabled via ?dev=true or 5 taps on the game title
-  const [isDevMode, setIsDevMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return new URLSearchParams(window.location.search).get('dev') === 'true';
-    }
-    return false;
-  });
+  // Dev Mode: enabled on dev sites (e.g. dev.minty.red), via ?dev=true, or 5 taps on the game title
+  const [isDevMode, setIsDevMode] = useState(() => isDevSite());
   const devTapCountRef = useRef(0);
 
   // Customization & Unlocked Themes (stored in localStorage)
   const [customization, setCustomization] = useState(() => {
+    const isDev = isDevSite();
+    const allThemeKeys = Object.keys(ORBIT_THEMES);
     try {
       const raw = localStorage.getItem('bobby_orbitdrop_customization');
       if (raw) {
         const parsed = JSON.parse(raw);
         return {
           activeTheme: parsed.activeTheme || 'default',
-          unlockedThemes: parsed.unlockedThemes || ['default'],
+          unlockedThemes: isDev ? allThemeKeys : (parsed.unlockedThemes || ['default']),
           maxInfiniteSector: parsed.maxInfiniteSector || 0,
           maxStreak: parsed.maxStreak || 0,
         };
@@ -111,7 +109,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
     } catch (_) {}
     return {
       activeTheme: 'default',
-      unlockedThemes: ['default'],
+      unlockedThemes: isDev ? allThemeKeys : ['default'],
       maxInfiniteSector: 0,
       maxStreak: 0,
     };
@@ -125,7 +123,8 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
   // Check and unlock themes based on streak & sector milestones
   const checkThemeUnlocks = useCallback((streakVal = 0, sectorVal = 0) => {
     setCustomization((prev) => {
-      const unlocked = new Set(prev.unlockedThemes || ['default']);
+      const isDev = isDevMode || isDevSite();
+      const unlocked = new Set(isDev ? Object.keys(ORBIT_THEMES) : (prev.unlockedThemes || ['default']));
       const maxSector = Math.max(prev.maxInfiniteSector || 0, sectorVal || 0);
       const maxStrk = Math.max(prev.maxStreak || 0, streakVal || 0);
 
@@ -1028,7 +1027,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
     missionHistory.length === TOTAL_MISSIONS &&
     missionHistory.every((m) => m.bullseye);
 
-  const isDailyLocked = mode === 'daily' && stats.todayCompleted && !isDevMode;
+  const isDailyLocked = mode === 'daily' && stats.todayCompleted && !(isDevMode || isDevSite());
 
   // Equip a theme
   const handleEquipTheme = (themeId) => {
@@ -1038,7 +1037,8 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
       return;
     }
 
-    const isUnlocked = customization.unlockedThemes?.includes(themeId) || themeId === 'default' || isDevMode;
+    const isDev = isDevMode || isDevSite();
+    const isUnlocked = customization.unlockedThemes?.includes(themeId) || themeId === 'default' || isDev;
     if (!isUnlocked) {
       soundEngine.playWrong();
       return;
@@ -1048,6 +1048,9 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
     const updated = {
       ...customization,
       activeTheme: themeId,
+      unlockedThemes: isDev
+        ? Object.keys(ORBIT_THEMES)
+        : (customization.unlockedThemes || ['default']),
     };
     setCustomization(updated);
     try {
@@ -1083,7 +1086,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
       {/* Main Top Navigation */}
       <NavBar
         title="OrbitDrop"
-        subtitle={isDevMode ? 'DEV MODE • Micro-Gravity' : 'Micro-Gravity Slingshot'}
+        subtitle={(isDevMode || isDevSite()) ? 'DEV MODE • Micro-Gravity' : 'Micro-Gravity Slingshot'}
         streak={stats.currentStreak}
         onHome={onHome}
       />
@@ -1119,7 +1122,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                 OrbitDrop
               </h2>
 
-              {isDevMode && (
+              {(isDevMode || isDevSite()) && (
                 <div className="text-[10px] text-amber-400 font-mono font-bold tracking-wider">
                   ⚡ [DEV MODE ACTIVE • DAILY LOCK BYPASS • ALL SKINS UNLOCKED]
                 </div>
@@ -1186,7 +1189,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                         )}
                       </div>
                       <div className="text-[11px] text-slate-400">
-                        {stats.todayCompleted && !isDevMode
+                        {stats.todayCompleted && !(isDevMode || isDevSite())
                           ? `Completed for today • Resets in ${getTimeUntilMidnightUTC()}`
                           : '5 curated daily missions. Scored on precision & probe efficiency.'}
                       </div>
@@ -1276,8 +1279,10 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                 <Play className="w-5 h-5 fill-slate-950" />
                 <span>
                   {mode === 'daily'
-                    ? isDevMode && stats.todayCompleted
-                      ? '[DEV] Replay Daily Expedition'
+                    ? stats.todayCompleted
+                      ? (isDevMode || isDevSite())
+                        ? 'Replay Daily Expedition'
+                        : 'Launch Daily Expedition'
                       : 'Launch Daily Expedition'
                     : 'Launch Infinite Sectors'}
                 </span>
@@ -1578,7 +1583,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
 
                 <button
                   onClick={() => {
-                    if (mode === 'daily' && !isDevMode) {
+                    if (mode === 'daily' && !(isDevMode || isDevSite())) {
                       initGameSession('infinite');
                     } else {
                       initGameSession(mode);
@@ -1588,10 +1593,10 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                 >
                   <RotateCcw className="w-4 h-4" />
                   <span>
-                    {mode === 'daily' && !isDevMode
-                      ? 'Play Infinite'
-                      : isDevMode
-                      ? '[DEV] Replay'
+                    {mode === 'daily'
+                      ? (isDevMode || isDevSite())
+                        ? 'Replay Daily'
+                        : 'Play Infinite'
                       : 'Play Again'}
                   </span>
                 </button>
@@ -1639,7 +1644,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
               </button>
             </div>
 
-            {isDevMode && (
+            {(isDevMode || isDevSite()) && (
               <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[10px] text-amber-300 font-mono font-bold flex items-center gap-1.5">
                 <span>⚡ DEV MODE ACTIVE: All skins unlocked for preview and testing!</span>
               </div>
@@ -1649,7 +1654,8 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
             <div className="space-y-2.5 max-h-[58vh] overflow-y-auto pr-1">
               {Object.values(ORBIT_THEMES).map((t) => {
                 const isEquipped = customization.activeTheme === t.id;
-                const isUnlocked = customization.unlockedThemes?.includes(t.id) || t.id === 'default' || isDevMode;
+                const isDev = isDevMode || isDevSite();
+                const isUnlocked = customization.unlockedThemes?.includes(t.id) || t.id === 'default' || isDev;
 
                 return (
                   <div
@@ -1677,7 +1683,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                             className="w-3 h-3 rounded-full"
                             style={{ backgroundColor: t.probeColor }}
                           />
-                          {!isUnlocked && !isDevMode && (
+                          {!isUnlocked && !isDev && (
                             <div className="absolute inset-0 bg-black/65 rounded-xl flex items-center justify-center">
                               <Lock className="w-3.5 h-3.5 text-slate-400" />
                             </div>
@@ -1700,7 +1706,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                           <div className="text-[10px] text-slate-400 leading-tight">
                             {t.description}
                           </div>
-                          {!isUnlocked && !isDevMode && (
+                          {!isUnlocked && !isDev && (
                             <div className="text-[10px] text-amber-400 font-semibold flex items-center gap-1 mt-0.5">
                               <Lock className="w-2.5 h-2.5 flex-shrink-0" />
                               <span>
@@ -1727,13 +1733,6 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                             className="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 hover:text-white font-bold text-[10px] border border-slate-700 active:scale-95 transition-all"
                           >
                             Equip
-                          </button>
-                        ) : isDevMode ? (
-                          <button
-                            onClick={() => handleEquipTheme(t.id)}
-                            className="px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 font-bold text-[10px] border border-amber-500/40 active:scale-95 transition-all"
-                          >
-                            [DEV] Equip
                           </button>
                         ) : (
                           <span className="px-2 py-1 rounded-xl bg-slate-900 text-slate-500 font-bold text-[10px] border border-slate-800 flex items-center gap-1">

@@ -48,6 +48,8 @@ export function isDevSite() {
 
   // Subdomains for dev, preview, or studio dashboard
   if (
+    host === 'dev.minty.red' ||
+    host.endsWith('.dev.minty.red') ||
     host.startsWith('dev.') ||
     host.startsWith('preview.') ||
     host.startsWith('dash.') ||
