@@ -99,6 +99,17 @@ export const HOUSE_ADS = [
     borderColor: 'border-teal-500/30',
   },
   {
+    id: 'ethnos-blitz',
+    gameSlug: 'ethnos',
+    title: 'Ethnos: Micro Ethnoguesser',
+    tagline: 'Rapid-fire demographic and phenotype guessing rounds',
+    cta: 'Play Ethnos',
+    icon: 'Sparkles',
+    accentColor: '#f59e0b',
+    bgGradient: 'from-amber-950/40 via-orange-950/30 to-slate-900/60',
+    borderColor: 'border-amber-500/30',
+  },
+  {
     id: 'roots-origins',
     gameSlug: 'roots',
     title: 'Roots: Surname Origins',

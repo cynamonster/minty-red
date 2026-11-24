@@ -1,6 +1,66 @@
 {
   "games": [
     {
+      "slug": "orbitdrop",
+      "title": "OrbitDrop",
+      "version": "1.0.0",
+      "status": "shipped",
+      "rating": 5,
+      "tagline": "Micro-Gravity Slingshot",
+      "description": "2D Keplerian orbital mechanics. Slingshot micro-probes around multi-body gravity wells into portal beacons.",
+      "category": "Physics / Arcade",
+      "targetSessionSeconds": 45,
+      "updatedAt": "2026-11-24T20:00:00Z",
+      "feedbackHistory": [
+        {
+          "rating": 5,
+          "verdict": "ship",
+          "notes": "Available on production. Daily Keplerian orbital mechanics puzzle.",
+          "timestamp": "2026-11-24T20:00:00Z"
+        }
+      ]
+    },
+    {
+      "slug": "ethnos",
+      "title": "Ethnos",
+      "version": "1.0.0",
+      "status": "shipped",
+      "rating": 5,
+      "tagline": "Micro Ethnoguesser",
+      "description": "Anthropological composite and regional demographic guessing inspired by humanphenotypes.org.",
+      "category": "Anthropology / Geography",
+      "targetSessionSeconds": 40,
+      "updatedAt": "2026-11-24T20:00:00Z",
+      "feedbackHistory": [
+        {
+          "rating": 5,
+          "verdict": "ship",
+          "notes": "Available on production. High viral engagement demographic guessing.",
+          "timestamp": "2026-11-24T20:00:00Z"
+        }
+      ]
+    },
+    {
+      "slug": "bearinglock",
+      "title": "Bearing Lock",
+      "version": "1.0.0",
+      "status": "shipped",
+      "rating": 5,
+      "tagline": "Tactile 360° Compass Blitz",
+      "description": "Lock into true nautical and aerial bearings across global landmarks, cities, and corridors on an interactive 360° tactile compass dial.",
+      "category": "Navigation / Geography",
+      "targetSessionSeconds": 45,
+      "updatedAt": "2026-11-24T20:00:00Z",
+      "feedbackHistory": [
+        {
+          "rating": 5,
+          "verdict": "ship",
+          "notes": "Available on production. Tactile compass navigation blitz.",
+          "timestamp": "2026-11-24T20:00:00Z"
+        }
+      ]
+    },
+    {
       "slug": "relic",
       "title": "RELIC: Temporal Restitution Protocol",
       "version": "1.0.0",
@@ -27,55 +87,16 @@
       "feedbackHistory": []
     },
     {
-      "slug": "bearinglock",
-      "title": "Bearing Lock",
+      "slug": "roots",
+      "title": "Roots",
       "version": "1.0.0",
       "status": "ready_for_review",
       "rating": null,
-      "tagline": "Tactile 360° Compass Blitz",
-      "description": "Lock into true nautical and aerial bearings across global landmarks, cities, and corridors on an interactive 360° tactile compass dial.",
-      "category": "Navigation / Geography",
+      "tagline": "Surname Origins Blitz",
+      "description": "Rapid-fire 60-second linguistic etymology trivia across 160+ surnames and 8 language families.",
+      "category": "Linguistics / Trivia",
       "targetSessionSeconds": 45,
-      "updatedAt": "2026-11-21T18:00:00Z",
-      "feedbackHistory": []
-    },
-    {
-      "slug": "logicgate",
-      "title": "LogicGate: Silicon Circuit Academy",
-      "version": "2.0.0",
-      "status": "ready_for_review",
-      "rating": null,
-      "tagline": "Logic Gate Circuit Puzzles",
-      "description": "Tactile, low-key educational puzzle game teaching logic gates (AND, OR, NOT, XOR, NAND, NOR) to normies. Solve real-world circuits from vaults to rockets.",
-      "category": "Electronics / Logic Puzzle",
-      "targetSessionSeconds": 45,
-      "updatedAt": "2026-11-21T17:30:00Z",
-      "feedbackHistory": []
-    },
-    {
-      "slug": "orbitdrop",
-      "title": "OrbitDrop",
-      "version": "1.0.0",
-      "status": "ready_for_review",
-      "rating": null,
-      "tagline": "Micro-Gravity Slingshot",
-      "description": "2D Keplerian orbital mechanics. Slingshot micro-probes around multi-body gravity wells into portal beacons.",
-      "category": "Physics / Arcade",
-      "targetSessionSeconds": 45,
-      "updatedAt": "2026-11-21T17:35:00Z",
-      "feedbackHistory": []
-    },
-    {
-      "slug": "scalecraft",
-      "title": "ScaleCraft",
-      "version": "1.0.0",
-      "status": "ready_for_review",
-      "rating": null,
-      "tagline": "Macro vs Micro",
-      "description": "Physical scale comparison higher/lower blitz across 80+ entities from microscopic viruses to cosmic planets.",
-      "category": "Physics / Science",
-      "targetSessionSeconds": 40,
-      "updatedAt": "2026-11-19T10:35:00Z",
+      "updatedAt": "2026-11-19T06:00:00Z",
       "feedbackHistory": []
     },
     {
@@ -92,87 +113,102 @@
       "feedbackHistory": []
     },
     {
+      "slug": "logicgate",
+      "title": "LogicGate: Silicon Circuit Academy",
+      "version": "2.0.0",
+      "status": "rejected",
+      "rating": null,
+      "tagline": "Logic Gate Circuit Puzzles",
+      "description": "Tactile, low-key educational puzzle game teaching logic gates (AND, OR, NOT, XOR, NAND, NOR) to normies. Solve real-world circuits from vaults to rockets.",
+      "category": "Electronics / Logic Puzzle",
+      "targetSessionSeconds": 45,
+      "updatedAt": "2026-11-24T20:00:00Z",
+      "feedbackHistory": [
+        {
+          "rating": null,
+          "verdict": "kill",
+          "notes": "Stopping development. No longer available on main or dev sites.",
+          "timestamp": "2026-11-24T20:00:00Z"
+        }
+      ]
+    },
+    {
       "slug": "citygrid",
       "title": "CityGrid",
       "version": "1.0.0",
-      "status": "ready_for_review",
+      "status": "rejected",
       "rating": null,
       "tagline": "Street Geometry Blitz",
       "description": "Identify world cities from minimalist glowing vector street grid patterns and urban layout geometries.",
       "category": "Urbanism / Geography",
       "targetSessionSeconds": 45,
-      "updatedAt": "2026-11-19T10:35:00Z",
-      "feedbackHistory": []
+      "updatedAt": "2026-11-24T20:00:00Z",
+      "feedbackHistory": [
+        {
+          "rating": null,
+          "verdict": "kill",
+          "notes": "Stopping development. No longer available on main or dev sites.",
+          "timestamp": "2026-11-24T20:00:00Z"
+        }
+      ]
+    },
+    {
+      "slug": "scalecraft",
+      "title": "ScaleCraft",
+      "version": "1.0.0",
+      "status": "rejected",
+      "rating": null,
+      "tagline": "Macro vs Micro",
+      "description": "Physical scale comparison higher/lower blitz across 80+ entities from microscopic viruses to cosmic planets.",
+      "category": "Physics / Science",
+      "targetSessionSeconds": 40,
+      "updatedAt": "2026-11-24T20:00:00Z",
+      "feedbackHistory": [
+        {
+          "rating": null,
+          "verdict": "kill",
+          "notes": "Stopping development. No longer available on main or dev sites.",
+          "timestamp": "2026-11-24T20:00:00Z"
+        }
+      ]
     },
     {
       "slug": "chronos",
       "title": "Chronos",
       "version": "1.0.0",
-      "status": "ready_for_review",
+      "status": "rejected",
       "rating": null,
       "tagline": "Tactile Timeline Scrubber",
       "description": "Guess the exact year of historical, scientific, and pop-culture milestones with a precision thumb slider. Rapid-fire 5-round blitz.",
       "category": "History / Pop-Culture",
       "targetSessionSeconds": 45,
-      "updatedAt": "2026-11-23T20:23:00Z",
+      "updatedAt": "2026-11-24T20:00:00Z",
       "feedbackHistory": [
         {
           "rating": null,
-          "verdict": "iterate",
-          "notes": "Taken off production and out of the ad rotation.",
-          "timestamp": "2026-11-23T20:23:00Z"
+          "verdict": "kill",
+          "notes": "Stopping development. No longer available on main or dev sites.",
+          "timestamp": "2026-11-24T20:00:00Z"
         }
       ]
-    },
-    {
-      "slug": "roots",
-      "title": "Roots",
-      "version": "1.0.0",
-      "status": "ready_for_review",
-      "rating": null,
-      "tagline": "Surname Origins Blitz",
-      "description": "Rapid-fire 60-second linguistic etymology trivia across 160+ surnames and 8 language families.",
-      "category": "Linguistics / Trivia",
-      "targetSessionSeconds": 45,
-      "updatedAt": "2026-11-19T06:00:00Z",
-      "feedbackHistory": []
-    },
-    {
-      "slug": "ethnos",
-      "title": "Ethnos",
-      "version": "1.0.0",
-      "status": "ready_for_review",
-      "rating": null,
-      "tagline": "Micro Ethnoguesser",
-      "description": "Anthropological composite and regional demographic guessing inspired by humanphenotypes.org.",
-      "category": "Anthropology / Geography",
-      "targetSessionSeconds": 40,
-      "updatedAt": "2026-11-19T06:00:00Z",
-      "feedbackHistory": []
     },
     {
       "slug": "shinobi",
       "title": "Cyber-Shinobi",
       "version": "1.1.0",
-      "status": "ready_for_review",
+      "status": "rejected",
       "rating": null,
       "tagline": "3x3 Neon Card Crawler",
       "description": "Strategic card crawler with equipment absorbing math, ninjutsu meter, and sector bosses.",
       "category": "Roguelike / Strategy",
       "targetSessionSeconds": 180,
-      "updatedAt": "2026-11-23T20:05:00Z",
+      "updatedAt": "2026-11-24T20:00:00Z",
       "feedbackHistory": [
         {
-          "rating": 5,
-          "verdict": "iterate",
-          "notes": "Taken off production and out of the ad rotation.",
-          "timestamp": "2026-11-23T20:05:00Z"
-        },
-        {
-          "rating": 5,
-          "verdict": "ship",
-          "notes": "Excellent tactile feedback and card movement mechanics.",
-          "timestamp": "2026-11-04T12:00:00Z"
+          "rating": null,
+          "verdict": "kill",
+          "notes": "Stopping development. No longer available on main or dev sites.",
+          "timestamp": "2026-11-24T20:00:00Z"
         }
       ]
     }

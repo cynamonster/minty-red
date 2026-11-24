@@ -1,21 +1,47 @@
 // Environment and game availability utilities
 
-export const ALL_GAMES = [
-  'relic',
-  'metro',
+/**
+ * Production games available on the live site (minty.red).
+ */
+export const PUBLIC_GAMES = [
   'orbitdrop',
-  'bearinglock',
-  'logicgate',
-  'citygrid',
-  'flaghex',
-  'scalecraft',
-  'chronos',
-  'roots',
   'ethnos',
-  'shinobi',
+  'bearinglock',
 ];
 
-export const PUBLIC_GAMES = ['metro', 'orbitdrop'];
+/**
+ * Prototypes and games only visible on dev in the lab cartridges list.
+ */
+export const LAB_GAMES = [
+  'relic',
+  'metro',
+  'roots',
+  'flagship',
+];
+
+/**
+ * All active games accessible in the development / preview environment.
+ * Includes production games plus dev lab cartridges (and legacy aliases).
+ */
+export const ALL_GAMES = [
+  ...PUBLIC_GAMES,
+  'relic',
+  'metro',
+  'roots',
+  'flagship',
+  'flaghex', // legacy alias for flagship
+];
+
+/**
+ * Games where development has stopped. No longer available on main or dev sites.
+ */
+export const STOPPED_GAMES = [
+  'logicgate',
+  'citygrid',
+  'scalecraft',
+  'chronos',
+  'shinobi',
+];
 
 /**
  * Checks if the current environment is a dev / staging / internal site.
@@ -72,9 +98,21 @@ export function isDevSite() {
 }
 
 /**
+ * Normalizes game slug aliases (e.g. bearing_lock -> bearinglock, flaghex -> flagship).
+ */
+export function normalizeGameSlug(slug) {
+  if (!slug) return '';
+  const clean = slug.toLowerCase().trim();
+  if (clean === 'bearing_lock') return 'bearinglock';
+  if (clean === 'flaghex') return 'flagship';
+  if (clean === 'cyber-shinobi') return 'shinobi';
+  return clean;
+}
+
+/**
  * Returns the list of games available in the current environment.
- * On production minty.red: only 'orbitdrop'
- * On dev site: all games
+ * On production minty.red: 'orbitdrop', 'ethnos', 'bearinglock'
+ * On dev site: production games + dev lab cartridges
  */
 export function getAvailableGames() {
   return isDevSite() ? ALL_GAMES : PUBLIC_GAMES;
@@ -85,6 +123,7 @@ export function getAvailableGames() {
  */
 export function isGameAvailable(slug) {
   if (!slug) return false;
+  const normalized = normalizeGameSlug(slug);
   const available = getAvailableGames();
-  return available.includes(slug.toLowerCase());
+  return available.includes(normalized) || available.includes(slug.toLowerCase());
 }

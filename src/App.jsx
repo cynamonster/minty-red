@@ -1,37 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { ArcadeHub } from './hub/ArcadeHub';
 import { StudioDashboard } from './dashboard/StudioDashboard';
-import { ChronosGame } from './games/chronos/ChronosGame';
 import { RootsGame } from './games/roots/RootsGame';
 import { EthnosGame } from './games/ethnos/EthnosGame';
-import { CyberShinobiGame } from './games/shinobi/CyberShinobiGame';
-import { ScaleCraftGame } from './games/scalecraft/ScaleCraftGame';
 import { FlagshipGame, FlagHexGame } from './games/flagship/FlagshipGame';
-import { CityGridGame } from './games/citygrid/CityGridGame';
 import { OrbitDropGame } from './games/orbitdrop/OrbitDropGame';
-import { LogicGateGame } from './games/logicgate/LogicGateGame';
 import { BearingLockGame } from './games/bearinglock/BearingLockGame';
 import { MetroGame } from './games/metro/MetroGame';
 import { RelicGame } from './games/relic/RelicGame';
 import { ReviewDrawer } from './shared/components/ReviewDrawer';
-import { ALL_GAMES, getAvailableGames, isDevSite } from './shared/utils/environment';
+import { ALL_GAMES, getAvailableGames, isDevSite, normalizeGameSlug } from './shared/utils/environment';
 import { initAnalytics, trackPageView, trackGameView } from './shared/analytics/analyticsService';
 
 function resolveRoute() {
   const host = window.location.hostname.toLowerCase();
   const params = new URLSearchParams(window.location.search);
-  const pathname = window.location.pathname.toLowerCase().replace(/^\/+|\/+$/g, '');
+  const rawPathname = window.location.pathname.toLowerCase().replace(/^\/+|\/+$/g, '');
+  const pathname = normalizeGameSlug(rawPathname);
   const isDev = isDevSite();
   const availableGames = getAvailableGames();
 
   // 1. Redirect legacy ?game= query param to /[game]
   const gameParam = params.get('game')?.toLowerCase();
   if (gameParam) {
-    let target = gameParam;
+    let target = normalizeGameSlug(gameParam);
     if (!ALL_GAMES.includes(target) && target !== 'dash' && target !== 'hub') {
       target = 'orbitdrop';
     } else if (!isDev && ALL_GAMES.includes(target) && !availableGames.includes(target)) {
-      // Hidden on production site; only Orbitdrop is available
+      // Hidden on production site; fallback to orbitdrop
       target = 'orbitdrop';
     }
 
@@ -65,15 +61,25 @@ function resolveRoute() {
   }
 
   // 4. Clean path routing (minty.red/[game])
-  if (pathname && ALL_GAMES.includes(pathname)) {
-    if (availableGames.includes(pathname)) {
-      return pathname;
+  if (pathname) {
+    if (ALL_GAMES.includes(pathname)) {
+      if (availableGames.includes(pathname)) {
+        return pathname;
+      }
+      // If in dev lab but viewed on production, redirect to /orbitdrop
+      const cleanParams = new URLSearchParams(window.location.search);
+      const qs = cleanParams.toString();
+      window.history.replaceState({}, '', `/orbitdrop${qs ? '?' + qs : ''}${window.location.hash}`);
+      return 'orbitdrop';
     }
-    // If not available in current environment (hidden on production), redirect to /orbitdrop
-    const cleanParams = new URLSearchParams(window.location.search);
-    const qs = cleanParams.toString();
-    window.history.replaceState({}, '', `/orbitdrop${qs ? '?' + qs : ''}${window.location.hash}`);
-    return 'orbitdrop';
+
+    // Stopped game or unrecognized route: redirect to home hub
+    if (pathname !== 'hub') {
+      const cleanParams = new URLSearchParams(window.location.search);
+      const qs = cleanParams.toString();
+      window.history.replaceState({}, '', `/${qs ? '?' + qs : ''}${window.location.hash}`);
+      return 'hub';
+    }
   }
 
   // 5. Default to public Arcade Hub
@@ -95,7 +101,14 @@ export function App() {
   });
 
   const handleSelectGame = (gameSlug, enableReview = false) => {
-    setActiveGame(gameSlug);
+    let target = normalizeGameSlug(gameSlug);
+    const available = getAvailableGames();
+
+    if (target !== 'hub' && target !== 'dash' && !available.includes(target)) {
+      target = 'orbitdrop';
+    }
+
+    setActiveGame(target);
     setIsReviewMode(enableReview);
 
     const url = new URL(window.location);
@@ -108,14 +121,14 @@ export function App() {
       url.searchParams.delete('review');
     }
 
-    if (gameSlug === 'hub') {
+    if (target === 'hub') {
       url.pathname = '/';
       url.searchParams.delete('c');
-    } else if (gameSlug === 'dash') {
+    } else if (target === 'dash') {
       url.pathname = '/dash';
       url.searchParams.delete('c');
     } else {
-      url.pathname = `/${gameSlug}`;
+      url.pathname = `/${target}`;
     }
     window.history.pushState({}, '', url);
   };
@@ -156,18 +169,14 @@ export function App() {
   }, [activeGame]);
 
   const getGameTitle = (slug) => {
-    if (slug === 'chronos') return 'Chronos: Year Slider';
-    if (slug === 'roots') return 'Roots: Surname Origins';
-    if (slug === 'ethnos') return 'Ethnos: Micro Ethnoguesser';
-    if (slug === 'shinobi') return 'Cyber-Shinobi';
-    if (slug === 'scalecraft') return 'ScaleCraft: Macro vs Micro';
-    if (slug === 'flagship' || slug === 'flaghex') return 'Flagship: Admiralty Signal Reflex';
-    if (slug === 'citygrid') return 'CityGrid: Street Geometry';
-    if (slug === 'orbitdrop') return 'OrbitDrop: Micro-Gravity Slingshot';
-    if (slug === 'logicgate') return 'LogicGate: Silicon Circuit Academy';
-    if (slug === 'bearinglock') return 'Bearing Lock: Compass Blitz';
-    if (slug === 'metro') return 'METRO: Transit Topology Reflex';
-    if (slug === 'relic') return 'RELIC: Temporal Restitution Protocol';
+    const normalized = normalizeGameSlug(slug);
+    if (normalized === 'roots') return 'Roots: Surname Origins';
+    if (normalized === 'ethnos') return 'Ethnos: Micro Ethnoguesser';
+    if (normalized === 'flagship') return 'Flagship: Admiralty Signal Reflex';
+    if (normalized === 'orbitdrop') return 'OrbitDrop: Micro-Gravity Slingshot';
+    if (normalized === 'bearinglock') return 'Bearing Lock: Compass Blitz';
+    if (normalized === 'metro') return 'METRO: Transit Topology Reflex';
+    if (normalized === 'relic') return 'RELIC: Temporal Restitution Protocol';
     return slug;
   };
 
@@ -189,69 +198,7 @@ export function App() {
         />
       )}
 
-      {/* 3. Game 1: Chronos */}
-      {activeGame === 'chronos' && (
-        <ChronosGame
-          onHome={handleHome}
-          onSelectGame={(slug) => handleSelectGame(slug, isReviewMode)}
-          challengeCode={challengeCode}
-        />
-      )}
-
-      {/* 4. Game 2: Roots */}
-      {activeGame === 'roots' && (
-        <RootsGame
-          onHome={handleHome}
-          onSelectGame={(slug) => handleSelectGame(slug, isReviewMode)}
-          challengeCode={challengeCode}
-        />
-      )}
-
-      {/* 5. Game 3: Ethnos */}
-      {activeGame === 'ethnos' && (
-        <EthnosGame
-          onHome={handleHome}
-          onSelectGame={(slug) => handleSelectGame(slug, isReviewMode)}
-          challengeCode={challengeCode}
-        />
-      )}
-
-      {/* 6. Game 4: Cyber-Shinobi */}
-      {activeGame === 'shinobi' && (
-        <CyberShinobiGame
-          onHome={handleHome}
-          onSelectGame={(slug) => handleSelectGame(slug, isReviewMode)}
-        />
-      )}
-
-      {/* 7. Game 5: ScaleCraft */}
-      {activeGame === 'scalecraft' && (
-        <ScaleCraftGame
-          onHome={handleHome}
-          onSelectGame={(slug) => handleSelectGame(slug, isReviewMode)}
-          challengeCode={challengeCode}
-        />
-      )}
-
-      {/* 8. Game 6: Flagship (formerly Flag Hex) */}
-      {(activeGame === 'flagship' || activeGame === 'flaghex') && (
-        <FlagshipGame
-          onHome={handleHome}
-          onSelectGame={(slug) => handleSelectGame(slug, isReviewMode)}
-          challengeCode={challengeCode}
-        />
-      )}
-
-      {/* 9. Game 7: CityGrid */}
-      {activeGame === 'citygrid' && (
-        <CityGridGame
-          onHome={handleHome}
-          onSelectGame={(slug) => handleSelectGame(slug, isReviewMode)}
-          challengeCode={challengeCode}
-        />
-      )}
-
-      {/* 10. Game 8: OrbitDrop */}
+      {/* 3. Production Game: OrbitDrop */}
       {activeGame === 'orbitdrop' && (
         <OrbitDropGame
           onHome={handleHome}
@@ -260,17 +207,17 @@ export function App() {
         />
       )}
 
-      {/* 11. Game 9: LogicGate */}
-      {activeGame === 'logicgate' && (
-        <LogicGateGame
+      {/* 4. Production Game: Ethnos */}
+      {activeGame === 'ethnos' && (
+        <EthnosGame
           onHome={handleHome}
           onSelectGame={(slug) => handleSelectGame(slug, isReviewMode)}
           challengeCode={challengeCode}
         />
       )}
 
-      {/* 12. Game 10: Bearing Lock */}
-      {activeGame === 'bearinglock' && (
+      {/* 5. Production Game: Bearing Lock */}
+      {(activeGame === 'bearinglock' || activeGame === 'bearing_lock') && (
         <BearingLockGame
           onHome={handleHome}
           onSelectGame={(slug) => handleSelectGame(slug, isReviewMode)}
@@ -278,16 +225,7 @@ export function App() {
         />
       )}
 
-      {/* 13. Game 11: METRO */}
-      {activeGame === 'metro' && (
-        <MetroGame
-          onHome={handleHome}
-          onSelectGame={(slug) => handleSelectGame(slug, isReviewMode)}
-          challengeCode={challengeCode}
-        />
-      )}
-
-      {/* 14. Game 12: RELIC */}
+      {/* 6. Dev Lab Game: RELIC */}
       {activeGame === 'relic' && (
         <RelicGame
           onHome={handleHome}
@@ -296,8 +234,35 @@ export function App() {
         />
       )}
 
+      {/* 7. Dev Lab Game: METRO */}
+      {activeGame === 'metro' && (
+        <MetroGame
+          onHome={handleHome}
+          onSelectGame={(slug) => handleSelectGame(slug, isReviewMode)}
+          challengeCode={challengeCode}
+        />
+      )}
+
+      {/* 8. Dev Lab Game: Roots */}
+      {activeGame === 'roots' && (
+        <RootsGame
+          onHome={handleHome}
+          onSelectGame={(slug) => handleSelectGame(slug, isReviewMode)}
+          challengeCode={challengeCode}
+        />
+      )}
+
+      {/* 9. Dev Lab Game: Flagship */}
+      {(activeGame === 'flagship' || activeGame === 'flaghex') && (
+        <FlagshipGame
+          onHome={handleHome}
+          onSelectGame={(slug) => handleSelectGame(slug, isReviewMode)}
+          challengeCode={challengeCode}
+        />
+      )}
+
       {/* Universal In-Game Review Drawer (Active when in review mode or launched from dash) */}
-      {['chronos', 'roots', 'ethnos', 'shinobi', 'scalecraft', 'flagship', 'flaghex', 'citygrid', 'orbitdrop', 'logicgate', 'bearinglock', 'metro', 'relic'].includes(activeGame) && isReviewMode && (
+      {['roots', 'ethnos', 'flagship', 'flaghex', 'orbitdrop', 'bearinglock', 'metro', 'relic'].includes(activeGame) && isReviewMode && (
         <ReviewDrawer
           gameSlug={activeGame}
           gameTitle={getGameTitle(activeGame)}

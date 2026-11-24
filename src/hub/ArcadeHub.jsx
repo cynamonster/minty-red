@@ -2,10 +2,6 @@ import React, { useState } from 'react';
 import {
   Compass,
   Sparkles,
-  Shield,
-  Clock,
-  Scale,
-  Palette,
   Layers,
   Flame,
   Volume2,
@@ -14,35 +10,29 @@ import {
   Trophy,
   ExternalLink,
   Orbit,
-  Cpu,
-  Lock,
   Zap,
   Anchor,
 } from 'lucide-react';
 import { soundEngine } from '../shared/audio/soundEngine';
 import { getGameStats } from '../shared/storage/playerStorage';
-import { isDevSite, getAvailableGames } from '../shared/utils/environment';
+import { isDevSite } from '../shared/utils/environment';
 
 export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
   const [muted, setMuted] = useState(soundEngine.isMuted());
   const isDev = isDevSite();
-  const availableSlugs = getAvailableGames();
 
-  const chronosStats = getGameStats('chronos');
-  const rootsStats = getGameStats('roots');
+  // Production Games Stats
+  const orbitdropStats = getGameStats('orbitdrop');
   const ethnosStats = getGameStats('ethnos');
-  const shinobiStats = getGameStats('cyber-shinobi');
-  const scalecraftStats = getGameStats('scalecraft');
+  const bearinglockStats = getGameStats('bearinglock');
+
+  // Dev Lab Games Stats
+  const relicStats = getGameStats('relic');
+  const metroStats = getGameStats('metro');
+  const rootsStats = getGameStats('roots');
   const flagshipRaw = getGameStats('flagship');
   const legacyFlaghex = getGameStats('flaghex');
   const flagshipStats = (flagshipRaw && flagshipRaw.gamesPlayed > 0) ? flagshipRaw : legacyFlaghex;
-  const flaghexStats = flagshipStats;
-  const citygridStats = getGameStats('citygrid');
-  const orbitdropStats = getGameStats('orbitdrop');
-  const logicgateStats = getGameStats('logicgate');
-  const bearinglockStats = getGameStats('bearinglock');
-  const metroStats = getGameStats('metro');
-  const relicStats = getGameStats('relic');
 
   const handleToggleSound = () => {
     const isMutedNow = soundEngine.toggleMute();
@@ -50,7 +40,34 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
     if (!isMutedNow) soundEngine.playTap();
   };
 
-  const allGames = [
+  // Live production games (available on production and dev)
+  const liveProductionGames = [
+    {
+      slug: 'bearinglock',
+      title: 'BEARING_LOCK',
+      displayTitle: 'Bearing Lock',
+      tagline: 'Tactile 360° Compass Blitz',
+      description: 'Lock into true nautical and aerial bearings across global landmarks, cities, and corridors on an interactive 360° tactile compass dial.',
+      stats: bearinglockStats,
+      badge: 'LIVE NOW',
+      badgeColor: 'bg-teal-500/20 text-teal-300 border-teal-500/30',
+      icon: Compass,
+    },
+    {
+      slug: 'ethnos',
+      title: 'ETHNOS',
+      displayTitle: 'Ethnos',
+      tagline: 'Micro Ethnoguesser Blitz',
+      description: 'Rapid-fire demographic and phenotype identification rounds inspired by human geography.',
+      stats: ethnosStats,
+      badge: 'VIRAL',
+      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+      icon: Sparkles,
+    },
+  ];
+
+  // Prototypes only visible on dev in the lab cartridges list
+  const labCartridges = [
     {
       slug: 'relic',
       title: 'R.E.L.I.C.',
@@ -74,26 +91,15 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       icon: Layers,
     },
     {
-      slug: 'bearinglock',
-      title: 'BEARING_LOCK',
-      displayTitle: 'Bearing Lock',
-      tagline: 'Tactile 360° Compass Blitz',
-      description: 'Lock into true nautical and aerial bearings across global landmarks, cities, and corridors on an interactive 360° tactile compass dial.',
-      stats: bearinglockStats,
-      badge: 'NEW',
-      badgeColor: 'bg-teal-500/20 text-teal-300 border-teal-500/30',
+      slug: 'roots',
+      title: 'ROOTS',
+      displayTitle: 'Roots',
+      tagline: 'Surname Origins Blitz',
+      description: 'Can you identify the linguistic roots of 150+ global surnames? Instant etymology reveals.',
+      stats: rootsStats,
+      badge: 'ORIGINS',
+      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
       icon: Compass,
-    },
-    {
-      slug: 'ethnos',
-      title: 'ETHNOS',
-      displayTitle: 'Ethnos',
-      tagline: 'Micro Ethnoguesser Blitz',
-      description: 'Rapid-fire demographic and phenotype identification rounds inspired by human geography.',
-      stats: ethnosStats,
-      badge: 'VIRAL',
-      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-      icon: Sparkles,
     },
     {
       slug: 'flagship',
@@ -106,148 +112,32 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
       icon: Anchor,
     },
-    {
-      slug: 'roots',
-      title: 'ROOTS',
-      displayTitle: 'Roots',
-      tagline: 'Surname Origins Blitz',
-      description: 'Can you identify the linguistic roots of 150+ global surnames? Instant etymology reveals.',
-      stats: rootsStats,
-      badge: 'ORIGINS',
-      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-      icon: Compass,
-    },
-    {
-      slug: 'logicgate',
-      title: 'LOGIC_GATE',
-      displayTitle: 'LogicGate',
-      tagline: 'Silicon Circuit Blitz',
-      description: 'Cyberpunk binary logic gates. Toggle silicon input switches, illuminate PCB copper traces, and overload the diode.',
-      stats: logicgateStats,
-      badge: 'CYBERPUNK',
-      badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-      icon: Cpu,
-    },
-    {
-      slug: 'citygrid',
-      title: 'CITY_GRID',
-      displayTitle: 'CityGrid',
-      tagline: 'Street Geometry Blitz',
-      description: 'Identify iconic world cities from minimalist street grid patterns, superblocks, and radial star networks.',
-      stats: citygridStats,
-      badge: 'GEOMETRY',
-      badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-      icon: Layers,
-    },
-    {
-      slug: 'scalecraft',
-      title: 'SCALE_CRAFT',
-      displayTitle: 'ScaleCraft',
-      tagline: 'Macro vs Micro',
-      description: 'Physical scale higher/lower. Compare microscopic viruses, colossal skyscrapers, and cosmic planets.',
-      stats: scalecraftStats,
-      badge: 'PHYSICS',
-      badgeColor: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-      icon: Scale,
-    },
-    {
-      slug: 'chronos',
-      title: 'CHRONOS',
-      displayTitle: 'Chronos',
-      tagline: 'Year Slider Blitz',
-      description: 'Tactile timeline scrubber. Guess the exact year of iconic inventions, space missions, and history.',
-      stats: chronosStats,
-      badge: 'HISTORY',
-      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-      icon: Clock,
-    },
-    {
-      slug: 'shinobi',
-      title: 'CYBER_SHINOBI',
-      displayTitle: 'Cyber-Shinobi',
-      tagline: '3x3 Neon Card Crawler',
-      description: 'Strategic cyberpunk dungeon crawler. Slay bio-mutants, cast Ninjutsu, ascend sectors.',
-      stats: shinobiStats,
-      badge: 'ROGUELIKE',
-      badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-      icon: Shield,
-    },
   ];
 
-  // Selected upcoming teaser games for production shelf
-  const upcomingTeasers = [
-    {
-      slug: 'relic',
-      title: 'R.E.L.I.C.',
-      tagline: 'Temporal Restitution Protocol',
-      badge: 'STASIS PROTOCOL',
-      badgeColor: 'bg-cyan-500/10 border-cyan-500/30 text-cyan-300',
-      icon: Zap,
-    },
-    {
-      slug: 'bearinglock',
-      title: 'BEARING_LOCK',
-      tagline: 'Tactile 360° Compass Blitz',
-      badge: 'NEW',
-      badgeColor: 'bg-teal-500/10 border-teal-500/30 text-teal-300',
-      icon: Compass,
-    },
-    {
-      slug: 'ethnos',
-      title: 'ETHNOS',
-      tagline: 'Micro Ethnoguesser Blitz',
-      badge: 'VIRAL',
-      badgeColor: 'bg-amber-500/10 border-amber-500/30 text-amber-300',
-      icon: Sparkles,
-    },
-    {
-      slug: 'flagship',
-      title: 'FLAGSHIP',
-      tagline: 'Admiralty Signal Reflex',
-      badge: 'NAVAL',
-      badgeColor: 'bg-amber-500/10 border-amber-500/30 text-amber-300',
-      icon: Anchor,
-    },
-    {
-      slug: 'roots',
-      title: 'ROOTS',
-      tagline: 'Surname Origins Blitz',
-      badge: 'ORIGINS',
-      badgeColor: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300',
-      icon: Compass,
-    },
-  ];
-
-  // Visible playable games
+  // Visible playable game totals
   const totalStreak = isDev
-    ? relicStats.currentStreak +
-      orbitdropStats.currentStreak +
-      chronosStats.currentStreak +
-      rootsStats.currentStreak +
-      ethnosStats.currentStreak +
-      scalecraftStats.currentStreak +
-      flaghexStats.currentStreak +
-      citygridStats.currentStreak +
-      logicgateStats.currentStreak +
-      bearinglockStats.currentStreak +
-      metroStats.currentStreak
-    : (metroStats.currentStreak || 0) + (orbitdropStats.currentStreak || 0);
+    ? (relicStats?.currentStreak || 0) +
+      (metroStats?.currentStreak || 0) +
+      (rootsStats?.currentStreak || 0) +
+      (flagshipStats?.currentStreak || 0) +
+      (orbitdropStats?.currentStreak || 0) +
+      (ethnosStats?.currentStreak || 0) +
+      (bearinglockStats?.currentStreak || 0)
+    : (orbitdropStats?.currentStreak || 0) +
+      (ethnosStats?.currentStreak || 0) +
+      (bearinglockStats?.currentStreak || 0);
 
   const totalPlayed = isDev
-    ? relicStats.gamesPlayed +
-      orbitdropStats.gamesPlayed +
-      chronosStats.gamesPlayed +
-      rootsStats.gamesPlayed +
-      ethnosStats.gamesPlayed +
-      shinobiStats.gamesPlayed +
-      scalecraftStats.gamesPlayed +
-      flaghexStats.gamesPlayed +
-      citygridStats.gamesPlayed +
-      orbitdropStats.gamesPlayed +
-      logicgateStats.gamesPlayed +
-      bearinglockStats.gamesPlayed +
-      metroStats.gamesPlayed
-    : (metroStats.gamesPlayed || 0) + (orbitdropStats.gamesPlayed || 0);
+    ? (relicStats?.gamesPlayed || 0) +
+      (metroStats?.gamesPlayed || 0) +
+      (rootsStats?.gamesPlayed || 0) +
+      (flagshipStats?.gamesPlayed || 0) +
+      (orbitdropStats?.gamesPlayed || 0) +
+      (ethnosStats?.gamesPlayed || 0) +
+      (bearinglockStats?.gamesPlayed || 0)
+    : (orbitdropStats?.gamesPlayed || 0) +
+      (ethnosStats?.gamesPlayed || 0) +
+      (bearinglockStats?.gamesPlayed || 0);
 
   return (
     <div className="min-h-[100dvh] w-full flex flex-col bg-[#07090e] text-slate-100 select-none">
@@ -269,7 +159,7 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
               )}
             </div>
             <div className="text-[9px] font-mono text-emerald-400/90 font-semibold uppercase tracking-wider">
-              [SYS_VER: 2.4.0 // ONLINE]
+              [SYS_VER: 2.5.0 // ONLINE]
             </div>
           </div>
         </div>
@@ -315,7 +205,7 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
         </section>
 
         {/* SPOTLIGHT CABINET 01: OrbitDrop (100% Clickable Card) */}
-        <section className="mb-5">
+        <section className="mb-4">
           <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1.5 px-0.5">
             <span className="text-emerald-400 font-bold tracking-wider">// SPOTLIGHT CABINET 01</span>
             <span className="text-slate-500">FREE PLAY ACTIVE</span>
@@ -381,11 +271,11 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
               </div>
               <div className="p-1.5 rounded-lg bg-slate-900/90 border border-slate-800">
                 <div className="text-[8px] text-slate-500 uppercase tracking-wider">HIGH SCORE</div>
-                <div className="text-xs font-bold text-emerald-400">{orbitdropStats.highScore || 0} PTS</div>
+                <div className="text-xs font-bold text-emerald-400">{orbitdropStats?.highScore || 0} PTS</div>
               </div>
               <div className="p-1.5 rounded-lg bg-slate-900/90 border border-slate-800">
                 <div className="text-[8px] text-slate-500 uppercase tracking-wider">STREAK</div>
-                <div className="text-xs font-bold text-amber-400">🔥 {orbitdropStats.currentStreak || 0}d</div>
+                <div className="text-xs font-bold text-amber-400">🔥 {orbitdropStats?.currentStreak || 0}d</div>
               </div>
             </div>
 
@@ -402,21 +292,80 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
           </div>
         </section>
 
-        {/* SECTION 2: Upcoming Drops (Prod: Locked Teasers / Dev: Playable Cartridges) */}
-        <section className="mb-4">
-          <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-2 px-0.5">
-            <span className="text-white font-bold tracking-wider">
-              {isDev ? '// LAB CARTRIDGES (DEV UNLOCKED)' : '// FROM THE LAB (NEXT DROPS)'}
-            </span>
-            <span className="text-slate-500 font-semibold">
-              {isDev ? 'FULL PLAYABLE ROSTER' : 'STAGE QUEUE'}
-            </span>
+        {/* LIVE PRODUCTION CABINETS: Bearing Lock & Ethnos */}
+        <section className="mb-4 space-y-2">
+          <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1.5 px-0.5">
+            <span className="text-cyan-400 font-bold tracking-wider">// LIVE PRODUCTION CABINETS</span>
+            <span className="text-slate-500 font-semibold">PLAYABLE NOW</span>
           </div>
 
-          <div className="space-y-2">
-            {isDev ? (
-              // Dev site: Render all remaining games as 100% clickable cartridges
-              allGames.map((g) => {
+          {liveProductionGames.map((g) => {
+            const Icon = g.icon;
+            return (
+              <div
+                key={g.slug}
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  soundEngine.playTap();
+                  onSelectGame(g.slug);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    soundEngine.playTap();
+                    onSelectGame(g.slug);
+                  }
+                }}
+                className="group cursor-pointer rounded-2xl p-3 bg-slate-950 border border-slate-800/90 hover:border-cyan-500/50 shadow-md shadow-cyan-500/5 active:scale-[0.99] transition-all relative overflow-hidden select-none outline-none focus:ring-2 focus:ring-cyan-400/40"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-cyan-400 group-hover:text-cyan-300 transition-colors">
+                      <Icon className="w-4.5 h-4.5 stroke-[2.2]" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5 font-mono">
+                        <h3 className="text-sm font-black text-white tracking-tight uppercase group-hover:text-cyan-300 transition-colors">
+                          {g.title}
+                        </h3>
+                        <span className={`text-[8px] font-mono px-1.5 py-0.2 rounded border font-bold uppercase ${g.badgeColor}`}>
+                          {g.badge}
+                        </span>
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-sans">{g.tagline}</div>
+                    </div>
+                  </div>
+
+                  <span className="px-2.5 py-1 rounded-lg bg-cyan-400 text-slate-950 font-black text-[11px] uppercase group-hover:bg-cyan-300 group-hover:scale-105 transition-all shadow-md shadow-cyan-400/20 flex items-center gap-1 font-mono">
+                    <Play className="w-2.5 h-2.5 fill-current" />
+                    <span>PLAY</span>
+                  </span>
+                </div>
+
+                <div className="mt-2 pt-1.5 border-t border-slate-900 flex items-center justify-between text-[9px] font-mono text-slate-500">
+                  <span>HIGH SCORE: <strong className="text-slate-300">{g.stats?.highScore || 0} PTS</strong></span>
+                  <span>STREAK: <strong className="text-amber-400">🔥 {g.stats?.currentStreak || 0}d</strong></span>
+                </div>
+              </div>
+            );
+          })}
+        </section>
+
+        {/* SECTION: Lab Cartridges (DEV SITE ONLY) */}
+        {isDev && (
+          <section className="mb-4">
+            <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-2 px-0.5">
+              <span className="text-amber-400 font-bold tracking-wider">
+                // LAB CARTRIDGES (DEV UNLOCKED)
+              </span>
+              <span className="text-slate-500 font-semibold">
+                STAGE QUEUE
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              {labCartridges.map((g) => {
                 const Icon = g.icon;
                 return (
                   <div
@@ -434,10 +383,10 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
                         onSelectGame(g.slug);
                       }
                     }}
-                    className="p-2.5 rounded-xl bg-slate-950 border border-slate-800/90 hover:border-emerald-500/60 flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all select-none group"
+                    className="p-2.5 rounded-xl bg-slate-950 border border-slate-800/90 hover:border-amber-500/60 flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all select-none group"
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-sky-400 group-hover:text-emerald-400 group-hover:border-emerald-500/40 transition-colors">
+                      <div className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-amber-400 group-hover:text-amber-300 group-hover:border-amber-500/40 transition-colors">
                         <Icon className="w-4 h-4" />
                       </div>
                       <div>
@@ -452,45 +401,15 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
                         <div className="text-[10px] text-slate-400 font-sans">{g.tagline}</div>
                       </div>
                     </div>
-                    <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold group-hover:bg-emerald-400 group-hover:text-slate-950 transition-colors">
+                    <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold group-hover:bg-amber-400 group-hover:text-slate-950 transition-colors">
                       PLAY ⚡
                     </span>
                   </div>
                 );
-              })
-            ) : (
-              // Production site: Pure non-clickable visual teaser cartridges
-              upcomingTeasers.map((teaser) => {
-                const Icon = teaser.icon;
-                return (
-                  <div
-                    key={teaser.slug}
-                    className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/90 flex items-center justify-between opacity-80 select-none"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400">
-                        <Icon className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1.5 font-mono">
-                          <span className="text-xs font-bold text-slate-300">{teaser.title}</span>
-                          <span className={`text-[8px] px-1.5 py-0.2 rounded border font-bold ${teaser.badgeColor}`}>
-                            {teaser.badge}
-                          </span>
-                        </div>
-                        <div className="text-[10px] text-slate-400 font-sans">{teaser.tagline}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 text-[9px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-500">
-                      <Lock className="w-2.5 h-2.5" />
-                      <span>IN LAB</span>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </section>
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Global Footer Stats & Studio Workbench Link */}
         <footer className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-500">

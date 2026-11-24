@@ -9,11 +9,14 @@ export function getStudioState() {
   }
   try {
     const parsed = JSON.parse(local);
-    // Ensure all default games exist even if local was stored earlier
+    // Ensure all default games exist and registry statuses (e.g. rejected or shipped) are respected
     const mergedGames = [...parsed.games || []];
     defaultRegistry.games.forEach((defG) => {
-      if (!mergedGames.some((g) => g.slug === defG.slug)) {
+      const idx = mergedGames.findIndex((g) => g.slug === defG.slug);
+      if (idx === -1) {
         mergedGames.push(defG);
+      } else if (defG.status === 'rejected' || defG.status === 'shipped') {
+        mergedGames[idx] = { ...mergedGames[idx], status: defG.status, rating: defG.rating ?? mergedGames[idx].rating };
       }
     });
     return {

@@ -1,73 +1,17 @@
 import React from 'react';
-import { Sparkles, ArrowRight, Gamepad2, Compass, Shield, Clock, Scale, Palette, Layers, Orbit, Cpu, Anchor } from 'lucide-react';
+import { Sparkles, ArrowRight, Gamepad2, Compass, Layers, Orbit, Anchor, Zap } from 'lucide-react';
 import { soundEngine } from '../audio/soundEngine';
 import { getAvailableGames } from '../utils/environment';
 import { trackNextGameClick } from '../analytics/analyticsService';
 
 const ALL_GAMES = [
   {
-    slug: 'bearinglock',
-    title: 'Bearing Lock',
-    subtitle: 'Tactile Compass Blitz',
-    badge: 'New',
-    icon: Compass,
-    accent: 'from-sky-500/20 to-teal-500/20 border-sky-500/30 text-sky-400',
-  },
-  {
-    slug: 'logicgate',
-    title: 'LogicGate',
-    subtitle: 'Silicon Circuit Blitz',
-    badge: 'Cyberpunk',
-    icon: Cpu,
-    accent: 'from-cyan-500/20 to-teal-500/20 border-cyan-500/30 text-cyan-400',
-  },
-  {
     slug: 'orbitdrop',
     title: 'OrbitDrop',
     subtitle: 'Micro-Gravity Slingshot',
-    badge: 'New',
+    badge: 'Popular',
     icon: Orbit,
     accent: 'from-sky-500/20 to-cyan-500/20 border-sky-500/30 text-sky-400',
-  },
-  {
-    slug: 'citygrid',
-    title: 'CityGrid',
-    subtitle: 'Street Geometry Blitz',
-    badge: 'New',
-    icon: Layers,
-    accent: 'from-cyan-500/20 to-teal-500/20 border-cyan-500/30 text-cyan-400',
-  },
-  {
-    slug: 'flagship',
-    title: 'Flagship',
-    subtitle: 'Admiralty Signal Reflex',
-    badge: 'Popular',
-    icon: Anchor,
-    accent: 'from-amber-500/20 to-sky-500/20 border-amber-500/30 text-amber-400',
-  },
-  {
-    slug: 'scalecraft',
-    title: 'ScaleCraft',
-    subtitle: 'Macro vs Micro',
-    badge: 'New',
-    icon: Scale,
-    accent: 'from-indigo-500/20 to-sky-500/20 border-indigo-500/30 text-indigo-400',
-  },
-  {
-    slug: 'chronos',
-    title: 'Chronos',
-    subtitle: 'Year Slider Blitz',
-    badge: 'Popular',
-    icon: Clock,
-    accent: 'from-amber-500/20 to-orange-500/20 border-amber-500/30 text-amber-400',
-  },
-  {
-    slug: 'roots',
-    title: 'Roots',
-    subtitle: 'Surname Origins Blitz',
-    badge: 'Popular',
-    icon: Compass,
-    accent: 'from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-400',
   },
   {
     slug: 'ethnos',
@@ -78,12 +22,44 @@ const ALL_GAMES = [
     accent: 'from-amber-500/20 to-orange-500/20 border-amber-500/30 text-amber-400',
   },
   {
-    slug: 'shinobi',
-    title: 'Cyber-Shinobi',
-    subtitle: '3x3 Neon Card Crawler',
-    badge: 'Action',
-    icon: Shield,
+    slug: 'bearinglock',
+    title: 'Bearing Lock',
+    subtitle: 'Tactile Compass Blitz',
+    badge: 'New',
+    icon: Compass,
+    accent: 'from-sky-500/20 to-teal-500/20 border-sky-500/30 text-sky-400',
+  },
+  {
+    slug: 'relic',
+    title: 'R.E.L.I.C.',
+    subtitle: 'Temporal Restitution Protocol',
+    badge: 'Lab',
+    icon: Zap,
     accent: 'from-cyan-500/20 to-blue-500/20 border-cyan-500/30 text-cyan-400',
+  },
+  {
+    slug: 'metro',
+    title: 'METRO',
+    subtitle: 'Transit Topology Reflex',
+    badge: 'Lab',
+    icon: Layers,
+    accent: 'from-cyan-500/20 to-teal-500/20 border-cyan-500/30 text-cyan-400',
+  },
+  {
+    slug: 'roots',
+    title: 'Roots',
+    subtitle: 'Surname Origins Blitz',
+    badge: 'Lab',
+    icon: Compass,
+    accent: 'from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-400',
+  },
+  {
+    slug: 'flagship',
+    title: 'Flagship',
+    subtitle: 'Admiralty Signal Reflex',
+    badge: 'Lab',
+    icon: Anchor,
+    accent: 'from-amber-500/20 to-sky-500/20 border-amber-500/30 text-amber-400',
   },
 ];
 
