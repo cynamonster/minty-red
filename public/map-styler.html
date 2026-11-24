@@ -304,13 +304,31 @@
       to { stroke-dashoffset: 0; }
     }
 
-    /* Crosshair Pin */
-    .retro-crosshair-marker {
+    /* Crosshair & Pin Markers */
+    .retro-crosshair-marker,
+    .retro-pin-marker {
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
       pointer-events: none;
+    }
+
+    .pin-ground-ripple {
+      position: absolute;
+      bottom: 0;
+      width: 22px;
+      height: 12px;
+      border-radius: 50%;
+      border-width: 1.5px;
+      border-style: solid;
+      animation: pinRipple 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+      opacity: 0.7;
+    }
+
+    @keyframes pinRipple {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(1.6); opacity: 0; }
     }
 
     .retro-crosshair-ping {
@@ -568,7 +586,18 @@
       <div class="section-card">
         <div class="section-title"><span>Markers & Geodesic Arc</span></div>
         <div class="control-row">
-          <span class="control-label">Crosshairs Guess Color:</span>
+          <span class="control-label">Guess Pin Shape:</span>
+          <select id="pin-style" onchange="renderOverlays()">
+            <option value="diamond" selected>Cyber Diamond (Pip)</option>
+            <option value="teardrop">Neon Teardrop (Classic Pin)</option>
+            <option value="chevron">Tactical Chevron (Pointer)</option>
+            <option value="beacon">Radio Beacon (Antenna)</option>
+            <option value="flag">Waypoint Pennant (Flag)</option>
+            <option value="crosshair">Retro Crosshair (Legacy)</option>
+          </select>
+        </div>
+        <div class="control-row">
+          <span class="control-label">Guess Marker Color:</span>
           <input type="color" id="crosshair-color" value="#00f3ff" oninput="updateStyle()">
         </div>
         <div class="control-row">
@@ -722,53 +751,76 @@
       }
     }
 
-    // View-bounded trajectory arc calculation
-    function calculateGeodesicArc(lat1, lon1, lat2, lon2, numPoints = 40) {
+    // 2D Mercator flat flight radar arc calculation
+    function calculateFlatFlightArc(lat1, lon1, lat2, lon2, numPoints = 40) {
+      lon1 = ((((lon1 + 180) % 360) + 360) % 360) - 180;
+      lon2 = ((((lon2 + 180) % 360) + 360) % 360) - 180;
+
       let dLon = lon2 - lon1;
       while (dLon > 180) dLon -= 360;
       while (dLon < -180) dLon += 360;
 
-      const maxAllowedLat = Math.min(62, Math.max(lat1, lat2) + 12);
-      const minAllowedLat = Math.max(-62, Math.min(lat1, lat2) - 12);
+      const dLat = lat2 - lat1;
+      const dist = Math.sqrt(dLon * dLon + dLat * dLat);
 
-      const p1 = (lat1 * Math.PI) / 180;
-      const p2 = (lat2 * Math.PI) / 180;
-      const dl = (dLon * Math.PI) / 180;
-
-      const cosOmega = Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(dl);
-      const omega = Math.acos(Math.max(-1, Math.min(1, cosOmega)));
-
-      if (omega < 1e-5) return [[lat1, lon1], [lat2, lon2]];
-
-      const sinOmega = Math.sin(omega);
-      const arc = [];
-
-      for (let i = 0; i <= numPoints; i++) {
-        const f = i / numPoints;
-        const a = Math.sin((1 - f) * omega) / sinOmega;
-        const b = Math.sin(f * omega) / sinOmega;
-
-        const x = a * Math.cos(p1) + b * Math.cos(p2) * Math.cos(dl);
-        const y = b * Math.cos(p2) * Math.sin(dl);
-        const z = a * Math.sin(p1) + b * Math.sin(p2);
-
-        let rawLat = Math.atan2(z, Math.sqrt(x * x + y * y)) * (180 / Math.PI);
-        let rawLon = lon1 + Math.atan2(y, x) * (180 / Math.PI);
-
-        if (rawLat > maxAllowedLat) {
-          const excess = rawLat - maxAllowedLat;
-          rawLat = maxAllowedLat + Math.tanh(excess / 12) * 4;
-        } else if (rawLat < minAllowedLat) {
-          const excess = minAllowedLat - rawLat;
-          rawLat = minAllowedLat - Math.tanh(excess / 12) * 4;
-        }
-
-        while (rawLon > 180) rawLon -= 360;
-        while (rawLon < -180) rawLon += 360;
-
-        arc.push([rawLat, rawLon]);
+      if (dist < 0.1) {
+        return [[[lat1, lon1], [lat2, lon2]]];
       }
-      return arc;
+
+      const lift = Math.min(8.5, dist * 0.08);
+      const midLat = (lat1 + lat2) / 2 + lift;
+      const targetLon = lon1 + dLon;
+      const midLon = (lon1 + targetLon) / 2;
+
+      const rawPoints = [];
+      for (let i = 0; i <= numPoints; i++) {
+        const t = i / numPoints;
+        const lat = (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * midLat + t * t * lat2;
+        const lon = (1 - t) * (1 - t) * lon1 + 2 * (1 - t) * t * midLon + t * t * targetLon;
+        rawPoints.push([lat, lon]);
+      }
+
+      const crossesDateLine = rawPoints.some(([, lon]) => lon > 180 || lon < -180);
+      if (!crossesDateLine) return [rawPoints];
+
+      const seg1 = [];
+      const seg2 = [];
+      let switched = false;
+
+      for (let i = 0; i < rawPoints.length; i++) {
+        const [lat, lon] = rawPoints[i];
+        if (dLon > 0) {
+          if (lon <= 180) {
+            seg1.push([lat, lon]);
+          } else {
+            if (!switched && seg1.length > 0) {
+              const prev = seg1[seg1.length - 1];
+              const frac = (180 - prev[1]) / (lon - prev[1]);
+              const boundaryLat = prev[0] + frac * (lat - prev[0]);
+              seg1.push([boundaryLat, 180]);
+              seg2.push([boundaryLat, -180]);
+              switched = true;
+            }
+            seg2.push([lat, lon - 360]);
+          }
+        } else {
+          if (lon >= -180) {
+            seg1.push([lat, lon]);
+          } else {
+            if (!switched && seg1.length > 0) {
+              const prev = seg1[seg1.length - 1];
+              const frac = (-180 - prev[1]) / (lon - prev[1]);
+              const boundaryLat = prev[0] + frac * (lat - prev[0]);
+              seg1.push([boundaryLat, -180]);
+              seg2.push([boundaryLat, 180]);
+              switched = true;
+            }
+            seg2.push([lat, lon + 360]);
+          }
+        }
+      }
+
+      return [seg1, seg2];
     }
 
     function renderOverlays() {
@@ -778,28 +830,139 @@
       const targetLat = data.centroid.lat;
       const targetLng = data.centroid.lng;
 
-      // 1. Guess Marker
+      // 1. Guess Marker with selectable pin shape
       if (guessMarker) map.removeLayer(guessMarker);
       const crosshairColor = document.getElementById('crosshair-color').value;
-      guessMarker = L.marker([userPin.lat, userPin.lng], {
-        icon: L.divIcon({
-          className: 'retro-crosshair-wrapper',
+      const pinShape = document.getElementById('pin-style') ? document.getElementById('pin-style').value : 'teardrop';
+
+      function createStylerPin(style, color) {
+        if (style === 'chevron') {
+          return L.divIcon({
+            className: 'retro-pin-wrapper',
+            html: `
+              <div class="retro-pin-marker">
+                <div class="pin-ground-ripple" style="border-color:${color}; left:4px; bottom:-4px;"></div>
+                <svg width="30" height="36" viewBox="0 0 30 36" fill="none" style="filter: drop-shadow(0 0 6px ${color});">
+                  <path d="M15 27L5 13h6V3h8v10h6L15 27z" stroke="${color}" stroke-width="1.8" fill="${color}" fill-opacity="0.3"/>
+                  <circle cx="15" cy="13" r="2.5" fill="${color}"/>
+                  <circle cx="15" cy="32" r="2.5" fill="${color}"/>
+                </svg>
+              </div>
+            `,
+            iconSize: [30, 36],
+            iconAnchor: [15, 32]
+          });
+        }
+        if (style === 'beacon') {
+          return L.divIcon({
+            className: 'retro-pin-wrapper',
+            html: `
+              <div class="retro-pin-marker">
+                <div class="pin-ground-ripple" style="border-color:${color}; left:6px; bottom:-3px;"></div>
+                <svg width="34" height="38" viewBox="0 0 34 38" fill="none" style="filter: drop-shadow(0 0 5px ${color});">
+                  <path d="M11 9a7 7 0 0112 0M7 5a13 13 0 0120 0" stroke="${color}" stroke-width="1.6" stroke-linecap="round"/>
+                  <circle cx="17" cy="13" r="3.5" fill="${color}"/>
+                  <line x1="17" y1="16.5" x2="17" y2="33" stroke="${color}" stroke-width="2.2"/>
+                  <circle cx="17" cy="34" r="2.5" fill="${color}"/>
+                </svg>
+              </div>
+            `,
+            iconSize: [34, 38],
+            iconAnchor: [17, 34]
+          });
+        }
+        if (style === 'diamond') {
+          return L.divIcon({
+            className: 'retro-pin-wrapper',
+            html: `
+              <div class="retro-pin-marker">
+                <div class="retro-crosshair-ping" style="border-color:${color}; width:28px; height:28px;"></div>
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="filter: drop-shadow(0 0 6px ${color});">
+                  <path d="M16 3L29 16L16 29L3 16Z" stroke="${color}" stroke-width="2" fill="${color}" fill-opacity="0.25"/>
+                  <circle cx="16" cy="16" r="3.5" fill="${color}"/>
+                  <path d="M12 16h8M16 12v8" stroke="${color}" stroke-width="1.5"/>
+                </svg>
+              </div>
+            `,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
+          });
+        }
+        if (style === 'flag') {
+          return L.divIcon({
+            className: 'retro-pin-wrapper',
+            html: `
+              <div class="retro-pin-marker">
+                <div class="pin-ground-ripple" style="border-color:${color}; left:-2px; bottom:-3px;"></div>
+                <svg width="32" height="38" viewBox="0 0 32 38" fill="none" style="filter: drop-shadow(0 0 5px ${color});">
+                  <line x1="8" y1="3" x2="8" y2="34" stroke="${color}" stroke-width="2.2" stroke-linecap="round"/>
+                  <path d="M8 4l18 8-18 8V4z" stroke="${color}" stroke-width="1.8" fill="${color}" fill-opacity="0.35"/>
+                  <circle cx="8" cy="34.5" r="2.5" fill="${color}"/>
+                  <line x1="4" y1="35" x2="12" y2="35" stroke="${color}" stroke-width="1.5"/>
+                </svg>
+              </div>
+            `,
+            iconSize: [32, 38],
+            iconAnchor: [8, 34.5]
+          });
+        }
+        if (style === 'crosshair') {
+          return L.divIcon({
+            className: 'retro-crosshair-wrapper',
+            html: `
+              <div class="retro-crosshair-marker">
+                <div class="retro-crosshair-ping" style="border-color:${color}"></div>
+                <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+                  <circle cx="17" cy="17" r="11" stroke="${color}" stroke-width="1.5" stroke-dasharray="3 3"/>
+                  <line x1="17" y1="2" x2="17" y2="11" stroke="${color}" stroke-width="2"/>
+                  <line x1="17" y1="23" x2="17" y2="32" stroke="${color}" stroke-width="2"/>
+                  <line x1="2" y1="17" x2="11" y2="17" stroke="${color}" stroke-width="2"/>
+                  <line x1="23" y1="17" x2="32" y2="17" stroke="${color}" stroke-width="2"/>
+                  <circle cx="17" cy="17" r="2.5" fill="${color}"/>
+                </svg>
+              </div>
+            `,
+            iconSize: [34, 34],
+            iconAnchor: [17, 17]
+          });
+        }
+        if (style === 'teardrop') {
+          return L.divIcon({
+            className: 'retro-pin-wrapper',
+            html: `
+              <div class="retro-pin-marker">
+                <div class="pin-ground-ripple" style="border-color:${color}; left:3px; bottom:-4px;"></div>
+                <svg width="28" height="38" viewBox="0 0 28 38" fill="none" style="filter: drop-shadow(0 0 6px ${color});">
+                  <path d="M14 2C7.37 2 2 7.37 2 14c0 8.5 12 20 12 20s12-11.5 12-20c0-6.63-5.37-12-12-12z" stroke="${color}" stroke-width="2" fill="${color}" fill-opacity="0.25"/>
+                  <circle cx="14" cy="14" r="4.5" fill="${color}"/>
+                  <circle cx="14" cy="14" r="7.5" stroke="${color}" stroke-width="1" stroke-dasharray="2 2"/>
+                </svg>
+              </div>
+            `,
+            iconSize: [28, 38],
+            iconAnchor: [14, 34]
+          });
+        }
+        // Default: diamond (Cyber Diamond Pip)
+        return L.divIcon({
+          className: 'retro-pin-wrapper',
           html: `
-            <div class="retro-crosshair-marker">
-              <div class="retro-crosshair-ping" style="border-color:${crosshairColor}"></div>
-              <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
-                <circle cx="17" cy="17" r="11" stroke="${crosshairColor}" stroke-width="1.5" stroke-dasharray="3 3"/>
-                <line x1="17" y1="2" x2="17" y2="11" stroke="${crosshairColor}" stroke-width="2"/>
-                <line x1="17" y1="23" x2="17" y2="32" stroke="${crosshairColor}" stroke-width="2"/>
-                <line x1="2" y1="17" x2="11" y2="17" stroke="${crosshairColor}" stroke-width="2"/>
-                <line x1="23" y1="17" x2="32" y2="17" stroke="${crosshairColor}" stroke-width="2"/>
-                <circle cx="17" cy="17" r="2.5" fill="${crosshairColor}"/>
+            <div class="retro-pin-marker">
+              <div class="retro-crosshair-ping" style="border-color:${color}; width:30px; height:30px;"></div>
+              <svg width="34" height="34" viewBox="0 0 34 34" fill="none" style="filter: drop-shadow(0 0 8px ${color});">
+                <path d="M17 3L31 17L17 31L3 17Z" stroke="${color}" stroke-width="2.2" fill="${color}" fill-opacity="0.3"/>
+                <circle cx="17" cy="17" r="4" fill="${color}"/>
+                <path d="M12 17h10M17 12v10" stroke="${color}" stroke-width="1.75"/>
               </svg>
             </div>
           `,
           iconSize: [34, 34],
           iconAnchor: [17, 17]
-        }),
+        });
+      }
+
+      guessMarker = L.marker([userPin.lat, userPin.lng], {
+        icon: createStylerPin(pinShape, crosshairColor),
         zIndexOffset: 1000
       }).addTo(map);
 
@@ -829,8 +992,8 @@
       if (geodesicLine) map.removeLayer(geodesicLine);
       const lineColor = document.getElementById('line-color').value;
       const lineWidth = parseFloat(document.getElementById('line-width').value);
-      const arcPoints = calculateGeodesicArc(userPin.lat, userPin.lng, targetLat, targetLng, 45);
-      geodesicLine = L.polyline(arcPoints, {
+      const arcSegments = calculateFlatFlightArc(userPin.lat, userPin.lng, targetLat, targetLng, 45);
+      geodesicLine = L.polyline(arcSegments, {
         color: lineColor,
         weight: lineWidth,
         className: 'retro-geodesic-line'
@@ -932,7 +1095,7 @@
         brightness: 1.5, contrast: 2.05, saturate: 0.8,
         coreFill: '#39ff14', coreOpacity: 0.35, coreStroke: '#39ff14', coreWidth: 2.5, coreGlow: 8,
         periFill: '#15803d', periOpacity: 0.34, periStroke: '#22c55e', periDash: '6 6',
-        crosshair: '#39ff14', bullseye: '#00f3ff', line: '#39ff14', lineWidth: 3.25,
+        crosshair: '#00f3ff', bullseye: '#00f3ff', line: '#39ff14', lineWidth: 3.25,
         scanlines: 1.0, reticles: '#39ff14'
       },
       outrun: {
@@ -948,7 +1111,7 @@
         brightness: 1.4, contrast: 1.95, saturate: 1.3,
         coreFill: '#f59e0b', coreOpacity: 0.45, coreStroke: '#fbbf24', coreWidth: 2.5, coreGlow: 10,
         periFill: '#b45309', periOpacity: 0.18, periStroke: '#d97706', periDash: '6 6',
-        crosshair: '#f59e0b', bullseye: '#38bdf8', line: '#fbbf24', lineWidth: 2.75,
+        crosshair: '#00f3ff', bullseye: '#38bdf8', line: '#fbbf24', lineWidth: 2.75,
         scanlines: 0.8, reticles: '#f59e0b'
       },
       matrix: {

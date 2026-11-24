@@ -34,7 +34,7 @@ export const THEMES = {
     key: 'crt',
     name: 'CRT Terminal',
     toggleLabel: '🟢 CRT',
-    crosshair: '#39ff14',
+    crosshair: '#00f3ff',
     bullseye: '#00f3ff',
     coreStroke: '#39ff14',
     coreFill: '#39ff14',
@@ -53,7 +53,7 @@ export const THEMES = {
     key: 'amber',
     name: 'Amber Radar',
     toggleLabel: '🟠 AMBER',
-    crosshair: '#f59e0b',
+    crosshair: '#00f3ff',
     bullseye: '#38bdf8',
     coreStroke: '#fbbf24',
     coreFill: '#f59e0b',
@@ -71,91 +71,227 @@ export const THEMES = {
 };
 
 /**
- * Calculates a view-bounded trajectory arc between two lat/lng pairs.
- * Takes the shortest longitudinal route across the globe and smoothly dampens
- * high-latitude polar excursions so the line never arches over the North Pole
- * and stays comfortably in view on a 2D Mercator projection.
+ * Calculates a smooth, 2D Mercator flat flight radar arc between two coordinates.
+ * - Flat map projection behavior: Does not compute spherical orthodromes that loop over the poles.
+ * - Shortest path wrapping: Smoothly crosses the 180° date line across the Pacific without jagged slashes.
+ * - Upward convex lift: Scales gently with distance (nearly straight for close guesses,
+ *   subtle upward convex bow for intercontinental spans, capped at 8.5° max lift).
  */
-function calculateGeodesicArc(lat1, lon1, lat2, lon2, numPoints = 40) {
+function calculateFlatFlightArc(lat1, lon1, lat2, lon2, numPoints = 40) {
+  // Normalize input longitudes to [-180, 180]
+  lon1 = ((((lon1 + 180) % 360) + 360) % 360) - 180;
+  lon2 = ((((lon2 + 180) % 360) + 360) % 360) - 180;
+
   let dLon = lon2 - lon1;
   while (dLon > 180) dLon -= 360;
   while (dLon < -180) dLon += 360;
 
-  const maxAllowedLat = Math.min(62, Math.max(lat1, lat2) + 12);
-  const minAllowedLat = Math.max(-62, Math.min(lat1, lat2) - 12);
+  const dLat = lat2 - lat1;
+  const dist = Math.sqrt(dLon * dLon + dLat * dLat);
 
-  const p1 = (lat1 * Math.PI) / 180;
-  const p2 = (lat2 * Math.PI) / 180;
-  const dl = (dLon * Math.PI) / 180;
-
-  const cosOmega =
-    Math.sin(p1) * Math.sin(p2) +
-    Math.cos(p1) * Math.cos(p2) * Math.cos(dl);
-  const omega = Math.acos(Math.max(-1, Math.min(1, cosOmega)));
-
-  if (omega < 1e-5) {
-    return [
-      [lat1, lon1],
-      [lat2, lon2],
-    ];
+  if (dist < 0.1) {
+    return [[[lat1, lon1], [lat2, lon2]]];
   }
 
-  const sinOmega = Math.sin(omega);
-  const arc = [];
+  // Distance-scaled upward convex bow:
+  // Short distance -> virtually zero lift (nearly ruler-straight line)
+  // Intercontinental spans -> gentle shallow lift capped at max 8.5 degrees of latitude
+  const lift = Math.min(8.5, dist * 0.08);
 
+  const midLat = (lat1 + lat2) / 2 + lift;
+  const targetLon = lon1 + dLon;
+  const midLon = (lon1 + targetLon) / 2;
+
+  // Generate intermediate points along the quadratic curve
+  const rawPoints = [];
   for (let i = 0; i <= numPoints; i++) {
-    const f = i / numPoints;
-    const a = Math.sin((1 - f) * omega) / sinOmega;
-    const b = Math.sin(f * omega) / sinOmega;
-
-    const x = a * Math.cos(p1) + b * Math.cos(p2) * Math.cos(dl);
-    const y = b * Math.cos(p2) * Math.sin(dl);
-    const z = a * Math.sin(p1) + b * Math.sin(p2);
-
-    let rawLat = Math.atan2(z, Math.sqrt(x * x + y * y)) * (180 / Math.PI);
-    let rawLon = lon1 + Math.atan2(y, x) * (180 / Math.PI);
-
-    // Compress excessive polar rise so the arc arches gracefully within map view
-    if (rawLat > maxAllowedLat) {
-      const excess = rawLat - maxAllowedLat;
-      rawLat = maxAllowedLat + Math.tanh(excess / 12) * 4;
-    } else if (rawLat < minAllowedLat) {
-      const excess = minAllowedLat - rawLat;
-      rawLat = minAllowedLat - Math.tanh(excess / 12) * 4;
-    }
-
-    // Keep longitude normalized
-    while (rawLon > 180) rawLon -= 360;
-    while (rawLon < -180) rawLon += 360;
-
-    arc.push([rawLat, rawLon]);
+    const t = i / numPoints;
+    const lat =
+      (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * midLat + t * t * lat2;
+    const lon =
+      (1 - t) * (1 - t) * lon1 + 2 * (1 - t) * t * midLon + t * t * targetLon;
+    rawPoints.push([lat, lon]);
   }
 
-  return arc;
+  // Check if trajectory crosses the 180° International Date Line
+  const crossesDateLine = rawPoints.some(([, lon]) => lon > 180 || lon < -180);
+
+  if (!crossesDateLine) {
+    return [rawPoints];
+  }
+
+  // Split into two clean segments at 180° / -180° to avoid jagged slashes across the map
+  const seg1 = [];
+  const seg2 = [];
+  let switched = false;
+
+  for (let i = 0; i < rawPoints.length; i++) {
+    const [lat, lon] = rawPoints[i];
+    if (dLon > 0) {
+      if (lon <= 180) {
+        seg1.push([lat, lon]);
+      } else {
+        if (!switched && seg1.length > 0) {
+          const prev = seg1[seg1.length - 1];
+          const frac = (180 - prev[1]) / (lon - prev[1]);
+          const boundaryLat = prev[0] + frac * (lat - prev[0]);
+          seg1.push([boundaryLat, 180]);
+          seg2.push([boundaryLat, -180]);
+          switched = true;
+        }
+        seg2.push([lat, lon - 360]);
+      }
+    } else {
+      if (lon >= -180) {
+        seg1.push([lat, lon]);
+      } else {
+        if (!switched && seg1.length > 0) {
+          const prev = seg1[seg1.length - 1];
+          const frac = (-180 - prev[1]) / (lon - prev[1]);
+          const boundaryLat = prev[0] + frac * (lat - prev[0]);
+          seg1.push([boundaryLat, -180]);
+          seg2.push([boundaryLat, 180]);
+          switched = true;
+        }
+        seg2.push([lat, lon + 360]);
+      }
+    }
+  }
+
+  return [seg1, seg2];
 }
 
 /**
- * Custom retro SVG DivIcon for the player's guess crosshair
+ * Selectable Pin Styles
  */
-function createCrosshairIcon(color = '#39ff14') {
+export const PIN_OPTIONS = [
+  { id: 'diamond', label: '💠 DIAMOND', name: 'Cyber Diamond' },
+  { id: 'teardrop', label: '📍 PIN', name: 'Neon Teardrop' },
+  { id: 'chevron', label: '🔻 ARROW', name: 'Tactical Chevron' },
+  { id: 'beacon', label: '📡 BEACON', name: 'Radio Beacon' },
+  { id: 'flag', label: '🚩 FLAG', name: 'Waypoint Flag' },
+  { id: 'crosshair', label: '🎯 CROSS', name: 'Crosshair' },
+];
+
+/**
+ * Custom retro SVG DivIcon for the player's guess pin with multiple selectable styles
+ */
+export function createPinIcon(style = 'diamond', color = '#00f3ff') {
+  if (style === 'chevron') {
+    return L.divIcon({
+      className: 'retro-pin-wrapper',
+      html: `
+        <div class="retro-pin-marker">
+          <div class="pin-ground-ripple" style="border-color:${color}; left:4px; bottom:-4px;"></div>
+          <svg width="30" height="36" viewBox="0 0 30 36" fill="none" style="filter: drop-shadow(0 0 6px ${color});">
+            <path d="M15 27L5 13h6V3h8v10h6L15 27z" stroke="${color}" stroke-width="1.8" fill="${color}" fill-opacity="0.3"/>
+            <circle cx="15" cy="13" r="2.5" fill="${color}"/>
+            <circle cx="15" cy="32" r="2.5" fill="${color}"/>
+          </svg>
+        </div>
+      `,
+      iconSize: [30, 36],
+      iconAnchor: [15, 32],
+    });
+  }
+
+  if (style === 'beacon') {
+    return L.divIcon({
+      className: 'retro-pin-wrapper',
+      html: `
+        <div class="retro-pin-marker">
+          <div class="pin-ground-ripple" style="border-color:${color}; left:6px; bottom:-3px;"></div>
+          <svg width="34" height="38" viewBox="0 0 34 38" fill="none" style="filter: drop-shadow(0 0 5px ${color});">
+            <path d="M11 9a7 7 0 0112 0M7 5a13 13 0 0120 0" stroke="${color}" stroke-width="1.6" stroke-linecap="round"/>
+            <circle cx="17" cy="13" r="3.5" fill="${color}"/>
+            <line x1="17" y1="16.5" x2="17" y2="33" stroke="${color}" stroke-width="2.2"/>
+            <circle cx="17" cy="34" r="2.5" fill="${color}"/>
+          </svg>
+        </div>
+      `,
+      iconSize: [34, 38],
+      iconAnchor: [17, 34],
+    });
+  }
+
+  if (style === 'teardrop') {
+    return L.divIcon({
+      className: 'retro-pin-wrapper',
+      html: `
+        <div class="retro-pin-marker">
+          <div class="pin-ground-ripple" style="border-color:${color}; left:3px; bottom:-4px;"></div>
+          <svg width="28" height="38" viewBox="0 0 28 38" fill="none" style="filter: drop-shadow(0 0 6px ${color});">
+            <path d="M14 2C7.37 2 2 7.37 2 14c0 8.5 12 20 12 20s12-11.5 12-20c0-6.63-5.37-12-12-12z" stroke="${color}" stroke-width="2" fill="${color}" fill-opacity="0.25"/>
+            <circle cx="14" cy="14" r="4.5" fill="${color}"/>
+            <circle cx="14" cy="14" r="7.5" stroke="${color}" stroke-width="1" stroke-dasharray="2 2"/>
+          </svg>
+        </div>
+      `,
+      iconSize: [28, 38],
+      iconAnchor: [14, 34],
+    });
+  }
+
+  if (style === 'flag') {
+    return L.divIcon({
+      className: 'retro-pin-wrapper',
+      html: `
+        <div class="retro-pin-marker">
+          <div class="pin-ground-ripple" style="border-color:${color}; left:-2px; bottom:-3px;"></div>
+          <svg width="32" height="38" viewBox="0 0 32 38" fill="none" style="filter: drop-shadow(0 0 5px ${color});">
+            <line x1="8" y1="3" x2="8" y2="34" stroke="${color}" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M8 4l18 8-18 8V4z" stroke="${color}" stroke-width="1.8" fill="${color}" fill-opacity="0.35"/>
+            <circle cx="8" cy="34.5" r="2.5" fill="${color}"/>
+            <line x1="4" y1="35" x2="12" y2="35" stroke="${color}" stroke-width="1.5"/>
+          </svg>
+        </div>
+      `,
+      iconSize: [32, 38],
+      iconAnchor: [8, 34.5],
+    });
+  }
+
+  if (style === 'crosshair') {
+    return L.divIcon({
+      className: 'retro-crosshair-marker-wrapper',
+      html: `
+        <div class="retro-crosshair-marker">
+          <div class="retro-crosshair-ping" style="border-color:${color}"></div>
+          <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+            <circle cx="17" cy="17" r="11" stroke="${color}" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <line x1="17" y1="2" x2="17" y2="11" stroke="${color}" stroke-width="2"/>
+            <line x1="17" y1="23" x2="17" y2="32" stroke="${color}" stroke-width="2"/>
+            <line x1="2" y1="17" x2="11" y2="17" stroke="${color}" stroke-width="2"/>
+            <line x1="23" y1="17" x2="32" y2="17" stroke="${color}" stroke-width="2"/>
+            <circle cx="17" cy="17" r="2.5" fill="${color}"/>
+          </svg>
+        </div>
+      `,
+      iconSize: [34, 34],
+      iconAnchor: [17, 17],
+    });
+  }
+
+  // Default: 'diamond' (Cyber Diamond Pip)
   return L.divIcon({
-    className: 'retro-crosshair-marker-wrapper',
+    className: 'retro-pin-wrapper',
     html: `
-      <div class="retro-crosshair-marker">
-        <div class="retro-crosshair-ping" style="border-color:${color}"></div>
-        <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
-          <circle cx="17" cy="17" r="11" stroke="${color}" stroke-width="1.5" stroke-dasharray="3 3"/>
-          <line x1="17" y1="2" x2="17" y2="11" stroke="${color}" stroke-width="2"/>
-          <line x1="17" y1="23" x2="17" y2="32" stroke="${color}" stroke-width="2"/>
-          <line x1="2" y1="17" x2="11" y2="17" stroke="${color}" stroke-width="2"/>
-          <line x1="23" y1="17" x2="32" y2="17" stroke="${color}" stroke-width="2"/>
-          <circle cx="17" cy="17" r="2.5" fill="${color}"/>
+      <div class="retro-pin-marker">
+        <div class="retro-crosshair-ping" style="border-color:${color}; width:30px; height:30px;"></div>
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none" style="filter: drop-shadow(0 0 8px ${color});">
+          <path d="M17 3L31 17L17 31L3 17Z" stroke="${color}" stroke-width="2.2" fill="${color}" fill-opacity="0.3"/>
+          <circle cx="17" cy="17" r="4" fill="${color}"/>
+          <path d="M12 17h10M17 12v10" stroke="${color}" stroke-width="1.75"/>
         </svg>
       </div>
     `,
     iconSize: [34, 34],
     iconAnchor: [17, 17],
   });
+}
+
+function createCrosshairIcon(color = '#39ff14') {
+  return createPinIcon('crosshair', color);
 }
 
 /**
@@ -200,6 +336,17 @@ export function EthnosLeafletMap({
     }
   });
 
+  // Pin style state ('diamond' | 'teardrop' | 'chevron' | 'beacon' | 'flag' | 'crosshair')
+  const [pinStyle, setPinStyle] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ethnos_pin_style_v2');
+      if (saved && PIN_OPTIONS.some((p) => p.id === saved)) return saved;
+      return 'diamond';
+    } catch (e) {
+      return 'diamond';
+    }
+  });
+
   const currentTheme = THEMES[activeTheme] || THEMES.crt;
 
   const toggleTheme = useCallback(() => {
@@ -207,6 +354,17 @@ export function EthnosLeafletMap({
       const next = prev === 'crt' ? 'amber' : 'crt';
       try {
         localStorage.setItem('ethnos_theme', next);
+      } catch (e) {}
+      return next;
+    });
+  }, []);
+
+  const cyclePinStyle = useCallback(() => {
+    setPinStyle((prev) => {
+      const idx = PIN_OPTIONS.findIndex((p) => p.id === prev);
+      const next = PIN_OPTIONS[(idx + 1) % PIN_OPTIONS.length].id;
+      try {
+        localStorage.setItem('ethnos_pin_style_v2', next);
       } catch (e) {}
       return next;
     });
@@ -324,7 +482,7 @@ export function EthnosLeafletMap({
         markersLayerGroupRef.current.removeLayer(guessMarkerRef.current);
       }
       const marker = L.marker([userPin.lat, userPin.lng], {
-        icon: createCrosshairIcon(currentTheme.crosshair),
+        icon: createPinIcon(pinStyle, currentTheme.crosshair),
         zIndexOffset: 1000,
         interactive: false,
       });
@@ -336,7 +494,7 @@ export function EthnosLeafletMap({
         guessMarkerRef.current = null;
       }
     }
-  }, [userPin, activeTheme]);
+  }, [userPin, activeTheme, pinStyle]);
 
   // 3. Render Phenotype Distribution Polygons & Handle Result Locking
   useEffect(() => {
@@ -409,16 +567,17 @@ export function EthnosLeafletMap({
         markersLayerGroupRef.current.addLayer(targetMarker);
         targetMarkerRef.current = targetMarker;
 
-        // 4. Render Geodesic Line if guess is outside the core
+        // 4. Render Flat Flight Trajectory Arc if guess is outside the core
         if (userPin && !targetCoords.isInsideCore) {
-          arcPoints = calculateGeodesicArc(
+          const arcSegments = calculateFlatFlightArc(
             userPin.lat,
             userPin.lng,
             targetCoords.lat,
             targetCoords.lng,
             45
           );
-          const geodesicLine = L.polyline(arcPoints, {
+          arcPoints = arcSegments.flat();
+          const geodesicLine = L.polyline(arcSegments, {
             color: currentTheme.geodesic,
             weight: currentTheme.geodesicWidth,
             className: 'retro-geodesic-line',
@@ -551,6 +710,14 @@ export function EthnosLeafletMap({
 
       {/* Touch & Navigation Controls Overlay: top-right cluster avoiding bottom attribution */}
       <div className="absolute top-2.5 right-3 z-30 flex items-center gap-1.5 select-none">
+        <button
+          onClick={cyclePinStyle}
+          className="h-7 px-2 rounded-md bg-slate-950/85 backdrop-blur-md border border-slate-700 hover:border-slate-500 text-[10px] font-mono font-bold flex items-center gap-1 shadow-lg active:scale-95 transition-all text-slate-200"
+          title={`Cycle Pin Style (Current: ${PIN_OPTIONS.find((p) => p.id === pinStyle)?.name || 'Neon Teardrop'})`}
+          aria-label="Cycle Pin Style"
+        >
+          <span>{PIN_OPTIONS.find((p) => p.id === pinStyle)?.label || '📍 PIN'}</span>
+        </button>
         <button
           onClick={toggleTheme}
           className="h-7 px-2 rounded-md bg-slate-950/85 backdrop-blur-md border border-slate-700 hover:border-slate-500 text-[10px] font-mono font-bold flex items-center gap-1 shadow-lg active:scale-95 transition-all"

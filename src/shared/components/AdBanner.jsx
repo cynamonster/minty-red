@@ -177,20 +177,9 @@ export function AdBanner({
           </div>
 
           <div className="min-w-0 flex flex-col">
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-black text-white truncate tracking-tight">
-                {houseAd.title}
-              </span>
-              <span
-                className="text-[9px] px-1.5 py-0.2 rounded font-mono font-bold uppercase tracking-wider shrink-0"
-                style={{
-                  backgroundColor: `${houseAd.accentColor}25`,
-                  color: houseAd.accentColor,
-                }}
-              >
-                {houseAd.badge}
-              </span>
-            </div>
+            <span className="text-xs font-black text-white truncate tracking-tight">
+              {houseAd.title}
+            </span>
             <p className="text-[10px] text-slate-300 truncate font-medium">
               {houseAd.tagline}
             </p>
