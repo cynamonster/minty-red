@@ -234,7 +234,7 @@ function BourdonSteamTube({ timeLeft, maxTime }) {
   const psi = Math.round(frac * 300);
   const isCritical = timeLeft <= 5 && timeLeft > 0;
   const isWarning = timeLeft <= 10 && !isCritical;
-  const needlePct = 2 + frac * 96;
+  const needlePct = Math.max(3, Math.min(97, 3 + frac * 94));
   const bonusYield = Math.round(500 * frac);
 
   let statusText = 'NORMAL HEAD STEAM';
@@ -378,7 +378,7 @@ function SignalEnsignDisplay({ target }) {
         <div className="absolute left-1.5 bottom-3 w-2.5 h-2.5 rounded-full bg-amber-400 border border-black shadow" />
 
         {/* The Proportional Swatch Flag */}
-        <div className="w-full h-28 rounded-xl overflow-hidden flex border-2 border-amber-400/80 shadow-2xl relative canvas-texture">
+        <div className="w-full h-24 sm:h-28 rounded-xl overflow-hidden flex border-2 border-amber-400/80 shadow-2xl relative canvas-texture">
           {colors.map((color, idx) => {
             const widthPct = (proportions[idx] / total) * 100;
             return (
@@ -396,18 +396,18 @@ function SignalEnsignDisplay({ target }) {
       </div>
 
       {/* Brass Hex Callout Plaques */}
-      <div className="flex items-center justify-center gap-1.5 flex-wrap pt-2 w-full">
+      <div className="flex items-center justify-center gap-1 sm:gap-1.5 flex-wrap pt-1.5 w-full">
         {colors.map((hex, i) => (
           <div
             key={i}
-            className="px-2 py-0.5 rounded-md bg-[#050a14] border border-amber-900/60 text-[9px] font-mono-code font-bold text-amber-200 flex items-center gap-1.5 shadow"
+            className="px-1.5 sm:px-2 py-0.5 rounded-md bg-[#050a14] border border-amber-900/60 text-[8px] sm:text-[9px] font-mono-code font-bold text-amber-200 flex items-center gap-1 shadow shrink-0"
           >
             <span
-              className="w-2.5 h-2.5 rounded-full border border-black/50 inline-block shadow-sm"
+              className="w-2 h-2 rounded-full border border-black/50 inline-block shadow-sm"
               style={{ backgroundColor: hex }}
             />
             <span>{hex}</span>
-            <span className="text-[8px] text-slate-400 font-normal">
+            <span className="text-[7px] sm:text-[8px] text-slate-400 font-normal">
               ({getColorName(hex)})
             </span>
           </div>
@@ -450,7 +450,7 @@ function SpyglassLensDisplay({ target }) {
   return (
     <div className="w-full h-full flex flex-col justify-between items-center py-1">
       {/* Spyglass Viewport Dial */}
-      <div className="relative w-36 h-36 mx-auto flex items-center justify-center">
+      <div className="relative w-32 h-32 sm:w-36 sm:h-36 mx-auto flex items-center justify-center">
         {/* Brass Bezel Ring with Degree Markings */}
         <div className="absolute inset-0 rounded-full border-4 border-amber-500 shadow-2xl bg-[#060e18] flex items-center justify-center">
           <div className="absolute top-1 text-[7px] font-mono-code text-amber-400 font-bold">000°</div>
@@ -796,7 +796,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#040810] text-slate-100 flex flex-col justify-between selection:bg-amber-500 selection:text-black font-naval">
+    <div className="w-full min-h-[100dvh] bg-[#040810] text-slate-100 flex flex-col justify-start selection:bg-amber-500 selection:text-black font-naval overflow-x-hidden">
       <ConfettiCanvas active={showConfetti} />
 
       {/* Top Navbar */}
@@ -808,12 +808,12 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
       />
 
       {/* Main Content Area */}
-      <main className="w-full max-w-md mx-auto px-4 py-3 flex-1 flex flex-col justify-center">
+      <main className="w-full max-w-md mx-auto px-4 sm:px-5 pt-3 pb-8 flex-1 flex flex-col justify-start gap-3">
         {/* ============================================================ */}
         {/* --- MENU SCREEN: COMMANDER'S BRIDGE TERMINAL --- */}
         {/* ============================================================ */}
         {mode === 'menu' && (
-          <div className="space-y-5 text-center animate-in fade-in duration-300">
+          <div className="w-full space-y-4 sm:space-y-5 text-center animate-in fade-in duration-300 my-auto py-2">
             {/* Hero Brass Compass Emblem */}
             <div className="relative mx-auto w-24 h-24 rounded-3xl p-1 shadow-2xl shadow-amber-600/20"
               style={{
@@ -924,29 +924,29 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
         {/* --- ACTIVE GAMEPLAY SCREEN --- */}
         {/* ============================================================ */}
         {mode !== 'menu' && !gameOver && currentQ && (
-          <div className="space-y-3.5 animate-in fade-in duration-200">
+          <div className="w-full space-y-3 animate-in fade-in duration-200">
             {/* Top Bar: Round Counter, Style Toggle & Score */}
-            <div className="flex items-center justify-between text-xs px-1">
-              <div className="flex items-center gap-2">
-                <span className="font-bold tracking-wider text-amber-300 uppercase">
-                  STATION {currentIndex + 1} / {questions.length}
+            <div className="w-full flex items-center justify-between text-xs px-1">
+              <div className="flex items-center gap-1.5 shrink-0 min-w-0">
+                <span className="font-bold tracking-wide text-amber-300 text-xs sm:text-sm uppercase font-mono-code truncate">
+                  STATION {currentIndex + 1}/{questions.length}
                 </span>
                 {streak >= 2 && (
-                  <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[10px] font-mono-code font-bold flex items-center gap-1 animate-pulse">
+                  <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[10px] font-mono-code font-bold flex items-center gap-1 animate-pulse shrink-0">
                     <Flame className="w-3 h-3 fill-amber-400" />
                     {streak}x
                   </span>
                 )}
               </div>
 
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2 shrink-0">
                 {/* Visual Style Toggle (Ensign vs Spyglass Dial) */}
                 <button
                   onClick={() => {
                     soundEngine.playTap();
                     setDisplayStyle((prev) => (prev === 'ensign' ? 'spyglass' : 'ensign'));
                   }}
-                  className="px-2 py-1 rounded-lg bg-[#07111e] border border-amber-900/60 hover:border-amber-400/80 text-amber-300 text-[10px] font-mono-code flex items-center gap-1 shadow transition-colors"
+                  className="px-2 py-1 rounded-lg bg-[#07111e] border border-amber-900/60 hover:border-amber-400/80 text-amber-300 text-[10px] font-mono-code flex items-center gap-1 shadow transition-colors active:scale-95"
                   title="Toggle Swatch Style (Ensign / Spyglass)"
                 >
                   {displayStyle === 'ensign' ? (
@@ -962,7 +962,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                   )}
                 </button>
 
-                <div className="text-right">
+                <div className="text-right shrink-0">
                   <span className="text-[10px] text-slate-400 uppercase font-mono-code">HONORS: </span>
                   <span className="text-sm font-black text-amber-400 font-mono-code">{totalScore}</span>
                 </div>
@@ -980,7 +980,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
             />
 
             {/* 3. Central Mystery Swatch Frame / Sovereign Ensign Reveal */}
-            <div className="relative w-full aspect-[3/2] max-h-56 mx-auto rounded-3xl bg-[#060c16] border-2 border-amber-900/60 p-3 shadow-2xl flex items-center justify-center overflow-hidden">
+            <div className="relative w-full aspect-[16/10] max-h-48 sm:max-h-52 mx-auto rounded-3xl bg-[#060c16] border-2 border-amber-900/60 p-2.5 sm:p-3 shadow-2xl flex items-center justify-center overflow-hidden">
               {!isRevealed ? (
                 // UNREVEALED: Dual Mode Optical Signal Swatch
                 displayStyle === 'spyglass' ? (
@@ -998,7 +998,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
 
             {/* 4. Post-Reveal Admiralty Deck Log Feedback Entry */}
             {isRevealed && (
-              <div className="p-3.5 rounded-2xl bg-[#08121f] border-2 border-amber-900/70 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-[#08121f] border-2 border-amber-900/70 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
                 <div className="flex items-center justify-between pb-1.5 border-b border-amber-900/40">
                   <div className="flex items-center gap-2">
                     {selectedAnswer && selectedAnswer.id === currentQ.target.id ? (
@@ -1039,7 +1039,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
             )}
 
             {/* 5. Mechanical Naval Telegraph Keys (4 Country Answer Choices) */}
-            <div className="grid grid-cols-2 gap-2.5 pt-1">
+            <div className="grid grid-cols-2 gap-2 sm:gap-2.5 pt-0.5">
               {currentQ.options.map((option, idx) => {
                 let btnStyle = 'bg-gradient-to-b from-[#14263e] to-[#0a1626] border-2 border-amber-500/80 text-white';
 
@@ -1061,7 +1061,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                       soundEngine.playTap();
                       handleChoice(option);
                     }}
-                    className={`telegraph-btn p-3 rounded-2xl text-left transition-all active:scale-[0.98] flex flex-col justify-between min-h-[74px] ${btnStyle}`}
+                    className={`telegraph-btn p-2.5 sm:p-3 rounded-2xl text-left transition-all active:scale-[0.98] flex flex-col justify-between min-h-[68px] sm:min-h-[72px] overflow-hidden ${btnStyle}`}
                   >
                     <div className="flex items-center justify-between w-full text-[9px] font-mono-code text-amber-400/90 pb-0.5 border-b border-amber-900/30">
                       <span className="font-bold flex items-center gap-1">
@@ -1073,14 +1073,14 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                       </span>
                     </div>
 
-                    <div className="font-bold text-sm leading-snug line-clamp-1 mt-1 text-slate-100">
+                    <div className="font-bold text-xs sm:text-sm leading-snug truncate mt-1 text-slate-100">
                       {option.country}
                     </div>
 
-                    <div className="text-[9px] font-mono-code text-slate-400 mt-0.5 flex items-center justify-between">
-                      <span>{option.continent}</span>
+                    <div className="text-[9px] font-mono-code text-slate-400 mt-0.5 flex items-center justify-between min-w-0">
+                      <span className="truncate">{option.continent}</span>
                       {isRevealed && option.id === currentQ.target.id && (
-                        <Check className="w-3 h-3 text-emerald-400 stroke-[3]" />
+                        <Check className="w-3 h-3 text-emerald-400 stroke-[3] shrink-0 ml-1" />
                       )}
                     </div>
                   </button>
@@ -1099,7 +1099,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
         {/* --- GAME OVER SUMMARY SCREEN: ADMIRALTY VOYAGE LOGBOOK --- */}
         {/* ============================================================ */}
         {gameOver && (
-          <div className="space-y-5 text-center animate-in zoom-in-95 duration-300">
+          <div className="w-full space-y-4 sm:space-y-5 text-center animate-in zoom-in-95 duration-300 py-2">
             {/* Header Title */}
             <div className="space-y-1">
               <span className="text-[9px] uppercase font-mono-code font-bold tracking-widest text-amber-400">
