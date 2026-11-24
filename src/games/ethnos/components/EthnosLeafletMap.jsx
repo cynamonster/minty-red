@@ -72,93 +72,34 @@ export const THEMES = {
 
 /**
  * Calculates a smooth, 2D Mercator flat flight radar arc between two coordinates.
- * - Flat map projection behavior: Does not compute spherical orthodromes that loop over the poles.
- * - Shortest path wrapping: Smoothly crosses the 180° date line across the Pacific without jagged slashes.
- * - Upward convex lift: Scales gently with distance (nearly straight for close guesses,
- *   subtle upward convex bow for intercontinental spans, capped at 8.5° max lift).
+ * Generates an unbroken array of [lat, lon] coordinates along a continuous trajectory.
+ * Scales gently with distance (nearly straight for close guesses, subtle upward convex bow
+ * for intercontinental spans, capped at 8.5° max lift).
  */
-function calculateFlatFlightArc(lat1, lon1, lat2, lon2, numPoints = 40) {
-  // Normalize input longitudes to [-180, 180]
-  lon1 = ((((lon1 + 180) % 360) + 360) % 360) - 180;
-  lon2 = ((((lon2 + 180) % 360) + 360) % 360) - 180;
-
-  let dLon = lon2 - lon1;
-  while (dLon > 180) dLon -= 360;
-  while (dLon < -180) dLon += 360;
-
+function calculateFlatFlightArc(lat1, lon1, lat2, lon2, numPoints = 45) {
   const dLat = lat2 - lat1;
+  const dLon = lon2 - lon1;
   const dist = Math.sqrt(dLon * dLon + dLat * dLat);
 
   if (dist < 0.1) {
-    return [[[lat1, lon1], [lat2, lon2]]];
+    return [[lat1, lon1], [lat2, lon2]];
   }
 
-  // Distance-scaled upward convex bow:
-  // Short distance -> virtually zero lift (nearly ruler-straight line)
-  // Intercontinental spans -> gentle shallow lift capped at max 8.5 degrees of latitude
   const lift = Math.min(8.5, dist * 0.08);
-
   const midLat = (lat1 + lat2) / 2 + lift;
-  const targetLon = lon1 + dLon;
-  const midLon = (lon1 + targetLon) / 2;
+  const midLon = (lon1 + lon2) / 2;
 
-  // Generate intermediate points along the quadratic curve
-  const rawPoints = [];
+  const points = [];
   for (let i = 0; i <= numPoints; i++) {
     const t = i / numPoints;
     const lat =
       (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * midLat + t * t * lat2;
     const lon =
-      (1 - t) * (1 - t) * lon1 + 2 * (1 - t) * t * midLon + t * t * targetLon;
-    rawPoints.push([lat, lon]);
+      (1 - t) * (1 - t) * lon1 + 2 * (1 - t) * t * midLon + t * t * lon2;
+    points.push([lat, lon]);
   }
 
-  // Check if trajectory crosses the 180° International Date Line
-  const crossesDateLine = rawPoints.some(([, lon]) => lon > 180 || lon < -180);
-
-  if (!crossesDateLine) {
-    return [rawPoints];
-  }
-
-  // Split into two clean segments at 180° / -180° to avoid jagged slashes across the map
-  const seg1 = [];
-  const seg2 = [];
-  let switched = false;
-
-  for (let i = 0; i < rawPoints.length; i++) {
-    const [lat, lon] = rawPoints[i];
-    if (dLon > 0) {
-      if (lon <= 180) {
-        seg1.push([lat, lon]);
-      } else {
-        if (!switched && seg1.length > 0) {
-          const prev = seg1[seg1.length - 1];
-          const frac = (180 - prev[1]) / (lon - prev[1]);
-          const boundaryLat = prev[0] + frac * (lat - prev[0]);
-          seg1.push([boundaryLat, 180]);
-          seg2.push([boundaryLat, -180]);
-          switched = true;
-        }
-        seg2.push([lat, lon - 360]);
-      }
-    } else {
-      if (lon >= -180) {
-        seg1.push([lat, lon]);
-      } else {
-        if (!switched && seg1.length > 0) {
-          const prev = seg1[seg1.length - 1];
-          const frac = (-180 - prev[1]) / (lon - prev[1]);
-          const boundaryLat = prev[0] + frac * (lat - prev[0]);
-          seg1.push([boundaryLat, -180]);
-          seg2.push([boundaryLat, 180]);
-          switched = true;
-        }
-        seg2.push([lat, lon + 360]);
-      }
-    }
-  }
-
-  return [seg1, seg2];
+  return points;
 }
 
 /**
@@ -472,7 +413,7 @@ export function EthnosLeafletMap({
     };
   }, []);
 
-  // 2. Render & Update Player Guess Marker
+  // 2. Render & Update Player Guess Marker across all world copies
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !markersLayerGroupRef.current) return;
@@ -481,13 +422,17 @@ export function EthnosLeafletMap({
       if (guessMarkerRef.current) {
         markersLayerGroupRef.current.removeLayer(guessMarkerRef.current);
       }
-      const marker = L.marker([userPin.lat, userPin.lng], {
-        icon: createPinIcon(pinStyle, currentTheme.crosshair),
-        zIndexOffset: 1000,
-        interactive: false,
+      const markerGroup = L.layerGroup();
+      [-360, 0, 360].forEach((offset) => {
+        const marker = L.marker([userPin.lat, userPin.lng + offset], {
+          icon: createPinIcon(pinStyle, currentTheme.crosshair),
+          zIndexOffset: 1000,
+          interactive: false,
+        });
+        markerGroup.addLayer(marker);
       });
-      marker.addTo(markersLayerGroupRef.current);
-      guessMarkerRef.current = marker;
+      markerGroup.addTo(markersLayerGroupRef.current);
+      guessMarkerRef.current = markerGroup;
     } else {
       if (guessMarkerRef.current) {
         markersLayerGroupRef.current.removeLayer(guessMarkerRef.current);
@@ -522,62 +467,85 @@ export function EthnosLeafletMap({
 
     // When round is locked, reveal target homeland and phenotype zones
     if (isLocked && polygonData) {
-      // 1. Render Periphery Zone (Dull) Polygons
+      // 1. Render Periphery Zone (Dull) Polygons on all world copies
       if (polygonData.dull && polygonData.dull.length > 0) {
-        const peripheryLatLngs = polygonData.dull.map((ring) =>
-          ring.map(([lng, lat]) => [lat, lng])
-        );
-        const peripheryPolygon = L.polygon(peripheryLatLngs, {
-          color: currentTheme.periStroke,
-          weight: currentTheme.periWidth,
-          fillColor: currentTheme.periFill,
-          fillOpacity: currentTheme.periOpacity,
-          className: 'retro-periphery-polygon',
-          interactive: false,
-          dashArray: '6, 6',
+        [-360, 0, 360].forEach((offset) => {
+          polygonData.dull.forEach((ring) => {
+            const peripheryLatLngs = ring.map(([lng, lat]) => [lat, lng + offset]);
+            const peripheryPolygon = L.polygon(peripheryLatLngs, {
+              color: currentTheme.periStroke,
+              weight: currentTheme.periWidth,
+              fillColor: currentTheme.periFill,
+              fillOpacity: currentTheme.periOpacity,
+              className: 'retro-periphery-polygon',
+              interactive: false,
+              dashArray: '6, 6',
+            });
+            peripheryLayerGroupRef.current.addLayer(peripheryPolygon);
+          });
         });
-        peripheryLayerGroupRef.current.addLayer(peripheryPolygon);
       }
 
-      // 2. Render Core Zone (Bright) Polygons
+      // 2. Render Core Zone (Bright) Polygons on all world copies
       if (polygonData.bright && polygonData.bright.length > 0) {
-        const coreLatLngs = polygonData.bright.map((ring) =>
-          ring.map(([lng, lat]) => [lat, lng])
-        );
-        const corePolygon = L.polygon(coreLatLngs, {
-          color: currentTheme.coreStroke,
-          weight: currentTheme.coreWidth,
-          fillColor: currentTheme.coreFill,
-          fillOpacity: currentTheme.coreOpacity,
-          className: 'retro-core-polygon',
-          interactive: false,
+        [-360, 0, 360].forEach((offset) => {
+          polygonData.bright.forEach((ring) => {
+            const coreLatLngs = ring.map(([lng, lat]) => [lat, lng + offset]);
+            const corePolygon = L.polygon(coreLatLngs, {
+              color: currentTheme.coreStroke,
+              weight: currentTheme.coreWidth,
+              fillColor: currentTheme.coreFill,
+              fillOpacity: currentTheme.coreOpacity,
+              className: 'retro-core-polygon',
+              interactive: false,
+            });
+            coreLayerGroupRef.current.addLayer(corePolygon);
+          });
         });
-        coreLayerGroupRef.current.addLayer(corePolygon);
       }
 
+      // Determine continuous reference coordinates for seamless antimeridian & Pacific crossing
+      let finalPinLng = null;
+      let finalTargetLng = null;
       let arcPoints = null;
 
-      // 3. Render Target Bullseye Marker
-      if (targetCoords) {
-        const targetMarker = L.marker([targetCoords.lat, targetCoords.lng], {
-          icon: createBullseyeIcon(currentTheme.bullseye, targetCoords.isInsideCore),
-          zIndexOffset: 950,
-          interactive: false,
-        });
-        markersLayerGroupRef.current.addLayer(targetMarker);
-        targetMarkerRef.current = targetMarker;
+      if (userPin && targetCoords) {
+        const pinLng = userPin.lng;
+        let dLng = targetCoords.lng - pinLng;
+        while (dLng > 180) dLng -= 360;
+        while (dLng < -180) dLng += 360;
+        const targetContLng = pinLng + dLng;
 
-        // 4. Render Flat Flight Trajectory Arc if guess is outside the core
-        if (userPin && !targetCoords.isInsideCore) {
-          const arcSegments = calculateFlatFlightArc(
+        // Shift midLng into [-180, 180] for ideal Leaflet viewport centering
+        let midLng = (pinLng + targetContLng) / 2;
+        let worldShift = 0;
+        while (midLng > 180) {
+          midLng -= 360;
+          worldShift -= 360;
+        }
+        while (midLng < -180) {
+          midLng += 360;
+          worldShift += 360;
+        }
+
+        finalPinLng = pinLng + worldShift;
+        finalTargetLng = targetContLng + worldShift;
+
+        // 3. Render continuous flight trajectory arc if guess is outside the core
+        if (!targetCoords.isInsideCore) {
+          arcPoints = calculateFlatFlightArc(
             userPin.lat,
-            userPin.lng,
+            finalPinLng,
             targetCoords.lat,
-            targetCoords.lng,
+            finalTargetLng,
             45
           );
-          arcPoints = arcSegments.flat();
-          const geodesicLine = L.polyline(arcSegments, {
+
+          // Render across world copies so arc is never cut off
+          const polylineRings = [-360, 0, 360].map((offset) =>
+            arcPoints.map(([lat, lon]) => [lat, lon + offset])
+          );
+          const geodesicLine = L.polyline(polylineRings, {
             color: currentTheme.geodesic,
             weight: currentTheme.geodesicWidth,
             className: 'retro-geodesic-line',
@@ -586,26 +554,93 @@ export function EthnosLeafletMap({
           markersLayerGroupRef.current.addLayer(geodesicLine);
           geodesicLineRef.current = geodesicLine;
         }
-      }
-
-      // 5. Smooth Animated Auto-Framing: ensures pin, phenotype zone, and trajectory arc stay in full view
-      const bounds = L.latLngBounds();
-      if (userPin) {
-        bounds.extend([userPin.lat, userPin.lng]);
-      }
-      if (polygonData.bbox) {
-        const [minLng, minLat, maxLng, maxLat] = polygonData.bbox;
-        bounds.extend([minLat, minLng]);
-        bounds.extend([maxLat, maxLng]);
       } else if (targetCoords) {
-        bounds.extend([targetCoords.lat, targetCoords.lng]);
+        finalTargetLng = targetCoords.lng;
+      } else if (userPin) {
+        finalPinLng = userPin.lng;
       }
 
-      // Extend bounds with intermediate arc points to guarantee the entire line stays visible
+      // 4. Render Target Bullseye Marker across world copies
+      if (targetCoords && finalTargetLng != null) {
+        const targetGroup = L.layerGroup();
+        [-360, 0, 360].forEach((offset) => {
+          const targetMarker = L.marker([targetCoords.lat, finalTargetLng + offset], {
+            icon: createBullseyeIcon(currentTheme.bullseye, targetCoords.isInsideCore),
+            zIndexOffset: 950,
+            interactive: false,
+          });
+          targetGroup.addLayer(targetMarker);
+        });
+        markersLayerGroupRef.current.addLayer(targetGroup);
+        targetMarkerRef.current = targetGroup;
+      }
+
+      // 5. Smooth Animated Auto-Framing: fits the guess pin and core/periphery snugly without full-world zoom out
+      const bounds = L.latLngBounds();
+
+      if (userPin && finalPinLng != null) {
+        bounds.extend([userPin.lat, finalPinLng]);
+      }
+
+      if (targetCoords && finalTargetLng != null) {
+        bounds.extend([targetCoords.lat, finalTargetLng]);
+      }
+
+      // Extend bounds with intermediate arc points to guarantee the flight line stays visible
       if (arcPoints && arcPoints.length > 0) {
-        for (let i = 0; i < arcPoints.length; i += 3) {
+        for (let i = 0; i < arcPoints.length; i += 2) {
           bounds.extend(arcPoints[i]);
         }
+      }
+
+      // Calculate distance between guess and target to scope the relevant homeland core/periphery rings
+      let guessDistKm = 0;
+      if (userPin && targetCoords && finalPinLng != null && finalTargetLng != null) {
+        const dLat = (userPin.lat - targetCoords.lat) * 111;
+        const avgLatRad = ((userPin.lat + targetCoords.lat) / 2) * (Math.PI / 180);
+        const dLng = (finalPinLng - finalTargetLng) * 111 * Math.cos(avgLatRad);
+        guessDistKm = Math.sqrt(dLat * dLat + dLng * dLng);
+      }
+
+      // Scope core and periphery rings relevant to the target and guess framing
+      const maxRingRadiusKm = Math.max(guessDistKm * 1.25, 2000);
+      const targetRefLng = finalTargetLng != null ? finalTargetLng : 0;
+      const targetRefLat = targetCoords ? targetCoords.lat : 0;
+
+      const includeRingInBounds = (ring) => {
+        if (!ring || ring.length === 0) return;
+        let ringSumLat = 0;
+        let ringSumLng = 0;
+        const contPoints = ring.map(([lng, lat]) => {
+          let d = lng - targetRefLng;
+          while (d > 180) d -= 360;
+          while (d < -180) d += 360;
+          const cLng = targetRefLng + d;
+          ringSumLat += lat;
+          ringSumLng += cLng;
+          return [lat, cLng];
+        });
+
+        const ringCenterLat = ringSumLat / ring.length;
+        const ringCenterLng = ringSumLng / ring.length;
+
+        const dLatKm = (ringCenterLat - targetRefLat) * 111;
+        const dLngKm =
+          (ringCenterLng - targetRefLng) *
+          111 *
+          Math.cos(targetRefLat * (Math.PI / 180));
+        const distToTarget = Math.sqrt(dLatKm * dLatKm + dLngKm * dLngKm);
+
+        if (distToTarget <= maxRingRadiusKm) {
+          contPoints.forEach((pt) => bounds.extend(pt));
+        }
+      };
+
+      if (polygonData?.bright) {
+        polygonData.bright.forEach(includeRingInBounds);
+      }
+      if (polygonData?.dull) {
+        polygonData.dull.forEach(includeRingInBounds);
       }
 
       if (bounds.isValid()) {
@@ -615,8 +650,8 @@ export function EthnosLeafletMap({
           if (!mapRef.current) return;
           mapRef.current.invalidateSize({ animate: false });
           mapRef.current.flyToBounds(bounds, {
-            paddingTopLeft: [36, 36],
-            paddingBottomRight: [36, 52],
+            paddingTopLeft: [40, 40],
+            paddingBottomRight: [40, 56],
             maxZoom: 6,
             duration: 0.8,
             easeLinearity: 0.25,

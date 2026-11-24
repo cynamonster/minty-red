@@ -26,7 +26,6 @@ import {
 } from './engine/physics';
 import { NavBar } from '../../shared/components/NavBar';
 import { ConfettiCanvas } from '../../shared/components/ConfettiCanvas';
-import { NextGameDrawer } from '../../shared/components/NextGameDrawer';
 import { AdBanner } from '../../shared/components/AdBanner';
 import { soundEngine } from '../../shared/audio/soundEngine';
 import {
@@ -1613,9 +1612,6 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
             <div className="pt-1">
               <AdBanner game="orbitdrop" onSelectGame={onSelectGame} />
             </div>
-
-            {/* More Games in Suite */}
-            <NextGameDrawer currentGameSlug="orbitdrop" onSelectGame={onSelectGame} />
           </div>
         )}
       </div>

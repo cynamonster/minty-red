@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SUBWAY_DATASET, getDailyMetroQuestions } from './datasets/subways';
-import { NavBar } from '../../shared/components/NavBar';
-import { ConfettiCanvas } from '../../shared/components/ConfettiCanvas';
-import { NextGameDrawer } from '../../shared/components/NextGameDrawer';
+import { GameContainer } from '../../shared/components/GameContainer';
 import { AdBanner } from '../../shared/components/AdBanner';
 import { soundEngine } from '../../shared/audio/soundEngine';
 import { getDailySeed, saveGameScore, getGameStats } from '../../shared/storage/playerStorage';
@@ -184,13 +182,17 @@ export function MetroGame({ onHome, onSelectGame, challengeCode }) {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#050a18] text-white flex flex-col justify-between font-sans selection:bg-cyan-500/30">
-      <NavBar onHome={onHome} />
-      <ConfettiCanvas active={showConfetti} />
-
+    <GameContainer
+      title="METRO"
+      subtitle="Transit Topology Reflex"
+      streak={stats.currentStreak}
+      onHome={onHome}
+      showConfetti={showConfetti}
+      className="bg-[#050a18] text-white selection:bg-cyan-500/30"
+    >
       {/* --- MENU STATE --- */}
       {gameState === 'menu' && (
-        <main className="flex-1 flex flex-col items-center justify-center px-4 py-8 max-w-md mx-auto text-center">
+        <div className="flex-1 flex flex-col items-center justify-center py-4 text-center">
           <div className="relative mb-6">
             <div className="w-24 h-24 rounded-3xl bg-cyan-950/40 border border-cyan-500/40 flex items-center justify-center shadow-[0_0_40px_rgba(0,240,255,0.25)]">
               <svg className="w-14 h-14" viewBox="0 0 100 100" fill="none">
@@ -240,12 +242,12 @@ export function MetroGame({ onHome, onSelectGame, challengeCode }) {
             <Zap className="w-5 h-5 fill-current" />
             START DAILY COMMUTE
           </button>
-        </main>
+        </div>
       )}
 
       {/* --- PLAYING STATE --- */}
       {gameState === 'playing' && (
-        <main className="flex-1 flex flex-col max-w-lg mx-auto w-full px-4 py-3 justify-between">
+        <div className="flex-1 flex flex-col w-full py-1 justify-between">
           {/* Header Bar */}
           <div className="flex items-center justify-between gap-4 mb-2">
             <div className="flex items-center gap-2">
@@ -365,12 +367,12 @@ export function MetroGame({ onHome, onSelectGame, challengeCode }) {
               );
             })}
           </div>
-        </main>
+        </div>
       )}
 
       {/* --- ROUND SUMMARY MODAL / DRAWER --- */}
       {gameState === 'round_summary' && (
-        <main className="flex-1 flex flex-col max-w-md mx-auto w-full px-4 py-6 justify-center">
+        <div className="flex-1 flex flex-col w-full py-4 justify-center">
           {(() => {
             const lastRound = roundScores[roundScores.length - 1];
             return (
@@ -443,12 +445,12 @@ export function MetroGame({ onHome, onSelectGame, challengeCode }) {
               </div>
             );
           })()}
-        </main>
+        </div>
       )}
 
       {/* --- GAME OVER STATE --- */}
       {gameState === 'game_over' && (
-        <main className="flex-1 flex flex-col max-w-md mx-auto w-full px-4 py-6 justify-center text-center">
+        <div className="flex-1 flex flex-col w-full py-4 justify-center text-center">
           <div className="bg-[#0b1528] border border-cyan-500/40 rounded-3xl p-6 shadow-[0_0_40px_rgba(0,240,255,0.15)]">
             <div className="w-20 h-20 rounded-3xl mx-auto mb-4 flex items-center justify-center bg-gradient-to-tr from-cyan-500 to-blue-600 text-black shadow-[0_0_30px_rgba(0,240,255,0.4)]">
               <Trophy className="w-10 h-10" />
@@ -508,13 +510,11 @@ export function MetroGame({ onHome, onSelectGame, challengeCode }) {
               </button>
             </div>
           </div>
-
-          <NextGameDrawer currentGameSlug="metro" onSelectGame={onSelectGame} />
-        </main>
+        </div>
       )}
 
       <AdBanner />
-    </div>
+    </GameContainer>
   );
 }
 export default MetroGame;

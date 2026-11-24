@@ -4,9 +4,7 @@ import {
   getClosestPointAndDistance,
   calculateEthnoGuessrScore,
 } from './utils/geoJsonScoring';
-import { NavBar } from '../../shared/components/NavBar';
-import { ConfettiCanvas } from '../../shared/components/ConfettiCanvas';
-import { NextGameDrawer } from '../../shared/components/NextGameDrawer';
+import { GameContainer } from '../../shared/components/GameContainer';
 import { AdBanner } from '../../shared/components/AdBanner';
 import { EthnosLeafletMap } from './components/EthnosLeafletMap';
 import { soundEngine } from '../../shared/audio/soundEngine';
@@ -395,15 +393,14 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
   // MENU
   if (mode === 'menu') {
     return (
-      <div className="min-h-[100dvh] w-full flex flex-col bg-slate-950 text-slate-100 select-none">
-        <NavBar
-          title="Ethnos"
-          subtitle="Micro Ethnoguesser"
-          streak={stats.currentStreak}
-          onHome={onHome}
-        />
-
-        <main className="flex-1 w-full max-w-md mx-auto px-4 py-6 flex flex-col items-center justify-between">
+      <GameContainer
+        title="Ethnos"
+        subtitle="Micro Ethnoguesser"
+        streak={stats.currentStreak}
+        onHome={onHome}
+        className="bg-slate-950 select-none"
+      >
+        <div className="flex-1 w-full flex flex-col items-center justify-between py-4">
           <div className="w-full text-center mt-2">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold mb-3">
               <Target className="w-3.5 h-3.5 text-amber-400" />
@@ -481,8 +478,8 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
               <div className="text-lg font-black text-white">{stats.gamesPlayed}</div>
             </div>
           </div>
-        </main>
-      </div>
+        </div>
+      </GameContainer>
     );
   }
 
@@ -494,16 +491,15 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
         : 0;
 
     return (
-      <div className="min-h-[100dvh] w-full flex flex-col bg-slate-950 text-slate-100 select-none">
-        <ConfettiCanvas active={showConfetti} />
-        <NavBar
-          title="Ethnos"
-          subtitle="Match Summary"
-          streak={stats.currentStreak}
-          onHome={() => setMode('menu')}
-        />
-
-        <main className="flex-1 w-full max-w-md mx-auto px-4 py-4 flex flex-col items-center justify-between">
+      <GameContainer
+        title="Ethnos"
+        subtitle="Match Summary"
+        streak={stats.currentStreak}
+        onHome={() => setMode('menu')}
+        showConfetti={showConfetti}
+        className="bg-slate-950 select-none"
+      >
+        <div className="flex-1 w-full flex flex-col items-center justify-between py-2">
           <div className="w-full text-center mt-2">
             <h2 className="text-2xl font-black text-white uppercase tracking-tight">
               {totalScore >= 20000
@@ -585,8 +581,6 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
             <AdBanner game="ethnos" onSelectGame={onSelectGame} />
           </div>
 
-          <NextGameDrawer currentGameSlug="ethnos" onSelectGame={onSelectGame} />
-
           <button
             onClick={() => setMode('menu')}
             className="w-full mt-3 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-[0.98] border border-slate-800 font-bold text-xs text-slate-300 flex items-center justify-center gap-2 transition-all"
@@ -594,8 +588,8 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
             <RotateCcw className="w-4 h-4" />
             Play Again / Choose Mode
           </button>
-        </main>
-      </div>
+        </div>
+      </GameContainer>
     );
   }
 
@@ -604,15 +598,15 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
     selectedGender === 'male' ? currentQ?.imageMale : currentQ?.imageFemale;
 
   return (
-    <div className="min-h-[100dvh] w-full flex flex-col bg-slate-950 text-slate-100 select-none pb-4">
-      <NavBar
-        title="Ethnos"
-        subtitle={`Round ${currentIndex + 1} of ${questions.length} • ${totalScore.toLocaleString()} pts`}
-        streak={stats.currentStreak}
-        onHome={() => setMode('menu')}
-      />
-
-      <main className="flex-1 w-full max-w-md mx-auto px-3 py-2 flex flex-col items-center justify-between min-h-0">
+    <GameContainer
+      title="Ethnos"
+      subtitle={`Round ${currentIndex + 1} of ${questions.length} • ${totalScore.toLocaleString()} pts`}
+      streak={stats.currentStreak}
+      onHome={() => setMode('menu')}
+      className="bg-slate-950 select-none"
+      viewboxClassName="px-3 py-2"
+    >
+      <div className="flex-1 w-full flex flex-col items-center justify-between min-h-0">
         {/* Facial Composite Inspection Card with Female on Left, Text in Middle, Male on Right */}
         <div className="w-full p-2.5 rounded-2xl bg-slate-900/90 border border-slate-800/90 shadow-xl flex items-center justify-between gap-2.5 relative flex-shrink-0">
           {/* Female Composite on Left */}
@@ -947,7 +941,7 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
         <div className="w-full pt-2">
           <AdBanner game="ethnos" onSelectGame={onSelectGame} />
         </div>
-      </main>
-    </div>
+      </div>
+    </GameContainer>
   );
 }

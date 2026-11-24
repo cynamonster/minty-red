@@ -55,10 +55,18 @@ export function isPointInAnyPolygon(lat, lng, polygons) {
  * Projects a point onto a line segment [p1, p2] where p = [lng, lat]
  */
 function closestPointOnSegment(lat, lng, p1, p2) {
+  let dLng = lng - p1[0];
+  while (dLng > 180) dLng -= 360;
+  while (dLng < -180) dLng += 360;
+
+  let segDLng = p2[0] - p1[0];
+  while (segDLng > 180) segDLng -= 360;
+  while (segDLng < -180) segDLng += 360;
+
   const cosLat = Math.cos((lat * Math.PI) / 180);
-  const x = (lng - p1[0]) * cosLat;
+  const x = dLng * cosLat;
   const y = lat - p1[1];
-  const dx = (p2[0] - p1[0]) * cosLat;
+  const dx = segDLng * cosLat;
   const dy = p2[1] - p1[1];
   const lenSq = dx * dx + dy * dy;
 
@@ -67,9 +75,13 @@ function closestPointOnSegment(lat, lng, p1, p2) {
   }
 
   const t = Math.max(0, Math.min(1, (x * dx + y * dy) / lenSq));
+  let resultLng = p1[0] + t * segDLng;
+  while (resultLng > 180) resultLng -= 360;
+  while (resultLng < -180) resultLng += 360;
+
   return {
     lat: p1[1] + t * (p2[1] - p1[1]),
-    lng: p1[0] + t * (p2[0] - p1[0]),
+    lng: Math.round(resultLng * 1000) / 1000,
   };
 }
 

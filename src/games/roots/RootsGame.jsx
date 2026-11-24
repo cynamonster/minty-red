@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SURNAMES_DATASET } from './datasets/surnames';
-import { NavBar } from '../../shared/components/NavBar';
-import { ConfettiCanvas } from '../../shared/components/ConfettiCanvas';
-import { NextGameDrawer } from '../../shared/components/NextGameDrawer';
+import { GameContainer } from '../../shared/components/GameContainer';
 import { AdBanner } from '../../shared/components/AdBanner';
 import { VectorMap, calculateDistanceKm, calculateRoundScore } from '../../shared/components/VectorMap';
 import { soundEngine } from '../../shared/audio/soundEngine';
@@ -245,15 +243,14 @@ export function RootsGame({ onHome, onSelectGame, challengeCode }) {
   // MENU
   if (mode === 'menu') {
     return (
-      <div className="min-h-[100dvh] w-full flex flex-col bg-slate-950 text-slate-100 select-none">
-        <NavBar
-          title="Roots"
-          subtitle="Surname Origins"
-          streak={stats.currentStreak}
-          onHome={onHome}
-        />
-
-        <main className="flex-1 w-full max-w-md mx-auto px-4 py-6 flex flex-col items-center justify-between">
+      <GameContainer
+        title="Roots"
+        subtitle="Surname Origins"
+        streak={stats.currentStreak}
+        onHome={onHome}
+        className="bg-slate-950 select-none"
+      >
+        <div className="flex-1 w-full flex flex-col items-center justify-between py-4">
           <div className="w-full text-center mt-2">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold mb-3">
               <Target className="w-3.5 h-3.5 text-emerald-400" />
@@ -335,8 +332,8 @@ export function RootsGame({ onHome, onSelectGame, challengeCode }) {
           <div className="w-full pt-3">
             <AdBanner game="roots" onSelectGame={onSelectGame} />
           </div>
-        </main>
-      </div>
+        </div>
+      </GameContainer>
     );
   }
 
@@ -348,16 +345,15 @@ export function RootsGame({ onHome, onSelectGame, challengeCode }) {
         : 0;
 
     return (
-      <div className="min-h-[100dvh] w-full flex flex-col bg-slate-950 text-slate-100 select-none">
-        <ConfettiCanvas active={showConfetti} />
-        <NavBar
-          title="Roots"
-          subtitle="Match Summary"
-          streak={stats.currentStreak}
-          onHome={() => setMode('menu')}
-        />
-
-        <main className="flex-1 w-full max-w-md mx-auto px-4 py-4 flex flex-col items-center justify-between">
+      <GameContainer
+        title="Roots"
+        subtitle="Match Summary"
+        streak={stats.currentStreak}
+        onHome={() => setMode('menu')}
+        showConfetti={showConfetti}
+        className="bg-slate-950 select-none"
+      >
+        <div className="flex-1 w-full flex flex-col items-center justify-between py-2">
           <div className="w-full text-center mt-2">
             <h2 className="text-2xl font-black text-white uppercase tracking-tight">
               {totalScore >= 20000
@@ -438,8 +434,6 @@ export function RootsGame({ onHome, onSelectGame, challengeCode }) {
             <AdBanner game="roots" onSelectGame={onSelectGame} />
           </div>
 
-          <NextGameDrawer currentGameSlug="roots" onSelectGame={onSelectGame} />
-
           <button
             onClick={() => setMode('menu')}
             className="w-full mt-3 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-[0.98] border border-slate-800 font-bold text-xs text-slate-300 flex items-center justify-center gap-2 transition-all"
@@ -447,22 +441,21 @@ export function RootsGame({ onHome, onSelectGame, challengeCode }) {
             <RotateCcw className="w-4 h-4" />
             Play Again / Choose Mode
           </button>
-        </main>
-      </div>
+        </div>
+      </GameContainer>
     );
   }
 
   // ACTIVE GAMEPLAY
   return (
-    <div className="min-h-[100dvh] w-full flex flex-col bg-slate-950 text-slate-100 select-none pb-4">
-      <NavBar
-        title="Roots"
-        subtitle={`Round ${currentIndex + 1} of ${questions.length} • ${totalScore.toLocaleString()} pts`}
-        streak={stats.currentStreak}
-        onHome={() => setMode('menu')}
-      />
-
-      <main className="flex-1 w-full max-w-md mx-auto px-4 py-3 flex flex-col justify-between items-center gap-3">
+    <GameContainer
+      title="Roots"
+      subtitle={`Round ${currentIndex + 1} of ${questions.length} • ${totalScore.toLocaleString()} pts`}
+      streak={stats.currentStreak}
+      onHome={() => setMode('menu')}
+      className="bg-slate-950 select-none"
+    >
+      <div className="flex-1 w-full flex flex-col justify-between items-center gap-2">
         {/* Surname Hero Inspection Card */}
         <div className="w-full p-4 rounded-2xl bg-slate-900/90 border border-slate-800/90 shadow-xl text-center relative overflow-hidden backdrop-blur">
           <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-1 flex items-center justify-center gap-1">
@@ -569,7 +562,7 @@ export function RootsGame({ onHome, onSelectGame, challengeCode }) {
             <AdBanner game="roots" onSelectGame={onSelectGame} />
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </GameContainer>
   );
 }

@@ -4,9 +4,7 @@ import {
   generateQuestion,
   generateGameRound,
 } from './datasets/flags';
-import { NavBar } from '../../shared/components/NavBar';
-import { ConfettiCanvas } from '../../shared/components/ConfettiCanvas';
-import { NextGameDrawer } from '../../shared/components/NextGameDrawer';
+import { GameContainer } from '../../shared/components/GameContainer';
 import { AdBanner } from '../../shared/components/AdBanner';
 import { soundEngine } from '../../shared/audio/soundEngine';
 import {
@@ -796,22 +794,17 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
   };
 
   return (
-    <div className="w-full min-h-[100dvh] bg-[#040810] text-slate-100 flex flex-col justify-start selection:bg-amber-500 selection:text-black font-naval overflow-x-hidden">
-      <ConfettiCanvas active={showConfetti} />
-
-      {/* Top Navbar */}
-      <NavBar
-        title="FLAGSHIP"
-        subtitle="Admiralty Signal Reflex"
-        streak={stats.currentStreak}
-        onHome={onHome}
-      />
-
-      {/* Main Content Area */}
-      <main className="w-full max-w-md mx-auto px-4 sm:px-5 pt-3 pb-8 flex-1 flex flex-col justify-start gap-3">
-        {/* ============================================================ */}
-        {/* --- MENU SCREEN: COMMANDER'S BRIDGE TERMINAL --- */}
-        {/* ============================================================ */}
+    <GameContainer
+      title="FLAGSHIP"
+      subtitle="Admiralty Signal Reflex"
+      streak={stats.currentStreak}
+      onHome={onHome}
+      showConfetti={showConfetti}
+      className="bg-[#040810] selection:bg-amber-500 selection:text-black font-naval"
+    >
+      {/* ============================================================ */}
+      {/* --- MENU SCREEN: COMMANDER'S BRIDGE TERMINAL --- */}
+      {/* ============================================================ */}
         {mode === 'menu' && (
           <div className="w-full space-y-4 sm:space-y-5 text-center animate-in fade-in duration-300 my-auto py-2">
             {/* Hero Brass Compass Emblem */}
@@ -914,9 +907,6 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
             <div className="pt-2">
               <AdBanner game="flagship" onSelectGame={onSelectGame} />
             </div>
-
-            {/* Next Game Drawer in Menu */}
-            <NextGameDrawer currentGameSlug="flagship" onSelectGame={onSelectGame} />
           </div>
         )}
 
@@ -925,14 +915,14 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
         {/* ============================================================ */}
         {mode !== 'menu' && !gameOver && currentQ && (
           <div className="w-full space-y-3 animate-in fade-in duration-200">
-            {/* Top Bar: Round Counter, Style Toggle & Score */}
-            <div className="w-full flex items-center justify-between text-xs px-1">
-              <div className="flex items-center gap-1.5 shrink-0 min-w-0">
-                <span className="font-bold tracking-wide text-amber-300 text-xs sm:text-sm uppercase font-mono-code truncate">
+            {/* Top Bar HUD: Station Counter, Style Toggle & Score */}
+            <div className="w-full flex items-center justify-between text-xs py-1 px-1">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="font-bold tracking-wider text-amber-300 text-xs sm:text-sm uppercase font-mono-code whitespace-nowrap">
                   STATION {currentIndex + 1}/{questions.length}
                 </span>
                 {streak >= 2 && (
-                  <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[10px] font-mono-code font-bold flex items-center gap-1 animate-pulse shrink-0">
+                  <span className="px-1.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[9px] font-mono-code font-bold flex items-center gap-1 shrink-0 animate-pulse">
                     <Flame className="w-3 h-3 fill-amber-400" />
                     {streak}x
                   </span>
@@ -946,7 +936,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                     soundEngine.playTap();
                     setDisplayStyle((prev) => (prev === 'ensign' ? 'spyglass' : 'ensign'));
                   }}
-                  className="px-2 py-1 rounded-lg bg-[#07111e] border border-amber-900/60 hover:border-amber-400/80 text-amber-300 text-[10px] font-mono-code flex items-center gap-1 shadow transition-colors active:scale-95"
+                  className="px-2 py-0.5 rounded-lg bg-[#07111e] border border-amber-900/60 hover:border-amber-400/80 text-amber-300 text-[10px] font-mono-code flex items-center gap-1 shadow transition-colors active:scale-95"
                   title="Toggle Swatch Style (Ensign / Spyglass)"
                 >
                   {displayStyle === 'ensign' ? (
@@ -1225,13 +1215,9 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
             <div className="pt-1">
               <AdBanner game="flagship" onSelectGame={onSelectGame} />
             </div>
-
-            {/* Next Game Drawer */}
-            <NextGameDrawer currentGameSlug="flagship" onSelectGame={onSelectGame} />
           </div>
         )}
-      </main>
-    </div>
+    </GameContainer>
   );
 }
 

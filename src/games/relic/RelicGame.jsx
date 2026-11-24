@@ -7,9 +7,9 @@ import {
   calculateRelicScore,
   formatYear,
 } from './datasets/artifacts';
-import { VectorMap, calculateDistanceKm } from '../../shared/components/VectorMap';
-import { NavBar } from '../../shared/components/NavBar';
-import { ConfettiCanvas } from '../../shared/components/ConfettiCanvas';
+import { RelicLeafletMap } from './components/RelicLeafletMap';
+import { calculateDistanceKm } from '../../shared/components/VectorMap';
+import { GameContainer } from '../../shared/components/GameContainer';
 import { NextGameDrawer } from '../../shared/components/NextGameDrawer';
 import { AdBanner } from '../../shared/components/AdBanner';
 import { soundEngine } from '../../shared/audio/soundEngine';
@@ -341,15 +341,14 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
   // ----------------------------------------------------
   if (mode === 'menu') {
     return (
-      <div className="w-full max-w-md mx-auto min-h-[100dvh] flex flex-col justify-between p-4 bg-[#050a18] text-slate-100 select-none">
-        <NavBar
-          title="R.E.L.I.C."
-          subtitle="Temporal Restitution"
-          onHome={onHome}
-          streak={stats.currentStreak}
-        />
-
-        <div className="flex-1 flex flex-col justify-center items-center text-center px-2 py-6">
+      <GameContainer
+        title="R.E.L.I.C."
+        subtitle="Temporal Restitution"
+        onHome={onHome}
+        streak={stats.currentStreak}
+        className="bg-[#050a18] select-none"
+      >
+        <div className="flex-1 flex flex-col justify-center items-center text-center px-2 py-4">
           {/* Neon Vault Icon */}
           <div className="relative mb-4">
             <div className="w-20 h-20 rounded-2xl bg-cyan-950/40 border-2 border-cyan-400/50 flex items-center justify-center shadow-[0_0_30px_rgba(0,240,255,0.25)]">
@@ -413,7 +412,7 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
         </div>
 
         <AdBanner format="auto" />
-      </div>
+      </GameContainer>
     );
   }
 
@@ -424,16 +423,14 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
     const rank = getRank(totalScore);
 
     return (
-      <div className="w-full max-w-md mx-auto min-h-[100dvh] flex flex-col justify-between p-4 bg-[#050a18] text-slate-100 select-none relative">
-        <ConfettiCanvas active={showConfetti} />
-
-        <NavBar
-          title="R.E.L.I.C."
-          subtitle="Mission Debrief"
-          onHome={onHome}
-          streak={stats.currentStreak}
-        />
-
+      <GameContainer
+        title="R.E.L.I.C."
+        subtitle="Mission Debrief"
+        onHome={onHome}
+        streak={stats.currentStreak}
+        showConfetti={showConfetti}
+        className="bg-[#050a18] select-none"
+      >
         <div className="flex-1 flex flex-col justify-center items-center text-center px-2 py-4">
           <div className={`px-3 py-1 rounded-full bg-slate-900 border ${rank.border} text-xs font-mono font-bold ${rank.color} uppercase mb-2`}>
             {rank.tier}-Rank • {rank.title}
@@ -510,7 +507,7 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
 
         <NextGameDrawer currentGameSlug="relic" onSelectGame={onSelectGame} />
         <AdBanner format="auto" />
-      </div>
+      </GameContainer>
     );
   }
 
@@ -531,48 +528,26 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
   const timerProgress = (timeLeft / POD_DECOHERENCE_SECONDS) * 100;
 
   return (
-    <div className="w-full max-w-md mx-auto h-[100dvh] flex flex-col justify-between bg-[#050a18] text-slate-100 select-none overflow-hidden relative">
-      <ConfettiCanvas active={showConfetti} />
-
-      {/* 1. Header & Decoherence Progress Bar */}
-      <div className="w-full flex-shrink-0 z-20">
-        <header className="px-3 py-2 flex items-center justify-between border-b border-slate-800/80 bg-slate-950/60 backdrop-blur">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                soundEngine.playTap();
-                onHome();
-              }}
-              className="p-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-cyan-400"
-              title="Return to Hub"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-            </button>
-            <div>
-              <div className="text-xs font-black text-white tracking-wide uppercase flex items-center gap-1.5">
-                <span>R.E.L.I.C.</span>
-                <span className="text-[10px] text-cyan-400 font-mono font-bold">
-                  POD {currentIndex + 1}/{ROUNDS_PER_GAME}
-                </span>
-              </div>
-            </div>
+    <GameContainer
+      title="R.E.L.I.C."
+      subtitle={`POD ${currentIndex + 1}/${ROUNDS_PER_GAME} • ${totalScore.toLocaleString()} PTS`}
+      streak={stats.currentStreak}
+      onHome={onHome}
+      className="bg-[#050a18] select-none"
+      viewboxClassName="px-2 py-1"
+    >
+      {/* 1. Decoherence Timer & Progress Bar */}
+      <div className="w-full flex-shrink-0 mb-2">
+        <div className="flex items-center justify-between pb-1 px-1">
+          <div className={`px-2 py-0.5 rounded-full border text-[11px] font-mono font-bold flex items-center gap-1 ${timerColor}`}>
+            <Clock className="w-3 h-3" />
+            <span>{timeLeft}s</span>
           </div>
-
-          <div className="flex items-center gap-2">
-            {/* 45s Quantum Decoherence Timer */}
-            <div className={`px-2 py-0.5 rounded-full border text-[11px] font-mono font-bold flex items-center gap-1 ${timerColor}`}>
-              <Clock className="w-3 h-3" />
-              <span>{timeLeft}s</span>
-            </div>
-
-            <div className="text-xs font-mono font-bold text-white bg-slate-900/80 px-2 py-0.5 rounded-md border border-slate-800">
-              {totalScore.toLocaleString()} pts
-            </div>
+          <div className="text-[10px] font-mono font-bold text-cyan-300">
+            {timerProgress.toFixed(0)}% STABILITY
           </div>
-        </header>
-
-        {/* Decoherence Decay Bar */}
-        <div className="w-full h-1 bg-slate-900 overflow-hidden">
+        </div>
+        <div className="w-full h-1 bg-slate-900 rounded-full overflow-hidden">
           <div
             className={`h-full transition-all duration-1000 ${
               timeLeft <= 5 ? 'bg-rose-500' : timeLeft <= 15 ? 'bg-amber-400' : 'bg-cyan-400'
@@ -595,6 +570,7 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
             alt={activeRelic.name}
             className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
             loading="eager"
+            referrerPolicy="no-referrer"
           />
 
           {/* Top Info Overlay */}
@@ -630,24 +606,16 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
         </div>
       </div>
 
-      {/* 3. MIDDLE: Interactive Tactical Vector Map */}
+      {/* 3. MIDDLE: Interactive Tactical Leaflet Map */}
       <div className="flex-1 w-full relative px-3 py-1 flex flex-col min-h-0 z-0">
         <div className="relative w-full h-full rounded-xl overflow-hidden border border-cyan-500/30 bg-[#050a18] shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]">
-          <VectorMap
+          <RelicLeafletMap
             targetCoords={targetCoords}
             userPin={userPin}
             onPinChange={handlePinChange}
             isLocked={isLocked}
             className="w-full h-full"
           />
-
-          {/* Reticle Hint if unpinned */}
-          {!userPin && !isLocked && (
-            <div className="absolute top-2 left-2 pointer-events-none px-2 py-1 rounded bg-slate-950/70 border border-slate-800 text-[10px] font-mono text-cyan-300 flex items-center gap-1">
-              <Target className="w-3 h-3 animate-ping" />
-              <span>Tap map to mark cultural origin</span>
-            </div>
-          )}
         </div>
       </div>
 
@@ -782,6 +750,7 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
                 src={activeRelic.imageUrl}
                 alt={activeRelic.name}
                 className="w-full h-auto max-h-[50vh] object-contain"
+                referrerPolicy="no-referrer"
               />
             </div>
 
@@ -814,6 +783,6 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
           </button>
         </div>
       )}
-    </div>
+    </GameContainer>
   );
 }

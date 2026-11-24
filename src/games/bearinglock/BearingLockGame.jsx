@@ -10,9 +10,7 @@ import {
   getCompassHeading,
 } from './datasets/waypoints';
 import { CompassDial } from './components/CompassDial';
-import { NavBar } from '../../shared/components/NavBar';
-import { ConfettiCanvas } from '../../shared/components/ConfettiCanvas';
-import { NextGameDrawer } from '../../shared/components/NextGameDrawer';
+import { GameContainer } from '../../shared/components/GameContainer';
 import { AdBanner } from '../../shared/components/AdBanner';
 import { ReviewDrawer } from '../../shared/components/ReviewDrawer';
 import { soundEngine } from '../../shared/audio/soundEngine';
@@ -338,21 +336,19 @@ Play now: ${window.location.origin}/bearinglock`;
       : 0;
 
   return (
-    <div className="w-full max-w-md mx-auto flex flex-col min-h-screen bg-[#070d18] text-slate-100 relative pb-10">
-      {showConfetti && <ConfettiCanvas duration={4000} />}
-
-      <NavBar
-        title="BEARING LOCK"
-        subtitle="Tactile Compass Blitz"
-        streak={combo > 1 ? `${combo}x` : 0}
-        onHome={onHome}
-      />
-
+    <GameContainer
+      title="BEARING LOCK"
+      subtitle="Tactile Compass Blitz"
+      streak={combo > 1 ? `${combo}x` : 0}
+      onHome={onHome}
+      showConfetti={showConfetti}
+      className="bg-[#070d18]"
+    >
       {/* ──────────────────────────────────────────────
           SCREEN 1: MENU & MODE SELECT
       ────────────────────────────────────────────── */}
       {mode === 'menu' && (
-        <div className="flex-1 px-4 py-6 flex flex-col justify-between animate-fadeIn">
+        <div className="flex-1 py-4 flex flex-col justify-between animate-fadeIn">
           <div>
             {/* Hero Header */}
             <div className="text-center mb-6">
@@ -458,8 +454,6 @@ Play now: ${window.location.origin}/bearinglock`;
           <div className="w-full pt-2">
             <AdBanner game="bearinglock" onSelectGame={onSelectGame} />
           </div>
-
-          <NextGameDrawer currentGameSlug="bearinglock" onSelectGame={onSelectGame} />
         </div>
       )}
 
@@ -467,7 +461,7 @@ Play now: ${window.location.origin}/bearinglock`;
           SCREEN 2: ACTIVE FLIGHT NAVIGATION
       ────────────────────────────────────────────── */}
       {(mode === 'daily' || mode === 'blitz' || mode === 'challenge') && !gameOver && (
-        <div className="flex-1 px-4 py-3 flex flex-col justify-between animate-fadeIn">
+        <div className="flex-1 py-1 flex flex-col justify-between animate-fadeIn">
           {/* Top Mission HUD */}
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -741,13 +735,11 @@ Play now: ${window.location.origin}/bearinglock`;
           <div className="w-full pt-2">
             <AdBanner game="bearinglock" onSelectGame={onSelectGame} />
           </div>
-
-          <NextGameDrawer currentGameSlug="bearinglock" onSelectGame={onSelectGame} />
         </div>
       )}
 
       {/* Studio Review Drawer (dash.minty.red / ?review=true) */}
       <ReviewDrawer gameSlug="bearinglock" />
-    </div>
+    </GameContainer>
   );
 }
