@@ -198,6 +198,33 @@ class SoundEngine {
       osc.stop(t + 0.36);
     });
   }
+
+  playOrbitBonus() {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    // Ascending harmonic chime (E5 -> B5, 659.25Hz -> 987.77Hz) for immediate orbit bonus feedback
+    const notes = [659.25, 987.77];
+    notes.forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const t = now + idx * 0.055;
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, t);
+
+      gain.gain.setValueAtTime(0.16, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(t);
+      osc.stop(t + 0.24);
+    });
+  }
 }
 
 export const soundEngine = new SoundEngine();

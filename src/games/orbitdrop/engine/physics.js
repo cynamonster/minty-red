@@ -50,35 +50,177 @@ export const ORBIT_THEMES = {
   default: {
     id: 'default',
     name: 'Cosmic Void',
-    description: 'Deep navy void with radiant cyan orbit tracers',
-    probeColor: '#38bdf8',
-    probeCore: '#e0f2fe',
-    shadowColor: '#0ea5e9',
-    gridColor: 'rgba(56, 189, 248, 0.08)',
-    accentColor: '#38bdf8',
+    description: 'Deep navy void with radiant cyan orbit tracers and azure spacetime warp',
     badge: 'DEFAULT',
+    unlockType: 'default',
+    unlockReq: 0,
+    unlockDesc: 'Unlocked by default',
+    probeColor: '#38bdf8',
+    probeCore: '#f0f9ff',
+    shadowColor: '#0284c7',
+    accentColor: '#38bdf8',
+    gridColor: 'rgba(56, 189, 248, 0.22)',
+    gridRipple: 'rgba(56, 189, 248, 0.45)',
+    portalOuterGlow: 'rgba(56, 189, 248, 0.55)',
+    portalRing1: '#38bdf8',
+    portalRing2: '#7dd3fc',
+    portalCore: '#f0f9ff',
+    portalLabel: '#38bdf8',
+    portalParticles: ['#38bdf8', '#7dd3fc', '#bae6fd', '#ffffff'],
+    frameBorder: 'rgba(56, 189, 248, 0.45)',
+    frameGlow: 'rgba(14, 165, 233, 0.25)',
+    menuBgTint: 'rgba(14, 165, 233, 0.15)',
+    buttonGrad: 'from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400',
+  },
+  emerald: {
+    id: 'emerald',
+    name: 'Tachyon Matrix',
+    description: 'Relativistic emerald tachyon grid with quantum green spacetime ripples',
+    badge: 'STREAK III',
+    unlockType: 'streak',
+    unlockReq: 3,
+    unlockDesc: 'Reach a Streak of 3',
+    probeColor: '#10b981',
+    probeCore: '#ecfdf5',
+    shadowColor: '#059669',
+    accentColor: '#10b981',
+    gridColor: 'rgba(16, 185, 129, 0.24)',
+    gridRipple: 'rgba(52, 211, 153, 0.48)',
+    portalOuterGlow: 'rgba(16, 185, 129, 0.6)',
+    portalRing1: '#10b981',
+    portalRing2: '#6ee7b7',
+    portalCore: '#ecfdf5',
+    portalLabel: '#10b981',
+    portalParticles: ['#10b981', '#34d399', '#a7f3d0', '#ffffff'],
+    frameBorder: 'rgba(16, 185, 129, 0.5)',
+    frameGlow: 'rgba(16, 185, 129, 0.3)',
+    menuBgTint: 'rgba(16, 185, 129, 0.16)',
+    buttonGrad: 'from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400',
   },
   synthwave: {
     id: 'synthwave',
     name: 'Nebula Synthwave',
-    description: 'Neon magenta and violet relativistic warp',
+    description: 'Retro-futuristic cyberpunk magenta with deep neon violet spacetime distortion',
+    badge: 'STREAK V',
+    unlockType: 'streak',
+    unlockReq: 5,
+    unlockDesc: 'Reach a Streak of 5',
     probeColor: '#ec4899',
     probeCore: '#fdf2f8',
     shadowColor: '#d946ef',
-    gridColor: 'rgba(236, 72, 153, 0.1)',
     accentColor: '#ec4899',
-    badge: 'COMMANDER I',
+    gridColor: 'rgba(236, 72, 153, 0.26)',
+    gridRipple: 'rgba(217, 70, 239, 0.5)',
+    portalOuterGlow: 'rgba(217, 70, 239, 0.6)',
+    portalRing1: '#ec4899',
+    portalRing2: '#f472b6',
+    portalCore: '#fdf2f8',
+    portalLabel: '#f472b6',
+    portalParticles: ['#ec4899', '#d946ef', '#f472b6', '#ffffff'],
+    frameBorder: 'rgba(236, 72, 153, 0.52)',
+    frameGlow: 'rgba(217, 70, 239, 0.35)',
+    menuBgTint: 'rgba(217, 70, 239, 0.18)',
+    buttonGrad: 'from-fuchsia-500 to-pink-500 hover:from-fuchsia-400 hover:to-pink-400',
   },
   supernova: {
     id: 'supernova',
-    name: 'Supernova Gold',
-    description: 'Blazing solar flare gold with emerald relativistic ripples',
+    name: 'Supernova Flare',
+    description: 'Blazing solar corona gold with thermonuclear amber spacetime ripples',
+    badge: 'STREAK X',
+    unlockType: 'streak',
+    unlockReq: 10,
+    unlockDesc: 'Reach a Streak of 10',
     probeColor: '#f59e0b',
     probeCore: '#fffbeb',
-    shadowColor: '#f97316',
-    gridColor: 'rgba(245, 158, 11, 0.11)',
+    shadowColor: '#ea580c',
     accentColor: '#f59e0b',
-    badge: 'COMMANDER II',
+    gridColor: 'rgba(245, 158, 11, 0.25)',
+    gridRipple: 'rgba(251, 146, 60, 0.5)',
+    portalOuterGlow: 'rgba(245, 158, 11, 0.6)',
+    portalRing1: '#f59e0b',
+    portalRing2: '#fde047',
+    portalCore: '#fffbeb',
+    portalLabel: '#f59e0b',
+    portalParticles: ['#f59e0b', '#f97316', '#fde047', '#ffffff'],
+    frameBorder: 'rgba(245, 158, 11, 0.52)',
+    frameGlow: 'rgba(245, 158, 11, 0.35)',
+    menuBgTint: 'rgba(245, 158, 11, 0.16)',
+    buttonGrad: 'from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400',
+  },
+  pulsar: {
+    id: 'pulsar',
+    name: 'Void Pulsar',
+    description: 'High-energy magnetic pulsar emissions with ultraviolet gravity wells',
+    badge: 'SECTOR 25',
+    unlockType: 'sector',
+    unlockReq: 25,
+    unlockDesc: 'Reach Sector 25 in Infinite',
+    probeColor: '#a855f7',
+    probeCore: '#faf5ff',
+    shadowColor: '#7c3aed',
+    accentColor: '#a855f7',
+    gridColor: 'rgba(168, 85, 247, 0.25)',
+    gridRipple: 'rgba(192, 132, 252, 0.5)',
+    portalOuterGlow: 'rgba(168, 85, 247, 0.6)',
+    portalRing1: '#a855f7',
+    portalRing2: '#c084fc',
+    portalCore: '#faf5ff',
+    portalLabel: '#c084fc',
+    portalParticles: ['#a855f7', '#818cf8', '#e9d5ff', '#ffffff'],
+    frameBorder: 'rgba(168, 85, 247, 0.52)',
+    frameGlow: 'rgba(124, 58, 237, 0.35)',
+    menuBgTint: 'rgba(168, 85, 247, 0.16)',
+    buttonGrad: 'from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400',
+  },
+  singularity: {
+    id: 'singularity',
+    name: 'Event Horizon',
+    description: 'Gravitational singularity horizon with intense crimson relativistic curvature',
+    badge: 'SECTOR 50',
+    unlockType: 'sector',
+    unlockReq: 50,
+    unlockDesc: 'Reach Sector 50 in Infinite',
+    probeColor: '#ef4444',
+    probeCore: '#fef2f2',
+    shadowColor: '#b91c1c',
+    accentColor: '#ef4444',
+    gridColor: 'rgba(239, 68, 68, 0.28)',
+    gridRipple: 'rgba(248, 113, 113, 0.55)',
+    portalOuterGlow: 'rgba(239, 68, 68, 0.65)',
+    portalRing1: '#ef4444',
+    portalRing2: '#f87171',
+    portalCore: '#fef2f2',
+    portalLabel: '#ef4444',
+    portalParticles: ['#ef4444', '#dc2626', '#fca5a5', '#ffffff'],
+    frameBorder: 'rgba(239, 68, 68, 0.58)',
+    frameGlow: 'rgba(220, 38, 38, 0.4)',
+    menuBgTint: 'rgba(239, 68, 68, 0.18)',
+    buttonGrad: 'from-rose-600 to-red-500 hover:from-rose-500 hover:to-red-400',
+  },
+  prismatic: {
+    id: 'prismatic',
+    name: 'Chronos Apex',
+    description: 'Apex celestial singularity with iridescent multi-spectrum spacetime refraction',
+    badge: 'SECTOR 100',
+    unlockType: 'sector',
+    unlockReq: 100,
+    unlockDesc: 'Reach Sector 100 in Infinite',
+    probeColor: '#38bdf8',
+    probeCore: '#ffffff',
+    shadowColor: '#ec4899',
+    accentColor: '#ec4899',
+    gridColor: 'rgba(56, 189, 248, 0.3)',
+    gridRipple: 'rgba(244, 63, 94, 0.55)',
+    portalOuterGlow: 'rgba(236, 72, 153, 0.65)',
+    portalRing1: '#38bdf8',
+    portalRing2: '#ec4899',
+    portalCore: '#ffffff',
+    portalLabel: '#38bdf8',
+    portalParticles: ['#38bdf8', '#ec4899', '#f59e0b', '#ffffff'],
+    frameBorder: 'rgba(236, 72, 153, 0.65)',
+    frameGlow: 'rgba(56, 189, 248, 0.45)',
+    menuBgTint: 'rgba(236, 72, 153, 0.2)',
+    buttonGrad: 'from-cyan-400 via-fuchsia-500 to-amber-400 hover:opacity-90',
   },
 };
 
@@ -150,11 +292,20 @@ export function stepPhysics(probe, planets, target, dt = 1.0, bounds = DEFAULT_P
 
   // Track distinct planets gravitationally slingshotted during this flight
   const slingshotPlanets = new Set(probe.slingshotPlanets || []);
+  const newAssists = [];
   for (let i = 0; i < planets.length; i++) {
     const p = planets[i];
     const dist = Math.hypot(nextPos.x - p.x, nextPos.y - p.y);
     if (dist <= p.radius * 2.6) {
-      slingshotPlanets.add(p.name || `planet-${i}`);
+      const pKey = p.name || `planet-${i}`;
+      if (!slingshotPlanets.has(pKey)) {
+        slingshotPlanets.add(pKey);
+        newAssists.push({
+          planetName: p.name || `Planet ${i + 1}`,
+          x: nextPos.x,
+          y: nextPos.y,
+        });
+      }
     }
   }
 
@@ -181,6 +332,7 @@ export function stepPhysics(probe, planets, target, dt = 1.0, bounds = DEFAULT_P
     vel: { x: nextVx, y: nextVy },
     trail: newTrail,
     slingshotPlanets: Array.from(slingshotPlanets),
+    newAssists,
     status,
     collision,
   };
@@ -282,8 +434,8 @@ export function renderGravitationalGrid(ctx, width, height, planets, time = 0, t
   const cols = Math.ceil(width / spacing) + 1;
 
   ctx.save();
-  ctx.strokeStyle = theme?.gridColor || 'rgba(56, 189, 248, 0.07)';
-  ctx.lineWidth = 1;
+  ctx.strokeStyle = theme?.gridColor || 'rgba(56, 189, 248, 0.22)';
+  ctx.lineWidth = 1.2;
 
   // Horizontal warped grid lines
   for (let r = 0; r <= rows; r++) {
@@ -352,13 +504,12 @@ export function renderGravitationalGrid(ctx, width, height, planets, time = 0, t
   for (let i = 0; i < planets.length; i++) {
     const p = planets[i];
     const rippleRadius = p.radius + 15 + ((time * 0.03 + i * 15) % 35);
-    const alpha = Math.max(0, 0.25 - (rippleRadius - p.radius) / 45);
+    const alpha = Math.max(0, 0.4 - (rippleRadius - p.radius) / 45);
 
     ctx.beginPath();
     ctx.arc(p.x, p.y, rippleRadius, 0, Math.PI * 2);
-    ctx.strokeStyle = p.glowColor
-      ? p.glowColor.replace('1)', `${alpha})`)
-      : `rgba(147, 197, 253, ${alpha})`;
+    const rippleBase = theme?.gridRipple || (p.glowColor ? p.glowColor.replace('1)', '0.5') : 'rgba(147, 197, 253, 0.5)');
+    ctx.strokeStyle = rippleBase.replace(/[\d\.]+\)$/, `${alpha})`);
     ctx.setLineDash([3, 4]);
     ctx.stroke();
     ctx.setLineDash([]);
@@ -440,7 +591,7 @@ export function renderPlanets(ctx, planets, time = 0) {
 /**
  * Canvas Renderer: Target Portal Beacon
  */
-export function renderTarget(ctx, target, time = 0) {
+export function renderTarget(ctx, target, time = 0, theme = null) {
   if (!target) return;
   ctx.save();
 
@@ -449,14 +600,20 @@ export function renderTarget(ctx, target, time = 0) {
   const rot2 = (-time * 0.03) % (Math.PI * 2);
   const pulse = Math.sin(time * 0.08) * 3;
 
+  const ring1Color = theme?.portalRing1 || '#34d399';
+  const ring2Color = theme?.portalRing2 || '#6ee7b7';
+  const outerGlowBase = theme?.portalOuterGlow || 'rgba(52, 211, 153, 0.5)';
+  const coreColor = theme?.portalCore || '#ecfdf5';
+  const labelColor = theme?.portalLabel || ring2Color;
+
   // Outward Portal Glow
-  const glow = ctx.createRadialGradient(x, y, radius * 0.5, x, y, radius * 2.4);
-  glow.addColorStop(0, 'rgba(52, 211, 153, 0.45)');
-  glow.addColorStop(0.6, 'rgba(16, 185, 129, 0.15)');
+  const glow = ctx.createRadialGradient(x, y, radius * 0.5, x, y, radius * 2.5);
+  glow.addColorStop(0, outerGlowBase);
+  glow.addColorStop(0.6, outerGlowBase.replace(/[\d\.]+\)$/, '0.15)'));
   glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
   ctx.fillStyle = glow;
   ctx.beginPath();
-  ctx.arc(x, y, radius * 2.4, 0, Math.PI * 2);
+  ctx.arc(x, y, radius * 2.5, 0, Math.PI * 2);
   ctx.fill();
 
   // Spinning outer dashed ring
@@ -465,11 +622,11 @@ export function renderTarget(ctx, target, time = 0) {
   ctx.rotate(rot1);
   ctx.beginPath();
   ctx.arc(0, 0, radius + pulse, 0, Math.PI * 2);
-  ctx.strokeStyle = '#34d399';
+  ctx.strokeStyle = ring1Color;
   ctx.lineWidth = 2.5;
   ctx.setLineDash([6, 5]);
-  ctx.shadowColor = '#34d399';
-  ctx.shadowBlur = 10;
+  ctx.shadowColor = ring1Color;
+  ctx.shadowBlur = 12;
   ctx.stroke();
   ctx.restore();
 
@@ -479,23 +636,25 @@ export function renderTarget(ctx, target, time = 0) {
   ctx.rotate(rot2);
   ctx.beginPath();
   ctx.arc(0, 0, (radius + pulse) * 0.65, 0, Math.PI * 2);
-  ctx.strokeStyle = '#6ee7b7';
+  ctx.strokeStyle = ring2Color;
   ctx.lineWidth = 2;
   ctx.setLineDash([4, 4]);
+  ctx.shadowColor = ring2Color;
+  ctx.shadowBlur = 8;
   ctx.stroke();
   ctx.restore();
 
   // Center beacon energy core
   ctx.beginPath();
   ctx.arc(x, y, radius * 0.32, 0, Math.PI * 2);
-  ctx.fillStyle = '#ecfdf5';
-  ctx.shadowColor = '#a7f3d0';
-  ctx.shadowBlur = 12;
+  ctx.fillStyle = coreColor;
+  ctx.shadowColor = ring2Color;
+  ctx.shadowBlur = 14;
   ctx.fill();
 
   // Target Portal Label
   ctx.font = '700 8.5px monospace';
-  ctx.fillStyle = '#6ee7b7';
+  ctx.fillStyle = labelColor;
   ctx.textAlign = 'center';
   ctx.shadowBlur = 0;
   ctx.fillText('PORTAL GATE', x, y + radius + 15);

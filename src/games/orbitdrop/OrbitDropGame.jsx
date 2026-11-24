@@ -102,21 +102,69 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
       if (raw) {
         const parsed = JSON.parse(raw);
         return {
-          ...parsed,
-          unlockedThemes: Object.keys(ORBIT_THEMES),
+          activeTheme: parsed.activeTheme || 'default',
+          unlockedThemes: parsed.unlockedThemes || ['default'],
+          maxInfiniteSector: parsed.maxInfiniteSector || 0,
+          maxStreak: parsed.maxStreak || 0,
         };
       }
     } catch (_) {}
     return {
       activeTheme: 'default',
-      unlockedThemes: Object.keys(ORBIT_THEMES),
-      commanderStreak: 0,
+      unlockedThemes: ['default'],
+      maxInfiniteSector: 0,
+      maxStreak: 0,
     };
   });
   const [showSettings, setShowSettings] = useState(false);
+  const [unlockToast, setUnlockToast] = useState(null);
 
   // Active theme definition
   const currentTheme = ORBIT_THEMES[customization.activeTheme] || ORBIT_THEMES.default;
+
+  // Check and unlock themes based on streak & sector milestones
+  const checkThemeUnlocks = useCallback((streakVal = 0, sectorVal = 0) => {
+    setCustomization((prev) => {
+      const unlocked = new Set(prev.unlockedThemes || ['default']);
+      const maxSector = Math.max(prev.maxInfiniteSector || 0, sectorVal || 0);
+      const maxStrk = Math.max(prev.maxStreak || 0, streakVal || 0);
+
+      let newlyUnlocked = null;
+
+      Object.values(ORBIT_THEMES).forEach((t) => {
+        if (t.unlockType === 'streak' && maxStrk >= t.unlockReq) {
+          if (!unlocked.has(t.id)) {
+            unlocked.add(t.id);
+            newlyUnlocked = t;
+          }
+        } else if (t.unlockType === 'sector' && maxSector >= t.unlockReq) {
+          if (!unlocked.has(t.id)) {
+            unlocked.add(t.id);
+            newlyUnlocked = t;
+          }
+        }
+      });
+
+      const updated = {
+        ...prev,
+        unlockedThemes: Array.from(unlocked),
+        maxInfiniteSector: maxSector,
+        maxStreak: maxStrk,
+      };
+
+      try {
+        localStorage.setItem('bobby_orbitdrop_customization', JSON.stringify(updated));
+      } catch (_) {}
+
+      if (newlyUnlocked) {
+        soundEngine.playBullseye();
+        setUnlockToast(newlyUnlocked);
+        setTimeout(() => setUnlockToast(null), 4500);
+      }
+
+      return updated;
+    });
+  }, []);
 
   const [gameState, setGameState] = useState('menu'); // 'menu' | 'playing' | 'gameover'
   const [currentMissionIdx, setCurrentMissionIdx] = useState(0);
@@ -142,6 +190,8 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
   const dragStartRef = useRef(null);
   const dragCurrentRef = useRef(null);
   const particlesRef = useRef([]);
+  const floatingAlertsRef = useRef([]);
+  const lastVibrateRef = useRef(0);
   const lastTimeRef = useRef(0);
   const flightTimeoutRef = useRef(null);
   const resetTimerRef = useRef(null);
@@ -251,6 +301,12 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
     }
   }, []);
 
+  // Sync unlocks from existing stats on mount
+  useEffect(() => {
+    const bestStreak = Math.max(stats.currentStreak || 0, stats.maxStreak || 0);
+    checkThemeUnlocks(bestStreak, customization.maxInfiniteSector || 0);
+  }, [stats.currentStreak, stats.maxStreak, checkThemeUnlocks, customization.maxInfiniteSector]);
+
   // Update probe position when mission index changes
   useEffect(() => {
     if (activeMission && gameState === 'playing') {
@@ -269,11 +325,11 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
       dragCurrentRef.current = null;
       particlesRef.current = [];
       setStatusBanner({
-        text: activeMission.name || `Mission ${currentMissionIdx + 1}`,
+        text: activeMission.name || (mode === 'infinite' ? `Sector ${currentMissionIdx + 1}` : `Mission ${currentMissionIdx + 1}`),
         type: 'info',
       });
     }
-  }, [currentMissionIdx, activeMission, gameState]);
+  }, [currentMissionIdx, activeMission, gameState, mode]);
 
   // Clean up timers on unmount
   useEffect(() => {
@@ -315,33 +371,11 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
       saveGameScore('orbitdrop', finalScore, isDaily, correctCount);
       setStats(getGameStats('orbitdrop'));
 
-      // Check Cosmic Commander theme unlocks:
-      // Cosmic Commander is awarded for flawless 5/5 run in daily or reaching mission 10+ in infinite
-      const isCommander = (isDaily && correctCount === TOTAL_MISSIONS && probesUsed === TOTAL_MISSIONS) ||
-                          (!isDaily && correctCount >= 10);
-
-      setCustomization((prev) => {
-        const unlocked = new Set(prev.unlockedThemes || ['default']);
-        let streak = prev.commanderStreak || 0;
-        if (isCommander) {
-          unlocked.add('synthwave');
-          streak += 1;
-          if (streak >= 2) {
-            unlocked.add('supernova');
-          }
-        } else {
-          streak = 0;
-        }
-        const updated = {
-          ...prev,
-          unlockedThemes: Array.from(unlocked),
-          commanderStreak: streak,
-        };
-        try {
-          localStorage.setItem('bobby_orbitdrop_customization', JSON.stringify(updated));
-        } catch (_) {}
-        return updated;
-      });
+      // Check customization unlocks for streak and infinite sectors
+      checkThemeUnlocks(
+        streakCountRef.current,
+        mode === 'infinite' ? correctCount : 0
+      );
 
       if (isVictory) {
         setShowConfetti(true);
@@ -376,7 +410,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
   // Warp particle burst when entering portal
   const spawnWarpBurst = (x, y) => {
     const list = [];
-    const colors = ['#34d399', '#38bdf8', '#a7f3d0', '#ffffff'];
+    const colors = currentThemeRef.current?.portalParticles || ['#34d399', '#38bdf8', '#a7f3d0', '#ffffff'];
     for (let i = 0; i < 35; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = 2 + Math.random() * 6;
@@ -398,6 +432,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
   const resetProbeToLauncher = useCallback(() => {
     clearTimeout(flightTimeoutRef.current);
     setIsResetGlowing(false);
+    lastVibrateRef.current = 0;
     if (!currentMissionRef.current) return;
     probeStateRef.current = {
       pos: { ...currentMissionRef.current.launcher },
@@ -437,8 +472,8 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
         // 2. Planets & Celestial Bodies
         renderPlanets(ctx, mission.planets, time);
 
-        // 3. Target Portal Beacon
-        renderTarget(ctx, mission.target, time);
+        // 3. Target Portal Beacon (themed)
+        renderTarget(ctx, mission.target, time, currentThemeRef.current);
 
         // 4. Launch Pad Base
         renderLauncherBase(ctx, mission.launcher, isDraggingRef.current, currentThemeRef.current);
@@ -463,12 +498,56 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
           );
           probeStateRef.current = nextProbe;
 
+          // Check if any new gravity assists / orbit bonuses were earned this tick
+          if (nextProbe.newAssists && nextProbe.newAssists.length > 0) {
+            nextProbe.newAssists.forEach((assist) => {
+              soundEngine.playOrbitBonus();
+              floatingAlertsRef.current.push({
+                text: '+250 ORBIT BONUS',
+                x: assist.x,
+                y: assist.y - 12,
+                life: 60,
+              });
+            });
+          }
+
+          // Off-screen gentle vibration pulses with frequency scaling with distance
+          const pos = nextProbe.pos;
+          let dxOff = 0;
+          if (pos.x < 0) dxOff = -pos.x;
+          else if (pos.x > CANVAS_WIDTH) dxOff = pos.x - CANVAS_WIDTH;
+
+          let dyOff = 0;
+          if (pos.y < 0) dyOff = -pos.y;
+          else if (pos.y > CANVAS_HEIGHT) dyOff = pos.y - CANVAS_HEIGHT;
+
+          const distOff = Math.hypot(dxOff, dyOff);
+          if (distOff > 15) {
+            // Lower frequency as it gets farther away
+            const norm = Math.min(1, Math.max(0, (distOff - 15) / 550));
+            const vibrateInterval = 220 + norm * 880; // 220ms (near) to 1100ms (far)
+            const now = Date.now();
+            if (now - lastVibrateRef.current >= vibrateInterval) {
+              lastVibrateRef.current = now;
+              try {
+                if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                  navigator.vibrate(15);
+                }
+              } catch (_) {}
+            }
+          } else {
+            lastVibrateRef.current = 0;
+          }
+
           // Check outcome transitions
           if (nextProbe.status === 'success') {
+            lastVibrateRef.current = 0;
             handleMissionSuccess(nextProbe);
           } else if (nextProbe.status === 'crashed') {
+            lastVibrateRef.current = 0;
             handleMissionCrash(nextProbe);
           } else if (nextProbe.status === 'lost') {
+            lastVibrateRef.current = 0;
             handleMissionLost();
           }
         }
@@ -513,6 +592,27 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
         // 7b. Smash Bros-Style Off-Screen Edge Indicator
         if (probeStateRef.current && probeStateRef.current.status === 'in_flight') {
           renderOffscreenIndicator(ctx, probeStateRef.current.pos, CANVAS_WIDTH, CANVAS_HEIGHT, currentThemeRef.current);
+        }
+
+        // 7c. In-Game Orbit Bonus Floating Indicators
+        if (floatingAlertsRef.current.length > 0) {
+          ctx.save();
+          floatingAlertsRef.current = floatingAlertsRef.current.filter((fa) => {
+            fa.y -= 0.8;
+            fa.life -= 1;
+            fa.alpha = Math.max(0, fa.life / 60);
+            if (fa.life <= 0) return false;
+
+            ctx.font = 'bold 11px monospace';
+            ctx.textAlign = 'center';
+            ctx.shadowColor = currentThemeRef.current?.shadowColor || '#38bdf8';
+            ctx.shadowBlur = 8;
+            ctx.fillStyle = currentThemeRef.current?.accentColor || '#38bdf8';
+            ctx.globalAlpha = fa.alpha;
+            ctx.fillText(fa.text, fa.x, fa.y);
+            return true;
+          });
+          ctx.restore();
         }
 
         // 8. Particle Explosions & Warp Bursts
@@ -577,6 +677,10 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
       soundEngine.playStreak();
     }
 
+    // Check unlocks for current streak and infinite sectors
+    const currentCompleted = currentMissionIdxRef.current + 1;
+    checkThemeUnlocks(newStreak, mode === 'infinite' ? currentCompleted : 0);
+
     const historyItem = {
       mission,
       success: true,
@@ -589,11 +693,11 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
     };
     setMissionHistory((h) => [...h, historyItem]);
 
-    const assistSuffix = slingshotBonus > 0 ? ` • +${slingshotBonus} Slingshot Assist` : '';
+    // Keep banner clean on single line without wrapping
     setStatusBanner({
       text: isBullseye
-        ? `🎯 BULLSEYE! (+1,000 pts${assistSuffix})`
-        : `PORTAL REACHED! (+${accuracyBonus} pts${assistSuffix})`,
+        ? '🎯 BULLSEYE! (+1,000 pts)'
+        : `PORTAL REACHED! (+${accuracyBonus} pts)`,
       type: 'success',
     });
 
@@ -630,6 +734,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
   const handleMissionCrash = (probe) => {
     clearTimeout(flightTimeoutRef.current);
     setIsResetGlowing(false);
+    lastVibrateRef.current = 0;
     soundEngine.playWrong();
     spawnExplosion(probe.pos.x, probe.pos.y, '#f43f5e', 28);
     setStreakCount(0);
@@ -649,6 +754,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
   const handleMissionLost = () => {
     clearTimeout(flightTimeoutRef.current);
     setIsResetGlowing(false);
+    lastVibrateRef.current = 0;
     soundEngine.playWrong();
     setStreakCount(0);
 
@@ -767,7 +873,8 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
         status: 'in_flight',
       };
 
-      setStatusBanner({ text: `Probe #${missionAttemptsRef.current} in orbital transit...`, type: 'info' });
+      // Clear banner during flight (don't show "Probe in orbital transit")
+      setStatusBanner(null);
 
       // After 10000ms timeout, start glowing the reset button instead of aborting
       setIsResetGlowing(false);
@@ -923,9 +1030,16 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
 
   const isDailyLocked = mode === 'daily' && stats.todayCompleted && !isDevMode;
 
-  // Equip a theme (all orbital themes supported and unlocked)
+  // Equip a theme
   const handleEquipTheme = (themeId) => {
-    if (!ORBIT_THEMES[themeId]) {
+    const targetTheme = ORBIT_THEMES[themeId];
+    if (!targetTheme) {
+      soundEngine.playWrong();
+      return;
+    }
+
+    const isUnlocked = customization.unlockedThemes?.includes(themeId) || themeId === 'default' || isDevMode;
+    if (!isUnlocked) {
       soundEngine.playWrong();
       return;
     }
@@ -934,7 +1048,6 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
     const updated = {
       ...customization,
       activeTheme: themeId,
-      unlockedThemes: Object.keys(ORBIT_THEMES),
     };
     setCustomization(updated);
     try {
@@ -943,8 +1056,29 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
   };
 
   return (
-    <div className="w-full min-h-[100dvh] bg-[#07090e] font-sans antialiased text-slate-100 flex flex-col items-center">
+    <div
+      className="w-full min-h-[100dvh] font-sans antialiased text-slate-100 flex flex-col items-center transition-colors duration-500 relative overflow-x-hidden"
+      style={{
+        backgroundColor: '#07090e',
+        backgroundImage: `radial-gradient(circle at 50% 12%, ${currentTheme.menuBgTint || 'rgba(56, 189, 248, 0.15)'} 0%, transparent 65%)`,
+      }}
+    >
       <ConfettiCanvas active={showConfetti} />
+
+      {/* Celebratory Theme Unlock Notification Toast */}
+      {unlockToast && (
+        <div className="fixed top-14 z-50 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-2xl bg-[#0c101a]/95 border-2 border-amber-400/90 shadow-[0_0_25px_rgba(251,191,36,0.5)] backdrop-blur text-white flex items-center gap-3 animate-in slide-in-from-top-4 duration-300">
+          <Sparkles className="w-5 h-5 text-amber-400 animate-spin" />
+          <div className="text-left">
+            <div className="text-[10px] uppercase font-bold text-amber-400 tracking-wider">
+              New Customization Unlocked!
+            </div>
+            <div className="text-xs font-black text-white">
+              {unlockToast.name} <span className="text-[10px] text-amber-300 font-mono">({unlockToast.badge})</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Top Navigation */}
       <NavBar
@@ -960,8 +1094,16 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
           <div className="flex-1 flex flex-col justify-center space-y-5 text-center animate-in fade-in duration-300">
             {/* Header Badge */}
             <div className="space-y-1.5">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-bold tracking-wide">
-                <Orbit className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '6s' }} />
+              <div
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-all"
+                style={{
+                  backgroundColor: `${currentTheme.accentColor}18`,
+                  borderColor: `${currentTheme.accentColor}44`,
+                  borderWidth: '1px',
+                  color: currentTheme.accentColor,
+                }}
+              >
+                <Orbit className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '6s', color: currentTheme.accentColor }} />
                 <span>Keplerian Gravity Physics</span>
               </div>
 
@@ -969,6 +1111,9 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
               <h2
                 onClick={handleTitleTap}
                 className="text-3xl font-black tracking-tight text-white uppercase select-none cursor-pointer active:scale-95 transition-transform"
+                style={{
+                  textShadow: `0 0 24px ${currentTheme.shadowColor}66`,
+                }}
                 title="Tap 5 times to toggle Dev Mode"
               >
                 OrbitDrop
@@ -988,7 +1133,11 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
               <div className="pt-1">
                 <button
                   onClick={() => setShowSettings(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 transition-all active:scale-95 shadow-md"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border text-xs font-semibold text-slate-200 transition-all active:scale-95 shadow-md"
+                  style={{
+                    borderColor: `${currentTheme.accentColor}55`,
+                    boxShadow: `0 0 14px ${currentTheme.shadowColor}22`,
+                  }}
                 >
                   <Sparkles className="w-3.5 h-3.5" style={{ color: currentTheme.probeColor }} />
                   <span>Theme: {currentTheme.name}</span>
@@ -1003,14 +1152,29 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                 onClick={() => setMode('daily')}
                 className={`p-3.5 rounded-2xl border transition-all active:scale-[0.98] ${
                   mode === 'daily'
-                    ? 'bg-sky-500/15 border-sky-500/50 shadow-lg shadow-sky-500/10'
+                    ? 'border shadow-lg'
                     : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'
                 }`}
+                style={
+                  mode === 'daily'
+                    ? {
+                        borderColor: `${currentTheme.accentColor}77`,
+                        backgroundColor: `${currentTheme.accentColor}15`,
+                        boxShadow: `0 0 16px ${currentTheme.shadowColor}20`,
+                      }
+                    : undefined
+                }
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="p-2 rounded-xl bg-sky-500/20 text-sky-400">
-                      <Flame className="w-5 h-5 text-sky-400" />
+                    <div
+                      className="p-2 rounded-xl transition-colors"
+                      style={{
+                        backgroundColor: `${currentTheme.accentColor}25`,
+                        color: currentTheme.accentColor,
+                      }}
+                    >
+                      <Flame className="w-5 h-5" style={{ color: currentTheme.accentColor }} />
                     </div>
                     <div>
                       <div className="text-sm font-bold text-white flex items-center gap-1.5">
@@ -1037,24 +1201,39 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                 onClick={() => setMode('infinite')}
                 className={`p-3.5 rounded-2xl border transition-all active:scale-[0.98] ${
                   mode === 'infinite'
-                    ? 'bg-cyan-500/15 border-cyan-500/50 shadow-lg shadow-cyan-500/10'
+                    ? 'border shadow-lg'
                     : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'
                 }`}
+                style={
+                  mode === 'infinite'
+                    ? {
+                        borderColor: `${currentTheme.accentColor}77`,
+                        backgroundColor: `${currentTheme.accentColor}15`,
+                        boxShadow: `0 0 16px ${currentTheme.shadowColor}20`,
+                      }
+                    : undefined
+                }
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="p-2 rounded-xl bg-cyan-500/20 text-cyan-400">
-                      <InfinityIcon className="w-5 h-5 text-cyan-400" />
+                    <div
+                      className="p-2 rounded-xl transition-colors"
+                      style={{
+                        backgroundColor: `${currentTheme.accentColor}25`,
+                        color: currentTheme.accentColor,
+                      }}
+                    >
+                      <InfinityIcon className="w-5 h-5" style={{ color: currentTheme.accentColor }} />
                     </div>
                     <div>
                       <div className="text-sm font-bold text-white flex items-center gap-1.5">
-                        Infinite Expedition
+                        Infinite Sectors
                         <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-semibold">
                           Endless
                         </span>
                       </div>
                       <div className="text-[11px] text-slate-400">
-                        Unlimited progressive celestial missions. Test your endurance!
+                        Unlimited progressive celestial sectors. Test your endurance!
                       </div>
                     </div>
                   </div>
@@ -1077,16 +1256,22 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                     setMode('infinite');
                     initGameSession('infinite');
                   }}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-sky-500 hover:from-cyan-400 hover:to-sky-400 text-slate-950 font-black text-sm uppercase tracking-wider shadow-lg shadow-cyan-500/25 active:scale-98 transition-all flex items-center justify-center gap-2"
+                  className={`w-full py-4 rounded-2xl bg-gradient-to-r ${currentTheme.buttonGrad || 'from-cyan-500 to-sky-500 hover:from-cyan-400 hover:to-sky-400'} text-slate-950 font-black text-sm uppercase tracking-wider shadow-lg active:scale-98 transition-all flex items-center justify-center gap-2`}
+                  style={{
+                    boxShadow: `0 0 20px ${currentTheme.shadowColor}35`,
+                  }}
                 >
                   <Play className="w-5 h-5 fill-slate-950" />
-                  <span>Play Infinite Mode</span>
+                  <span>Play Infinite Sectors</span>
                 </button>
               </div>
             ) : (
               <button
                 onClick={() => initGameSession(mode)}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 text-slate-950 font-black text-sm uppercase tracking-wider shadow-lg shadow-sky-500/25 active:scale-98 transition-all flex items-center justify-center gap-2"
+                className={`w-full py-4 rounded-2xl bg-gradient-to-r ${currentTheme.buttonGrad || 'from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400'} text-slate-950 font-black text-sm uppercase tracking-wider shadow-lg active:scale-98 transition-all flex items-center justify-center gap-2`}
+                style={{
+                  boxShadow: `0 0 20px ${currentTheme.shadowColor}35`,
+                }}
               >
                 <Play className="w-5 h-5 fill-slate-950" />
                 <span>
@@ -1094,7 +1279,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                     ? isDevMode && stats.todayCompleted
                       ? '[DEV] Replay Daily Expedition'
                       : 'Launch Daily Expedition'
-                    : 'Launch Infinite Expedition'}
+                    : 'Launch Infinite Sectors'}
                 </span>
               </button>
             )}
@@ -1114,32 +1299,43 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
               <div className="flex items-center gap-2">
                 <span className="font-mono text-slate-400 font-bold uppercase">
                   {mode === 'infinite'
-                    ? `MISSION ${currentMissionIdx + 1}`
+                    ? `SECTOR ${currentMissionIdx + 1}`
                     : `MISSION ${currentMissionIdx + 1}/${TOTAL_MISSIONS}`}
                 </span>
               </div>
 
               {/* Probe Efficiency Counter */}
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-800">
-                <Orbit className="w-3.5 h-3.5 text-sky-400" />
+              <div
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-900 border transition-colors"
+                style={{ borderColor: `${currentTheme.accentColor}44` }}
+              >
+                <Orbit className="w-3.5 h-3.5" style={{ color: currentTheme.accentColor }} />
                 <span className="text-[10px] uppercase font-bold text-slate-400">Probe:</span>
-                <span className="font-mono font-black text-xs text-sky-400">
+                <span className="font-mono font-black text-xs" style={{ color: currentTheme.accentColor }}>
                   {missionAttempts + (probeStateRef.current?.status === 'in_flight' ? 0 : 1)}
                 </span>
                 <span className="text-[10px] text-slate-500 font-semibold">
-                  • Total: <span className="text-sky-500 font-mono">{totalProbesUsed}</span>
+                  • Total: <span className="font-mono font-bold" style={{ color: currentTheme.accentColor }}>{totalProbesUsed}</span>
                 </span>
               </div>
 
               {/* Current Score */}
               <div className="text-right">
                 <div className="text-[10px] uppercase text-slate-500 font-semibold">Score</div>
-                <div className="font-mono font-black text-sky-400 text-sm">{score}</div>
+                <div className="font-mono font-black text-sm" style={{ color: currentTheme.accentColor }}>
+                  {score}
+                </div>
               </div>
             </div>
 
-            {/* Interactive HTML5 Canvas Viewport */}
-            <div className="relative w-full aspect-[400/480] rounded-3xl overflow-hidden border border-slate-800 bg-[#060810] shadow-2xl select-none touch-none">
+            {/* Interactive HTML5 Canvas Viewport (Themed Frame) */}
+            <div
+              className="relative w-full aspect-[400/480] rounded-3xl overflow-hidden bg-[#060810] select-none touch-none transition-all duration-500"
+              style={{
+                border: `2px solid ${currentTheme.frameBorder || 'rgba(56, 189, 248, 0.45)'}`,
+                boxShadow: `0 0 28px ${currentTheme.frameGlow || 'rgba(14, 165, 233, 0.25)'}`,
+              }}
+            >
               <canvas
                 ref={canvasRef}
                 width={CANVAS_WIDTH}
@@ -1153,28 +1349,27 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                 onTouchStart={handlePointerDown}
               />
 
-              {/* Floating Mission Banner HUD (interactive reset button after 10s) */}
+              {/* Floating Mission Banner HUD */}
               {statusBanner && (
                 <div className="absolute top-3 inset-x-3 pointer-events-none flex justify-center">
                   <div
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide backdrop-blur border shadow-lg animate-in fade-in duration-200 flex items-center gap-2 ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide backdrop-blur border shadow-lg animate-in fade-in duration-200 flex items-center gap-2 whitespace-nowrap ${
                       statusBanner.type === 'success'
-                        ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-300'
+                        ? 'bg-emerald-950/50 border-emerald-500/60 text-emerald-300'
                         : statusBanner.type === 'crash'
-                        ? 'bg-rose-950/40 border-rose-500/50 text-rose-300'
-                        : 'bg-slate-900/40 border-slate-700/60 text-slate-300'
+                        ? 'bg-rose-950/50 border-rose-500/60 text-rose-300'
+                        : 'bg-slate-900/60 border-slate-700/60 text-slate-200'
                     }`}
+                    style={
+                      statusBanner.type === 'info'
+                        ? {
+                            borderColor: `${currentTheme.accentColor}66`,
+                            boxShadow: `0 0 16px ${currentTheme.shadowColor}33`,
+                          }
+                        : undefined
+                    }
                   >
                     <span>{statusBanner.text}</span>
-                    {/* {isResetGlowing && (
-                      <button
-                        onClick={handleAbortFlight}
-                        className="px-2 py-0.5 rounded-lg bg-amber-500/30 hover:bg-amber-500/50 text-amber-200 border border-amber-400/60 font-semibold text-[11px] flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
-                      >
-                        <RotateCcw className="w-3 h-3 text-amber-300" />
-                        <span>Reset Probe</span>
-                      </button>
-                    )} */}
                   </div>
                 </div>
               )}
@@ -1205,8 +1400,11 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                     );
                   })
                 ) : (
-                  <div className="text-xs font-mono font-bold text-cyan-400">
-                    Missions Cleared: {missionHistory.filter((m) => m.success).length}
+                  <div
+                    className="text-xs font-mono font-bold"
+                    style={{ color: currentTheme.accentColor }}
+                  >
+                    Sectors Cleared: {missionHistory.filter((m) => m.success).length}
                   </div>
                 )}
               </div>
@@ -1280,7 +1478,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                 </div>
                 <div className="space-y-1 font-mono text-[11px]">
                   <div className="flex justify-between text-slate-300">
-                    <span>Mission Points:</span>
+                    <span>{mode === 'infinite' ? 'Sector Points:' : 'Mission Points:'}</span>
                     <span>
                       {missionHistory
                         .reduce((acc, m) => acc + (m.parScore || 1000) + (m.accuracyBonus || 0), 0)
@@ -1327,10 +1525,10 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                 </div>
               )}
 
-              {/* Mission Attempt Log */}
+              {/* Mission/Sector Attempt Log */}
               <div className="space-y-1.5 pt-1">
                 <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider text-left px-1">
-                  Missions Log:
+                  {mode === 'infinite' ? 'Sectors Log:' : 'Missions Log:'}
                 </div>
                 <div className="grid grid-cols-5 gap-1.5">
                   {missionHistory.slice(0, 5).map((m, i) => (
@@ -1429,7 +1627,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                     Orbital Themes & Skins
                   </h3>
                   <div className="text-[10px] text-slate-400">
-                    Unlock color schemes through Cosmic Commander ratings
+                    Unlock themes through Infinite sectors & streak milestones
                   </div>
                 </div>
               </div>
@@ -1447,10 +1645,11 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
               </div>
             )}
 
-            {/* List of 3 Themes */}
-            <div className="space-y-2.5">
+            {/* List of Expansive Themes with Unlocks */}
+            <div className="space-y-2.5 max-h-[58vh] overflow-y-auto pr-1">
               {Object.values(ORBIT_THEMES).map((t) => {
                 const isEquipped = customization.activeTheme === t.id;
+                const isUnlocked = customization.unlockedThemes?.includes(t.id) || t.id === 'default' || isDevMode;
 
                 return (
                   <div
@@ -1458,14 +1657,16 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                     className={`p-3 rounded-2xl border transition-all ${
                       isEquipped
                         ? 'bg-sky-500/15 border-sky-400/60 shadow-md'
-                        : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'
+                        : isUnlocked
+                        ? 'bg-slate-900/80 border-slate-800 hover:border-slate-700'
+                        : 'bg-slate-950/60 border-slate-900/80 opacity-70'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        {/* Swatch preview */}
+                        {/* Swatch preview with glowing shadow and lock overlay if locked */}
                         <div
-                          className="w-8 h-8 rounded-xl border flex items-center justify-center shadow-inner"
+                          className="w-8 h-8 rounded-xl border flex items-center justify-center shadow-inner relative flex-shrink-0"
                           style={{
                             backgroundColor: '#060810',
                             borderColor: t.probeColor,
@@ -1476,34 +1677,69 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                             className="w-3 h-3 rounded-full"
                             style={{ backgroundColor: t.probeColor }}
                           />
+                          {!isUnlocked && !isDevMode && (
+                            <div className="absolute inset-0 bg-black/65 rounded-xl flex items-center justify-center">
+                              <Lock className="w-3.5 h-3.5 text-slate-400" />
+                            </div>
+                          )}
                         </div>
 
                         <div>
                           <div className="text-xs font-bold text-white flex items-center gap-1.5">
                             {t.name}
-                            <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 font-mono">
+                            <span
+                              className="text-[9px] px-1.5 py-0.5 rounded font-mono font-bold"
+                              style={{
+                                backgroundColor: `${t.accentColor}25`,
+                                color: t.accentColor,
+                              }}
+                            >
                               {t.badge}
                             </span>
                           </div>
                           <div className="text-[10px] text-slate-400 leading-tight">
                             {t.description}
                           </div>
+                          {!isUnlocked && !isDevMode && (
+                            <div className="text-[10px] text-amber-400 font-semibold flex items-center gap-1 mt-0.5">
+                              <Lock className="w-2.5 h-2.5 flex-shrink-0" />
+                              <span>
+                                {t.unlockDesc} (
+                                {t.unlockType === 'sector'
+                                  ? `Best Sector: ${customization.maxInfiniteSector || 0}/${t.unlockReq}`
+                                  : `Best Streak: ${customization.maxStreak || 0}/${t.unlockReq}`}
+                                )
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
 
                       {/* Equip / Status Button */}
-                      <div>
+                      <div className="flex-shrink-0 pl-2">
                         {isEquipped ? (
                           <span className="px-2.5 py-1 rounded-xl bg-emerald-500/20 text-emerald-400 font-bold text-[10px] border border-emerald-500/30">
                             Equipped
                           </span>
-                        ) : (
+                        ) : isUnlocked ? (
                           <button
                             onClick={() => handleEquipTheme(t.id)}
                             className="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 hover:text-white font-bold text-[10px] border border-slate-700 active:scale-95 transition-all"
                           >
                             Equip
                           </button>
+                        ) : isDevMode ? (
+                          <button
+                            onClick={() => handleEquipTheme(t.id)}
+                            className="px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 font-bold text-[10px] border border-amber-500/40 active:scale-95 transition-all"
+                          >
+                            [DEV] Equip
+                          </button>
+                        ) : (
+                          <span className="px-2 py-1 rounded-xl bg-slate-900 text-slate-500 font-bold text-[10px] border border-slate-800 flex items-center gap-1">
+                            <Lock className="w-2.5 h-2.5" />
+                            Locked
+                          </span>
                         )}
                       </div>
                     </div>

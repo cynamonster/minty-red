@@ -917,7 +917,7 @@ export function generateInfiniteMission(missionIdx, seed = 42) {
     return {
       ...baseMission,
       id: `inf-${missionIdx + 1}`,
-      name: `Mission ${missionIdx + 1}: ${baseMission.name}`,
+      name: `Sector ${missionIdx + 1}: ${baseMission.name}`,
     };
   }
 
@@ -935,7 +935,7 @@ export function generateInfiniteMission(missionIdx, seed = 42) {
   return {
     ...baseMission,
     id: `inf-${missionIdx + 1}`,
-    name: `Mission ${missionIdx + 1}: Deep ${baseMission.name}`,
+    name: `Sector ${missionIdx + 1}: Deep ${baseMission.name}`,
     parScore: (baseMission.parScore || 1000) + cycle * 200,
     planets,
   };
