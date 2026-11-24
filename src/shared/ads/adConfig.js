@@ -52,18 +52,6 @@ export const AD_SLOTS = {
  */
 export const HOUSE_ADS = [
   {
-    id: 'cyber-shinobi',
-    gameSlug: 'shinobi',
-    title: 'Cyber-Shinobi',
-    tagline: 'Neon Cyberpunk Reflex Slasher',
-    badge: 'Trending',
-    cta: 'Play Now',
-    icon: 'Swords',
-    accentColor: '#ec4899',
-    bgGradient: 'from-pink-950/40 via-purple-950/30 to-slate-900/60',
-    borderColor: 'border-pink-500/30',
-  },
-  {
     id: 'orbitdrop-skins',
     gameSlug: 'orbitdrop',
     title: 'OrbitDrop Daily Slingshot',
@@ -74,18 +62,6 @@ export const HOUSE_ADS = [
     accentColor: '#0ea5e9',
     bgGradient: 'from-sky-950/40 via-cyan-950/30 to-slate-900/60',
     borderColor: 'border-sky-500/30',
-  },
-  {
-    id: 'chronos-blitz',
-    gameSlug: 'chronos',
-    title: 'Chronos: Year Slider',
-    tagline: 'Pinpoint historical milestones on the scrubbing ruler',
-    badge: 'Popular',
-    cta: 'Scrub Timeline',
-    icon: 'Clock',
-    accentColor: '#f59e0b',
-    bgGradient: 'from-amber-950/40 via-orange-950/30 to-slate-900/60',
-    borderColor: 'border-amber-500/30',
   },
   {
     id: 'flaghex-reflex',
@@ -111,7 +87,41 @@ export const HOUSE_ADS = [
     bgGradient: 'from-indigo-950/40 via-violet-950/30 to-slate-900/60',
     borderColor: 'border-indigo-500/30',
   },
+  {
+    id: 'bearinglock-blitz',
+    gameSlug: 'bearinglock',
+    title: 'Bearing Lock: Compass Blitz',
+    tagline: 'Lock into true nautical and aerial bearings across global landmarks',
+    badge: 'Tactile',
+    cta: 'Spin Compass',
+    icon: 'Compass',
+    accentColor: '#14b8a6',
+    bgGradient: 'from-teal-950/40 via-cyan-950/30 to-slate-900/60',
+    borderColor: 'border-teal-500/30',
+  },
+  {
+    id: 'roots-origins',
+    gameSlug: 'roots',
+    title: 'Roots: Surname Origins',
+    tagline: 'Trace the linguistic roots and etymology of global surnames',
+    badge: 'Linguistics',
+    cta: 'Explore Roots',
+    icon: 'Compass',
+    accentColor: '#10b981',
+    bgGradient: 'from-emerald-950/40 via-teal-950/30 to-slate-900/60',
+    borderColor: 'border-emerald-500/30',
+  },
 ];
+
+/**
+ * Detects whether an AdSense slot ID is an unconfigured placeholder.
+ * Placeholder IDs use the pattern 1000000000 - 1000000099.
+ */
+export function isPlaceholderSlot(slotId) {
+  if (!slotId) return true;
+  const str = String(slotId).trim();
+  return /^10{8}\d$/.test(str) || str === '1000000000' || str.startsWith('100000000');
+}
 
 /**
  * Gets a random or specific house ad fallback, excluding the current active game

@@ -1,4 +1,5 @@
 // Player persistence & deterministic daily seed generator.
+import { trackGameEnd, trackDailyChallenge } from '../analytics/analyticsService';
 
 export function getTodayKey() {
   const now = new Date();
@@ -74,5 +75,19 @@ export function saveGameScore(gameSlug, score, isDaily = false, correctCount = 0
   }
 
   localStorage.setItem(`bobby_stats_${gameSlug}`, JSON.stringify(stats));
+
+  try {
+    trackGameEnd(gameSlug, {
+      score,
+      streak: stats.currentStreak || 0,
+      isDaily,
+      win: score > 0,
+    });
+
+    if (isDaily) {
+      trackDailyChallenge(gameSlug, stats.currentStreak || 0, score);
+    }
+  } catch {}
+
   return stats;
 }

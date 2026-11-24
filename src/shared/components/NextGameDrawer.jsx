@@ -2,6 +2,7 @@ import React from 'react';
 import { Sparkles, ArrowRight, Gamepad2, Compass, Shield, Clock, Scale, Palette, Layers, Orbit, Cpu } from 'lucide-react';
 import { soundEngine } from '../audio/soundEngine';
 import { getAvailableGames } from '../utils/environment';
+import { trackNextGameClick } from '../analytics/analyticsService';
 
 const ALL_GAMES = [
   {
@@ -112,6 +113,7 @@ export function NextGameDrawer({ currentGameSlug, onSelectGame }) {
               key={game.slug}
               onClick={() => {
                 soundEngine.playTap();
+                trackNextGameClick(currentGameSlug, game.slug);
                 onSelectGame(game.slug);
               }}
               className={`w-full p-2.5 rounded-xl bg-gradient-to-r ${game.accent} border flex items-center justify-between hover:scale-[1.01] active:scale-[0.99] transition-all text-left`}

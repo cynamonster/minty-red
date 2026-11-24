@@ -18,6 +18,9 @@ import {
   Clock,
   Send,
   Trash2,
+  Activity,
+  BarChart3,
+  ShieldAlert,
 } from 'lucide-react';
 import {
   getStudioState,
@@ -27,6 +30,7 @@ import {
   generateAgentPrompt,
 } from '../shared/storage/studioStorage';
 import { soundEngine } from '../shared/audio/soundEngine';
+import { getAnalyticsSummary } from '../shared/analytics/analyticsService';
 
 export function StudioDashboard({ onLaunchGame, onSwitchToArcade }) {
   const [state, setState] = useState(() => getStudioState());
@@ -231,6 +235,7 @@ export function StudioDashboard({ onLaunchGame, onSwitchToArcade }) {
               { id: 'revision', label: `In Revision (${inRevision.length})` },
               { id: 'graveyard', label: `Graveyard (${rejected.length})` },
               { id: 'ideas', label: `Idea Backlog (${ideas.length})` },
+              { id: 'analytics', label: '📊 Telemetry & DAU' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -540,6 +545,216 @@ export function StudioDashboard({ onLaunchGame, onSwitchToArcade }) {
             ))}
           </div>
         )}
+
+        {/* ANALYTICS & TELEMETRY TAB */}
+        {activeTab === 'analytics' && (() => {
+          const summary = getAnalyticsSummary();
+          const { user, engagement, isAdblockActive, isGA4Ready, isGA4Blocked, isPostHogBlocked } = summary;
+          const gameSlugs = Object.keys({ ...engagement.gameStarts, ...engagement.gameCompletions });
+
+          return (
+            <div className="flex flex-col gap-5">
+              {/* Macro DAU / WAU Overview Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
+                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Activity className="w-3.5 h-3.5 text-emerald-400" />
+                    DAU (Today)
+                  </div>
+                  <div className="mt-2 text-2xl font-black text-white flex items-baseline gap-2">
+                    {engagement.isActiveToday ? 'Active' : 'Idle'}
+                    <span className="text-[11px] text-emerald-400 font-semibold">Today</span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 mt-1">
+                    First seen {user.daysSinceFirstSeen}d ago • Session #{user.sessionCount}
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
+                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <BarChart3 className="w-3.5 h-3.5 text-sky-400" />
+                    WAU (Past 7 Days)
+                  </div>
+                  <div className="mt-2 text-2xl font-black text-sky-400 flex items-baseline gap-2">
+                    {engagement.activeDaysPast7}
+                    <span className="text-[11px] text-slate-400 font-normal">/ 7 active days</span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 mt-1">
+                    30-Day Active: {engagement.activeDaysPast30} days
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
+                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Flame className="w-3.5 h-3.5 text-amber-400" />
+                    Total Rounds Played
+                  </div>
+                  <div className="mt-2 text-2xl font-black text-amber-400">
+                    {engagement.totalRoundsPlayed}
+                  </div>
+                  <div className="text-[10px] text-slate-500 mt-1">
+                    Total Social Shares: {engagement.sharesCount || 0}
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
+                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <ShieldAlert className="w-3.5 h-3.5 text-purple-400" />
+                    Adblock Status
+                  </div>
+                  <div className="mt-2 text-2xl font-black flex items-baseline gap-2">
+                    {isAdblockActive ? (
+                      <span className="text-amber-400 text-lg">Active (Fallback)</span>
+                    ) : (
+                      <span className="text-emerald-400 text-lg">Direct Tracked</span>
+                    )}
+                  </div>
+                  <div className="text-[10px] text-slate-500 mt-1">
+                    Cloudflare edge fallback: Active
+                  </div>
+                </div>
+              </div>
+
+              {/* Provider Pipeline Status */}
+              <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-col gap-3">
+                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  Telemetry Dispatch Pipeline
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
+                    <div>
+                      <div className="font-bold text-white">Google Analytics 4</div>
+                      <div className="text-[10px] text-slate-400">Cookie-less DAU/WAU + AdSense</div>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      isGA4Blocked
+                        ? 'bg-rose-500/20 text-rose-400'
+                        : isGA4Ready
+                        ? 'bg-emerald-500/20 text-emerald-400'
+                        : 'bg-slate-800 text-slate-400'
+                    }`}>
+                      {isGA4Blocked ? 'Blocked (CF active)' : isGA4Ready ? 'Connected' : 'Configured'}
+                    </span>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
+                    <div>
+                      <div className="font-bold text-white">PostHog Analytics</div>
+                      <div className="text-[10px] text-slate-400">Post-paint load • Mobile Replays</div>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      isPostHogBlocked
+                        ? 'bg-rose-500/20 text-rose-400'
+                        : 'bg-indigo-500/20 text-indigo-400'
+                    }`}>
+                      {isPostHogBlocked ? 'Blocked (CF active)' : 'Deferred Load'}
+                    </span>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
+                    <div>
+                      <div className="font-bold text-white">Cloudflare Edge /api/track</div>
+                      <div className="text-[10px] text-slate-400">1st-party adblock-proof fallback</div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400">
+                      Live
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Game-by-Game Engagement Table */}
+              <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">
+                  Game Gameplay Funnels
+                </h4>
+                {gameSlugs.length === 0 ? (
+                  <div className="text-center py-6 text-xs text-slate-500">
+                    No gameplay events recorded in this browser session yet. Play a game to see stats populate!
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-slate-800 text-slate-400 uppercase text-[10px]">
+                          <th className="pb-2 font-bold">Game</th>
+                          <th className="pb-2 font-bold">Starts</th>
+                          <th className="pb-2 font-bold">Completions</th>
+                          <th className="pb-2 font-bold">Completion Rate</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60">
+                        {gameSlugs.map((slug) => {
+                          const starts = engagement.gameStarts[slug] || 0;
+                          const completes = engagement.gameCompletions[slug] || 0;
+                          const rate = starts > 0 ? Math.round((completes / starts) * 100) : 0;
+                          return (
+                            <tr key={slug} className="hover:bg-white/[0.02]">
+                              <td className="py-2.5 font-bold text-white capitalize">{slug}</td>
+                              <td className="py-2.5 text-slate-300">{starts}</td>
+                              <td className="py-2.5 text-slate-300">{completes}</td>
+                              <td className="py-2.5">
+                                <span className={`font-bold ${rate >= 70 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                  {rate}%
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Real-time Event Feed */}
+              <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                    Recent Event Stream (In-Browser Ring Buffer)
+                  </h4>
+                  <span className="text-[10px] text-slate-500">Last 20 events</span>
+                </div>
+                {engagement.recentEvents.length === 0 ? (
+                  <div className="text-center py-4 text-xs text-slate-500">
+                    No events captured yet.
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-1.5 max-h-60 overflow-y-auto">
+                    {engagement.recentEvents.map((evt) => (
+                      <div
+                        key={evt.id}
+                        className="px-3 py-2 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between text-xs font-mono"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-500 text-[10px]">{evt.time}</span>
+                          <span className="px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-400 text-[10px] font-bold">
+                            {evt.event}
+                          </span>
+                          {evt.game && (
+                            <span className="text-slate-300 text-xs font-sans font-semibold">
+                              {evt.game}
+                            </span>
+                          )}
+                          {evt.score !== null && (
+                            <span className="text-emerald-400 text-[11px]">
+                              score: {evt.score}
+                            </span>
+                          )}
+                        </div>
+                        {evt.adblock && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-sans">
+                            Adblock Active
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
       </main>
 
       {/* PROMPT NEW GAME MODAL */}

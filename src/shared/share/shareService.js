@@ -1,4 +1,5 @@
 // Social sharing and visual score card generator for Minty.red micro-games.
+import { trackShare } from '../analytics/analyticsService';
 
 export function formatWordleShare({ gameTitle, score, total, timeSeconds, streak, history, challengeCode }) {
   const emojiGrid = history.map(item => (item.correct ? '🟩' : '🟥')).join('');
@@ -47,6 +48,11 @@ export async function copyShareText(text) {
 
 export async function shareResult({ gameTitle, score, total, timeSeconds, streak, history, challengeCode }) {
   const text = formatWordleShare({ gameTitle, score, total, timeSeconds, streak, history, challengeCode });
+
+  try {
+    const slug = (gameTitle || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    trackShare(slug, challengeCode ? 'challenge' : 'score', score);
+  } catch {}
 
   if (navigator.share) {
     try {

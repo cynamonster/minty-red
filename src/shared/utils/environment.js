@@ -1,6 +1,7 @@
 // Environment and game availability utilities
 
 export const ALL_GAMES = [
+  'metro',
   'orbitdrop',
   'bearinglock',
   'logicgate',
@@ -13,7 +14,7 @@ export const ALL_GAMES = [
   'shinobi',
 ];
 
-export const PUBLIC_GAMES = ['orbitdrop'];
+export const PUBLIC_GAMES = ['metro', 'orbitdrop'];
 
 /**
  * Checks if the current environment is a dev / staging / internal site.

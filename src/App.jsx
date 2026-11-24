@@ -11,8 +11,10 @@ import { CityGridGame } from './games/citygrid/CityGridGame';
 import { OrbitDropGame } from './games/orbitdrop/OrbitDropGame';
 import { LogicGateGame } from './games/logicgate/LogicGateGame';
 import { BearingLockGame } from './games/bearinglock/BearingLockGame';
+import { MetroGame } from './games/metro/MetroGame';
 import { ReviewDrawer } from './shared/components/ReviewDrawer';
 import { ALL_GAMES, getAvailableGames, isDevSite } from './shared/utils/environment';
+import { initAnalytics, trackPageView, trackGameView } from './shared/analytics/analyticsService';
 
 function resolveRoute() {
   const host = window.location.hostname.toLowerCase();
@@ -139,6 +141,19 @@ export function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  useEffect(() => {
+    initAnalytics();
+  }, []);
+
+  useEffect(() => {
+    const path = activeGame === 'hub' ? '/' : `/${activeGame}`;
+    const title = activeGame === 'hub' ? 'Minty.red | Arcade Hub' : activeGame === 'dash' ? 'Minty.red | Studio' : getGameTitle(activeGame);
+    trackPageView(path, title);
+    if (activeGame !== 'hub' && activeGame !== 'dash') {
+      trackGameView(activeGame, 'navigation');
+    }
+  }, [activeGame]);
+
   const getGameTitle = (slug) => {
     if (slug === 'chronos') return 'Chronos: Year Slider';
     if (slug === 'roots') return 'Roots: Surname Origins';
@@ -150,6 +165,7 @@ export function App() {
     if (slug === 'orbitdrop') return 'OrbitDrop: Micro-Gravity Slingshot';
     if (slug === 'logicgate') return 'LogicGate: Silicon Circuit Academy';
     if (slug === 'bearinglock') return 'Bearing Lock: Compass Blitz';
+    if (slug === 'metro') return 'METRO: Transit Topology Reflex';
     return slug;
   };
 
@@ -260,8 +276,17 @@ export function App() {
         />
       )}
 
+      {/* 13. Game 11: METRO */}
+      {activeGame === 'metro' && (
+        <MetroGame
+          onHome={handleHome}
+          onSelectGame={(slug) => handleSelectGame(slug, isReviewMode)}
+          challengeCode={challengeCode}
+        />
+      )}
+
       {/* Universal In-Game Review Drawer (Active when in review mode or launched from dash) */}
-      {['chronos', 'roots', 'ethnos', 'shinobi', 'scalecraft', 'flaghex', 'citygrid', 'orbitdrop', 'logicgate', 'bearinglock'].includes(activeGame) && isReviewMode && (
+      {['chronos', 'roots', 'ethnos', 'shinobi', 'scalecraft', 'flaghex', 'citygrid', 'orbitdrop', 'logicgate', 'bearinglock', 'metro'].includes(activeGame) && isReviewMode && (
         <ReviewDrawer
           gameSlug={activeGame}
           gameTitle={getGameTitle(activeGame)}

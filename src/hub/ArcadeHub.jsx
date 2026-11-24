@@ -36,6 +36,7 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
   const orbitdropStats = getGameStats('orbitdrop');
   const logicgateStats = getGameStats('logicgate');
   const bearinglockStats = getGameStats('bearinglock');
+  const metroStats = getGameStats('metro');
 
   const handleToggleSound = () => {
     const isMutedNow = soundEngine.toggleMute();
@@ -44,6 +45,17 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
   };
 
   const allGames = [
+    {
+      slug: 'metro',
+      title: 'METRO',
+      displayTitle: 'Metro Topology',
+      tagline: 'Neon Transit Topology Reflex',
+      description: 'Stripped-down neon rapid transit diagrams from OpenStreetMap. 25-second countdown with high-voltage speed bonuses.',
+      stats: metroStats,
+      badge: 'PROTOTYPE',
+      badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+      icon: Layers,
+    },
     {
       slug: 'bearinglock',
       title: 'BEARING_LOCK',

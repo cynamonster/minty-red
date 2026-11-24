@@ -1,6 +1,19 @@
 {
   "games": [
     {
+      "slug": "metro",
+      "title": "METRO: Transit Topology Reflex",
+      "version": "1.0.0",
+      "status": "ready_for_review",
+      "rating": null,
+      "tagline": "Neon Subway Topology Reflex",
+      "description": "Stripped-down neon transit network topologies from OpenStreetMap. 25-second countdown timer with dynamic speed bonuses.",
+      "category": "Transit / Reflex / Cartography",
+      "targetSessionSeconds": 45,
+      "updatedAt": "2026-11-23T20:00:00Z",
+      "feedbackHistory": []
+    },
+    {
       "slug": "bearinglock",
       "title": "Bearing Lock",
       "version": "1.0.0",
@@ -88,8 +101,15 @@
       "description": "Guess the exact year of historical, scientific, and pop-culture milestones with a precision thumb slider. Rapid-fire 5-round blitz.",
       "category": "History / Pop-Culture",
       "targetSessionSeconds": 45,
-      "updatedAt": "2026-11-19T09:50:00Z",
-      "feedbackHistory": []
+      "updatedAt": "2026-11-23T20:23:00Z",
+      "feedbackHistory": [
+        {
+          "rating": null,
+          "verdict": "iterate",
+          "notes": "Taken off production and out of the ad rotation.",
+          "timestamp": "2026-11-23T20:23:00Z"
+        }
+      ]
     },
     {
       "slug": "roots",
@@ -121,14 +141,20 @@
       "slug": "shinobi",
       "title": "Cyber-Shinobi",
       "version": "1.1.0",
-      "status": "shipped",
-      "rating": 5,
+      "status": "ready_for_review",
+      "rating": null,
       "tagline": "3x3 Neon Card Crawler",
       "description": "Strategic card crawler with equipment absorbing math, ninjutsu meter, and sector bosses.",
       "category": "Roguelike / Strategy",
       "targetSessionSeconds": 180,
-      "updatedAt": "2026-11-03T22:00:00Z",
+      "updatedAt": "2026-11-23T20:05:00Z",
       "feedbackHistory": [
+        {
+          "rating": 5,
+          "verdict": "iterate",
+          "notes": "Taken off production and out of the ad rotation.",
+          "timestamp": "2026-11-23T20:05:00Z"
+        },
         {
           "rating": 5,
           "verdict": "ship",

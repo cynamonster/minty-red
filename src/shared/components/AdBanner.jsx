@@ -3,12 +3,14 @@ import {
   ADSENSE_CLIENT_ID,
   getAdSlot,
   getHouseAd,
+  isPlaceholderSlot,
 } from '../ads/adConfig';
 import {
   loadAdSenseScript,
   pushAdSense,
   isAdSenseBlocked,
 } from '../ads/adLoader';
+import { isDevSite } from '../utils/environment';
 import {
   Swords,
   Orbit,
@@ -17,6 +19,7 @@ import {
   Gamepad2,
   ExternalLink,
   Sparkles,
+  Compass,
 } from 'lucide-react';
 
 const ICON_MAP = {
@@ -25,6 +28,7 @@ const ICON_MAP = {
   Clock,
   Zap,
   Gamepad2,
+  Compass,
 };
 
 export function AdBanner({
@@ -34,32 +38,84 @@ export function AdBanner({
   onSelectGame,
 }) {
   const [adSenseReady, setAdSenseReady] = useState(false);
+  const [adSenseFailed, setAdSenseFailed] = useState(false);
   const [houseAd] = useState(() => getHouseAd(game));
   const adRef = useRef(null);
+  const insRef = useRef(null);
   const pushedRef = useRef(false);
+
+  const slotId = getAdSlot(game);
+  const isDev = isDevSite();
+  const isPlaceholder = isPlaceholderSlot(slotId);
+  const canAttemptAdSense = Boolean(
+    ADSENSE_CLIENT_ID && !isDev && !isPlaceholder && !adSenseFailed && !isAdSenseBlocked()
+  );
 
   useEffect(() => {
     let isMounted = true;
 
-    if (ADSENSE_CLIENT_ID && !isAdSenseBlocked()) {
-      loadAdSenseScript(ADSENSE_CLIENT_ID).then((success) => {
-        if (isMounted && success) {
-          setAdSenseReady(true);
-          // Wait for DOM layout then push
-          requestAnimationFrame(() => {
-            if (!pushedRef.current) {
-              pushAdSense();
-              pushedRef.current = true;
-            }
-          });
-        }
-      });
+    if (!canAttemptAdSense) {
+      return;
     }
+
+    loadAdSenseScript(ADSENSE_CLIENT_ID).then((success) => {
+      if (isMounted && success) {
+        setAdSenseReady(true);
+        // Wait for DOM layout then push
+        requestAnimationFrame(() => {
+          if (!pushedRef.current) {
+            pushAdSense();
+            pushedRef.current = true;
+          }
+        });
+      } else if (isMounted) {
+        setAdSenseFailed(true);
+      }
+    });
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [canAttemptAdSense]);
+
+  // Monitor AdSense status to gracefully fallback to house ad if unfilled
+  useEffect(() => {
+    if (!adSenseReady || !insRef.current) return;
+
+    const ins = insRef.current;
+
+    // Check if AdSense already set status to unfilled
+    if (ins.getAttribute('data-ad-status') === 'unfilled') {
+      setAdSenseFailed(true);
+      return;
+    }
+
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.attributeName === 'data-ad-status') {
+          const status = ins.getAttribute('data-ad-status');
+          if (status === 'unfilled') {
+            setAdSenseFailed(true);
+          }
+        }
+      }
+    });
+
+    observer.observe(ins, { attributes: true, attributeFilter: ['data-ad-status'] });
+
+    // Safety timeout: if after 2.5s AdSense has not populated or is unfilled, show house ad
+    const timer = setTimeout(() => {
+      const status = ins.getAttribute('data-ad-status');
+      if (status === 'unfilled' || (!ins.querySelector('iframe') && status !== 'filled')) {
+        setAdSenseFailed(true);
+      }
+    }, 2500);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(timer);
+    };
+  }, [adSenseReady]);
 
   const handleHouseAdClick = (e) => {
     if (!houseAd) return;
@@ -73,9 +129,8 @@ export function AdBanner({
 
   const IconComponent = houseAd && ICON_MAP[houseAd.icon] ? ICON_MAP[houseAd.icon] : Sparkles;
 
-  // Real Google AdSense Banner (when client ID configured & script active)
-  if (ADSENSE_CLIENT_ID && adSenseReady) {
-    const slotId = getAdSlot(game);
+  // Real Google AdSense Banner (when real slot configured, production site, & ad filled)
+  if (canAttemptAdSense && adSenseReady && !adSenseFailed) {
     return (
       <aside
         aria-label="Advertisement"
@@ -87,6 +142,7 @@ export function AdBanner({
         </div>
         <div className="w-full flex justify-center min-h-[50px] overflow-hidden" ref={adRef}>
           <ins
+            ref={insRef}
             className="adsbygoogle"
             style={{ display: 'block', minWidth: '300px', width: '100%', height: '50px' }}
             data-ad-client={ADSENSE_CLIENT_ID}
@@ -99,7 +155,11 @@ export function AdBanner({
     );
   }
 
-  // Graceful Arcade House Ad & Sponsor Banner (Fallback / Dev / AdBlocked)
+  if (!houseAd) {
+    return null;
+  }
+
+  // Graceful Arcade House Ad & Sponsor Banner (Fallback / Dev / AdBlocked / Unfilled)
   return (
     <aside
       aria-label="Arcade Sponsor Banner"

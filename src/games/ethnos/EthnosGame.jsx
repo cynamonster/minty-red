@@ -8,7 +8,7 @@ import { NavBar } from '../../shared/components/NavBar';
 import { ConfettiCanvas } from '../../shared/components/ConfettiCanvas';
 import { NextGameDrawer } from '../../shared/components/NextGameDrawer';
 import { AdBanner } from '../../shared/components/AdBanner';
-import { VectorMap, calculateDistanceKm, calculateRoundScore } from '../../shared/components/VectorMap';
+import { EthnosLeafletMap } from './components/EthnosLeafletMap';
 import { soundEngine } from '../../shared/audio/soundEngine';
 import {
   getDailySeed,
@@ -692,9 +692,9 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
           </div>
         </div>
 
-        {/* Interactive Vector Map */}
+        {/* Interactive Retro Leaflet Map */}
         <div className="w-full flex-1 min-h-[300px] my-1.5 flex flex-col">
-          <VectorMap
+          <EthnosLeafletMap
             targetCoords={
               isLocked && roundResult
                 ? {
@@ -807,7 +807,7 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
         {/* Image Zoom Modal */}
         {isImageZoomed && (
           <div
-            className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
+            className="fixed inset-0 z-[1000] bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
             onClick={() => setIsImageZoomed(false)}
           >
             <div
