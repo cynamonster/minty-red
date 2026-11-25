@@ -363,15 +363,21 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
             R.E.L.I.C.
           </h2>
           <p className="text-xs font-mono font-bold text-cyan-400 tracking-widest uppercase mb-4">
-            Recovery & Extrication of Lost Intertemporal Contraband
+            Recovery & Extrication of Looted Intertemporal Contraband
           </p>
 
           <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 text-left text-xs leading-relaxed text-slate-300 mb-6 space-y-2">
             <p>
-              <strong className="text-white">MISSION INTEL:</strong> Trillionaire oligarch <span className="text-cyan-300">Viktor Vane</span> looted history&apos;s greatest treasures into an automated orbital vault. Vane is dead, and the derelict station is entering orbital decay.
+              <strong className="text-white">MISSION INTEL:</strong>
             </p>
             <p>
-              Board the decaying vault, crack the stasis pods, and calibrate each artifact&apos;s exact calendar year and cultural coordinates before the <span className="text-amber-400 font-bold">45-second quantum decoherence</span> destroys the atomic matrix.
+              Using experimental tachyon chronometry, trillionaire <span className="text-cyan-300">Viktor Vane</span> looted history&apos;s greatest treasures for his private collection.
+            </p>
+            <p>  
+              He calls it the Vane Vault. You've snuck into it and are sending these artifacts home!
+            </p>
+            <p>
+              You have 45 seconds to calibrate each artifact&apos;s exact calendar year and geo-coordinates before the <span className="text-amber-400 font-bold">45-seconds</span> before too leaking too many tachyons to trace their spacetime origin.
             </p>
           </div>
 
@@ -718,7 +724,7 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
               onClick={handleNextPod}
               className="w-full h-11 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(0,240,255,0.3)] active:scale-[0.98] transition-all"
             >
-              <span>{currentIndex + 1 < ROUNDS_PER_GAME ? 'CRACK NEXT STASIS POD ➔' : 'COMPLETE SALVAGE OPERATION ➔'}</span>
+              <span>{currentIndex + 1 < ROUNDS_PER_GAME ? 'NEXT STASIS POD' : 'COMPLETE SALVAGE OPERATION'}</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -730,8 +736,8 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
         <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col p-4 animate-in fade-in duration-200">
           <div className="flex items-center justify-between pb-3 border-b border-slate-800">
             <div>
-              <h4 className="text-sm font-black text-white uppercase">{activeRelic.name}</h4>
-              <p className="text-[10px] text-cyan-400 font-mono">{activeRelic.culture} • {formatYear(activeRelic.exactYear)}</p>
+              <h4 className="text-sm font-black text-white uppercase">Artifact #{currentIndex + 1}</h4>
+              <p className="text-[10px] text-cyan-400 font-mono">Statis Pod Opened • Tachyons Leaking Out</p>
             </div>
             <button
               onClick={() => {
@@ -757,9 +763,9 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
             <div className="w-full space-y-3 text-xs leading-relaxed text-slate-300 text-left">
               <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
                 <span className="text-[10px] font-mono text-cyan-400 font-bold block mb-1">
-                  HISTORICAL PROVENANCE:
+                  VANE VAULT INTEL:
                 </span>
-                <p>{activeRelic.historicalProvenanceFact}</p>
+                <p className="text-white font-mono">{activeRelic.historicalProvenanceFact}</p>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
@@ -767,7 +773,6 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
                   MATERIAL & SPECIFICATIONS:
                 </span>
                 <p className="text-white font-mono">{activeRelic.material}</p>
-                <p className="text-slate-400 font-mono text-[10px] mt-1">Origin: {activeRelic.region}</p>
               </div>
             </div>
           </div>
