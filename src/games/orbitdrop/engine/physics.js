@@ -333,10 +333,16 @@ export function stepPhysics(probe, planets, target, dt = 1.0, bounds = DEFAULT_P
           minDist: nextMinDist,
         };
         slingshotPlanets.add(pKey);
+        const midX = (nextPos.x + p.x) / 2;
+        const midY = (nextPos.y + p.y) / 2;
         newAssists.push({
           planetName: p.name || `Planet ${i + 1}`,
-          x: nextPos.x,
-          y: nextPos.y,
+          x: midX,
+          y: midY,
+          probeX: nextPos.x,
+          probeY: nextPos.y,
+          planetX: p.x,
+          planetY: p.y,
         });
       } else {
         orbitTracking[pKey] = {

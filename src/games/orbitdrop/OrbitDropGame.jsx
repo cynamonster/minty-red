@@ -500,11 +500,20 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
           if (nextProbe.newAssists && nextProbe.newAssists.length > 0) {
             nextProbe.newAssists.forEach((assist) => {
               soundEngine.playOrbitBonus();
+              const spawnX =
+                assist.probeX !== undefined && assist.planetX !== undefined
+                  ? (assist.probeX + assist.planetX) / 2
+                  : assist.x;
+              const spawnY =
+                assist.probeY !== undefined && assist.planetY !== undefined
+                  ? (assist.probeY + assist.planetY) / 2
+                  : assist.y;
               floatingAlertsRef.current.push({
                 text: '+250 ORBIT BONUS',
-                x: assist.x,
-                y: assist.y - 12,
-                life: 60,
+                x: spawnX,
+                y: spawnY,
+                life: 90,
+                maxLife: 90,
               });
             });
           }
@@ -596,13 +605,15 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
         if (floatingAlertsRef.current.length > 0) {
           ctx.save();
           floatingAlertsRef.current = floatingAlertsRef.current.filter((fa) => {
-            fa.y -= 0.8;
+            fa.y -= 0.5;
             fa.life -= 1;
-            fa.alpha = Math.max(0, fa.life / 60);
+            const maxLife = fa.maxLife || 90;
+            fa.alpha = Math.max(0, fa.life / maxLife);
             if (fa.life <= 0) return false;
 
             ctx.font = 'bold 11px monospace';
             ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
             ctx.shadowColor = currentThemeRef.current?.shadowColor || '#38bdf8';
             ctx.shadowBlur = 8;
             ctx.fillStyle = currentThemeRef.current?.accentColor || '#38bdf8';
