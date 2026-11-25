@@ -39,12 +39,13 @@ import {
   Compass,
   Check,
   Ship,
-  ShipWheel
+  ShipWheel,
+  Infinity as InfinityIcon
 } from 'lucide-react';
 
 const ROUND_TIME_SECONDS = 25;
 const DAILY_ROUNDS = 5;
-const BLITZ_ROUNDS = 10;
+const INFINITE_MAX_STRIKES = 3;
 
 // Morse code phonetic patterns for telegraph keys
 const MORSE_KEYS = ['··—·', '··', '—·', '·——·'];
@@ -102,7 +103,7 @@ function YardarmPennant({ index, isCurrent, isPast, result }) {
               : 'border-dashed border-slate-700 text-slate-500'
           }`}
         >
-          {isCurrent ? '' : `0${index + 1}`}
+          {isCurrent ? '' : String(index + 1).padStart(2, '0')}
         </div>
       </div>
     );
@@ -175,9 +176,24 @@ function YardarmPennant({ index, isCurrent, isPast, result }) {
   );
 }
 
-function YardarmRigging({ totalRounds, currentIndex, history }) {
+function YardarmRigging({ totalRounds, currentIndex, history, isInfinite = false, strikes = 0 }) {
   const correctCount = history.filter((h) => h.correct).length;
-  const isFullDress = correctCount === totalRounds && history.length === totalRounds;
+  const isFullDress = !isInfinite && correctCount === totalRounds && history.length === totalRounds;
+
+  // In infinite mode, show a rolling halyard of up to 7 pennants
+  const slots = [];
+  if (isInfinite) {
+    const windowSize = 7;
+    const end = Math.max(currentIndex + 1, history.length);
+    const start = Math.max(0, end - windowSize);
+    for (let i = start; i < end; i++) {
+      slots.push(i);
+    }
+  } else {
+    for (let i = 0; i < totalRounds; i++) {
+      slots.push(i);
+    }
+  }
 
   return (
     <div className="w-full bg-[#08121f] border-2 border-amber-900/50 rounded-2xl p-2.5 shadow-2xl relative overflow-hidden">
@@ -187,13 +203,25 @@ function YardarmRigging({ totalRounds, currentIndex, history }) {
           <Anchor className="w-3.5 h-3.5 text-amber-400" />
           {isFullDress ? (
             <span className="text-amber-400 ml-1.5 font-bold animate-pulse">DRESSED SHIP</span>
+          ) : isInfinite ? (
+            'Infinite Sea Patrol'
           ) : (
-            'Signal Halyard • Main Yardarm'
+            'Daily Voyage' // add # of voyage. e.g., Daily Voyage #220. Should increment daily.
           )}
         </span>
         <span className="text-amber-200/80">
-          Flags: <strong className="text-white">{correctCount}</strong> / {totalRounds}
-          
+          {isInfinite ? (
+            <>
+              Flags: <strong className="text-white">{correctCount}</strong> • Fouls:{' '}
+              <strong className={strikes >= 2 ? 'text-rose-400' : 'text-amber-300'}>
+                {strikes}/3
+              </strong>
+            </>
+          ) : (
+            <>
+              Flags: <strong className="text-white">{correctCount}</strong> / {totalRounds}
+            </>
+          )}
         </span>
       </div>
 
@@ -205,7 +233,7 @@ function YardarmRigging({ totalRounds, currentIndex, history }) {
         <div className="absolute left-1.5 top-2 w-2 h-2 rounded-full bg-amber-300 border border-black shadow" />
         <div className="absolute right-1.5 top-2 w-2 h-2 rounded-full bg-amber-300 border border-black shadow" />
 
-        {Array.from({ length: totalRounds }).map((_, idx) => {
+        {slots.map((idx) => {
           const isPast = idx < history.length;
           const isCurrent = idx === currentIndex && !isPast;
           const result = isPast ? history[idx] : null;
@@ -325,9 +353,9 @@ function BourdonSteamTube({ timeLeft, maxTime }) {
           <span className={`w-2 h-2 rounded-full ${pingClass}`} />
           <span className={statusColor}>{statusText}</span>
         </span>
-        {/* <span className="text-amber-400 font-bold">
-          +{bonusYield} PTS SPEED YIELD
-        </span> */}
+        <span className="text-amber-400 font-bold">
+          +{bonusYield} PTS SPEED BONUS
+        </span>
       </div>
     </div>
   );
@@ -449,7 +477,7 @@ function SpyglassLensDisplay({ target }) {
 // ============================================================================
 
 export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
-  const [mode, setMode] = useState('menu'); // 'menu' | 'daily' | 'blitz' | 'challenge'
+  const [mode, setMode] = useState('menu'); // 'menu' | 'daily' | 'infinite' | 'challenge'
   const [stats, setStats] = useState(() => {
     const s = getGameStats('flagship');
     // Seamless fallback to legacy flaghex stats if flagship has no games played yet
@@ -467,6 +495,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
   const [totalScore, setTotalScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [maxRoundStreak, setMaxRoundStreak] = useState(0);
+  const [strikes, setStrikes] = useState(0); // 3 fouls in infinite mode
   const [history, setHistory] = useState([]); // array of { correct, target, picked, timeSpent, points }
 
   // Current round timer state
@@ -483,6 +512,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
   const timerIntervalRef = useRef(null);
   const lastTickSecondRef = useRef(null);
   const totalGameTimeRef = useRef(0);
+  const infinitePoolRef = useRef([]);
 
   // Challenge code listener
   useEffect(() => {
@@ -541,6 +571,9 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
     setRoundDeltaScore(0);
     setRoundDeltaTime(elapsed);
     setStreak(0);
+    if (mode === 'infinite') {
+      setStrikes((prev) => prev + 1);
+    }
     setIsRevealed(true);
 
     const roundData = {
@@ -584,6 +617,9 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
     } else {
       soundEngine.playWrong();
       setStreak(0);
+      if (mode === 'infinite') {
+        setStrikes((prev) => prev + 1);
+      }
     }
 
     setRoundDeltaScore(roundPoints);
@@ -604,6 +640,30 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
 
   const handleNextRound = () => {
     soundEngine.playTap();
+
+    if (mode === 'infinite') {
+      if (strikes >= INFINITE_MAX_STRIKES) {
+        finishGame();
+        return;
+      }
+
+      const nextIdx = currentIndex + 1;
+      // Replenish question queue as needed
+      if (nextIdx >= questions.length || nextIdx + 2 >= questions.length) {
+        if (!infinitePoolRef.current || infinitePoolRef.current.length === 0) {
+          infinitePoolRef.current = [...FLAGS_DATASET].sort(() => Math.random() - 0.5);
+        }
+        const nextFlag = infinitePoolRef.current.pop();
+        const nextQ = generateQuestion(nextFlag, FLAGS_DATASET, Math.random);
+        setQuestions((prev) => [...prev, nextQ]);
+      }
+
+      setIsRevealed(false);
+      setSelectedAnswer(null);
+      setCurrentIndex(nextIdx);
+      return;
+    }
+
     if (currentIndex + 1 >= questions.length) {
       finishGame();
     } else {
@@ -618,14 +678,19 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
     const correctCount = history.filter((h) => h.correct).length;
     const finalScore = totalScore;
     const isDaily = mode === 'daily';
-    const totalCount = questions.length || 5;
+    const totalCount = mode === 'infinite' ? Math.max(1, history.length) : (questions.length || 5);
 
     saveGameScore('flagship', finalScore, isDaily, correctCount);
     // Also update legacy storage for player backward compatibility
     saveGameScore('flaghex', finalScore, isDaily, correctCount);
     setStats(getGameStats('flagship'));
 
-    if (finalScore >= totalCount * 700 || correctCount >= Math.ceil(totalCount * 0.8)) {
+    const won =
+      mode === 'infinite'
+        ? correctCount >= 10 || finalScore >= 8000
+        : finalScore >= totalCount * 700 || correctCount >= Math.ceil(totalCount * 0.8);
+
+    if (won) {
       setShowConfetti(true);
       soundEngine.playBullseye();
     }
@@ -643,6 +708,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
     setTotalScore(0);
     setStreak(0);
     setMaxRoundStreak(0);
+    setStrikes(0);
     setHistory([]);
     setIsRevealed(false);
     setSelectedAnswer(null);
@@ -652,23 +718,29 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
     setMode('daily');
   };
 
-  // Start Blitz Game (10 Rapid Flags)
-  const startBlitzGame = () => {
+  // Start Infinite Game (Continuous Sea Patrol with 3 Strikes)
+  const startInfiniteGame = () => {
     soundEngine.playTap();
-    const roundQuestions = generateGameRound(BLITZ_ROUNDS, FLAGS_DATASET, Math.random);
+    const shuffled = [...FLAGS_DATASET].sort(() => Math.random() - 0.5);
+    infinitePoolRef.current = shuffled;
 
-    setQuestions(roundQuestions);
+    const initialBatch = shuffled.slice(0, 5).map((flag) =>
+      generateQuestion(flag, FLAGS_DATASET, Math.random)
+    );
+
+    setQuestions(initialBatch);
     setCurrentIndex(0);
     setTotalScore(0);
     setStreak(0);
     setMaxRoundStreak(0);
+    setStrikes(0);
     setHistory([]);
     setIsRevealed(false);
     setSelectedAnswer(null);
     setGameOver(false);
     setShowConfetti(false);
     totalGameTimeRef.current = 0;
-    setMode('blitz');
+    setMode('infinite');
   };
 
   // Start Challenge Game
@@ -694,7 +766,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
   const handleShare = async () => {
     soundEngine.playTap();
     const correctCount = history.filter((h) => h.correct).length;
-    const totalCount = questions.length || 5;
+    const totalCount = mode === 'infinite' ? history.length : (questions.length || 5);
     const res = await shareResult({
       gameTitle: 'flagship',
       score: correctCount,
@@ -702,6 +774,10 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
       timeSeconds: totalGameTimeRef.current,
       streak: stats.currentStreak,
       history,
+      customText:
+        mode === 'infinite'
+          ? `⚓ Flagship Infinite Patrol: Identified ${correctCount} flags with ${totalScore} honors!`
+          : undefined,
     });
 
     if (res.method === 'clipboard') {
@@ -717,7 +793,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
     const code = encodeChallenge('flagship', seed, totalScore, totalGameTimeRef.current);
     const url = `${window.location.origin}/flagship?c=${code}`;
 
-    const copied = await copyShareText(`⚓ I scored ${totalScore} pts in Flagship: Admiralty Blitz! Can you out-signal me? 👉 ${url}`);
+    const copied = await copyShareText(`⚓ I scored ${totalScore} pts in Flagship! Can you out-signal me? 👉 ${url}`);
     if (copied) {
       setCopyToast('Admiralty challenge link copied to clipboard!');
       setTimeout(() => setCopyToast(null), 2500);
@@ -728,8 +804,15 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
 
   // Rating Tier (Maritime Honors)
   const getRating = () => {
-    const total = questions.length || 5;
     const correctCount = history.filter((h) => h.correct).length;
+    if (mode === 'infinite') {
+      if (correctCount >= 25) return { title: 'Fleet Admiral', subtitle: 'Perfect Performance', color: 'text-amber-400' };
+      if (correctCount >= 15) return { title: 'Commodore', subtitle: 'Master Signalman', color: 'text-emerald-400' };
+      if (correctCount >= 10) return { title: 'Navigator', subtitle: 'Palette Adept', color: 'text-sky-400' };
+      if (correctCount >= 5) return { title: 'Helmsman', subtitle: 'Color Scout', color: 'text-indigo-400' };
+      return { title: 'Deckhand', subtitle: 'Flag Cadet', color: 'text-slate-400' };
+    }
+    const total = questions.length || 5;
     const ratio = correctCount / total;
     if (ratio === 1) return { title: 'Fleet Admiral', subtitle: 'Perfect Performance', color: 'text-amber-400' };
     if (ratio >= 0.8) return { title: 'Commodore', subtitle: 'Master Signalman', color: 'text-emerald-400' };
@@ -813,19 +896,21 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
               </button>
 
               <button
-                onClick={startBlitzGame}
-                className="w-full py-3.5 px-4 rounded-2xl bg-[#08121f] hover:bg-[#0c1a2d] border-2 border-amber-900/60 hover:border-amber-500/60 text-white font-bold text-xs tracking-wider active:scale-[0.98] transition-all flex items-center justify-between"
+                onClick={startInfiniteGame}
+                className="w-full py-3.5 px-4 rounded-2xl bg-[#08121f] hover:bg-[#0c1a2d] border-2 border-amber-900/60 hover:border-amber-500/60 text-white font-bold text-xs tracking-wider active:scale-[0.98] transition-all flex items-center justify-between group"
               >
                 <div className="flex items-center gap-2.5 text-left">
-                  <Zap className="w-5 h-5 text-amber-400" />
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
+                    <InfinityIcon className="w-5 h-5 text-amber-400" />
+                  </div>
                   <div>
-                    <div className="text-sm font-bold text-amber-200 leading-none">RAPID SEA PATROL (BLITZ)</div>
+                    <div className="text-sm font-bold text-amber-200 leading-none">INFINITE SEA PATROL</div>
                     <div className="text-[10px] text-slate-400 font-mono-code mt-0.5">
-                      10 Random Rounds • Endless Patrol Replay
+                      Endless Flags • 3 Mistakes Allowed
                     </div>
                   </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-amber-400" />
+                <ArrowRight className="w-4 h-4 text-amber-400 group-hover:translate-x-0.5 transition-transform" />
               </button>
             </div>
 
@@ -864,8 +949,27 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
             <div className="w-full flex items-center justify-between text-xs py-1 px-1">
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="font-bold tracking-wider text-amber-300 text-xs sm:text-sm uppercase font-mono-code whitespace-nowrap">
-                  STATION {currentIndex + 1}/{questions.length}
+                  {mode === 'infinite'
+                    ? `STATION ${currentIndex + 1}`
+                    : `STATION ${currentIndex + 1}/${questions.length}`}
                 </span>
+                {mode === 'infinite' && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-slate-900/90 border border-amber-900/60 text-[9px] font-mono-code flex items-center gap-1 shrink-0">
+                    <span className="text-slate-400">FOULS:</span>
+                    <span className="flex items-center gap-0.5">
+                      {[0, 1, 2].map((i) => (
+                        <span
+                          key={i}
+                          className={`font-bold ${
+                            i < strikes ? 'text-rose-400' : 'text-slate-600'
+                          }`}
+                        >
+                          ✕
+                        </span>
+                      ))}
+                    </span>
+                  </span>
+                )}
                 {streak >= 2 && (
                   <span className="px-1.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[9px] font-mono-code font-bold flex items-center gap-1 shrink-0 animate-pulse">
                     <Flame className="w-3 h-3 fill-amber-400" />
@@ -887,6 +991,8 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                 totalRounds={questions.length}
                 currentIndex={currentIndex}
                 history={history}
+                isInfinite={mode === 'infinite'}
+                strikes={strikes}
               />
 
               {/* 2. Bourdon Glass Steam Tube (Countdown Timer) */}
@@ -907,12 +1013,20 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                       {selectedAnswer && selectedAnswer.id === currentQ.target.id ? (
                         <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                          Correct! +{roundDeltaScore} PTS
+                          <span>Correct!</span>
+                            <span className="text-[10px] text-amber-300 font-mono-code font-normal hidden sm:inline">
+                              +{roundDeltaScore} PTS
+                            </span>
                         </span>
                       ) : (
                         <span className="text-xs font-bold text-rose-400 flex items-center gap-1">
                           <XCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                          {selectedAnswer ? 'Incorrect' : 'Loss of Pressure'}
+                          <span>{selectedAnswer ? 'Incorrect' : 'Loss of Pressure'}</span>
+                          {mode === 'infinite' && (
+                            <span className="text-[10px] text-rose-300 font-mono-code font-bold ml-1">
+                              • Foul {strikes}/{INFINITE_MAX_STRIKES}
+                            </span>
+                          )}
                         </span>
                       )}
                     </div>
@@ -934,14 +1048,31 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                     </div>
                   </div>
 
-                  {/* Bottom: Full Width NEXT Advance Button */}
-                  <button
-                    onClick={handleNextRound}
-                    className="w-full py-2 sm:py-3 rounded-xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm tracking-wider flex items-center justify-center gap-2 transition-all active:scale-[0.99] shadow-lg shadow-amber-500/25 font-mono-code"
-                  >
-                    <span>NEXT STATION</span>
-                    <ArrowRight className="w-4 h-4 text-slate-950 stroke-[2.5]" />
-                  </button>
+                  {/* Bottom: Advance Buttons */}
+                  <div className="space-y-1.5 w-full">
+                    <button
+                      onClick={handleNextRound}
+                      className="w-full py-2 sm:py-3 rounded-xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm tracking-wider flex items-center justify-center gap-2 transition-all active:scale-[0.99] shadow-lg shadow-amber-500/25 font-mono-code"
+                    >
+                      <span>
+                        {mode === 'infinite' && strikes >= INFINITE_MAX_STRIKES
+                          ? 'SEAL DISPATCH & VIEW LOGBOOK'
+                          : mode === 'daily' && currentIndex + 1 >= questions.length
+                          ? 'CONCLUDE VOYAGE & VIEW LOGBOOK'
+                          : 'NEXT VESSEL'}
+                      </span>
+                      <ArrowRight className="w-4 h-4 text-slate-950 stroke-[2.5]" />
+                    </button>
+
+                    {mode === 'infinite' && strikes < INFINITE_MAX_STRIKES && currentIndex > 0 && (
+                      <button
+                        onClick={finishGame}
+                        className="w-full py-0.5 text-center text-[10px] text-slate-400 hover:text-amber-300 font-mono-code transition-colors"
+                      >
+                        Conclude Voyage Early & Bank Honors ({totalScore} pts)
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -1046,7 +1177,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                     FLAGS IDENTIFIED
                   </div>
                   <div className="text-2xl font-black text-emerald-400 font-mono-code">
-                    {history.filter((h) => h.correct).length} / {questions.length}
+                    {history.filter((h) => h.correct).length} {mode === 'infinite' ? `/ ${history.length}` : `/ ${questions.length}`}
                   </div>
                 </div>
               </div>
@@ -1059,7 +1190,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                 <div>
                   Avg Reaction:{' '}
                   <span className="font-bold text-sky-400">
-                    {(totalGameTimeRef.current / (questions.length || 1)).toFixed(2)}s
+                    {(totalGameTimeRef.current / (history.length || 1)).toFixed(2)}s
                   </span>
                 </div>
                 <div>
@@ -1073,6 +1204,8 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                   totalRounds={questions.length}
                   currentIndex={questions.length}
                   history={history}
+                  isInfinite={mode === 'infinite'}
+                  strikes={strikes}
                 />
               </div>
 
@@ -1108,11 +1241,29 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
 
             {/* Share & Challenge Action Buttons */}
             <div className="space-y-2.5">
+              {mode === 'infinite' ? (
+                <button
+                  onClick={startInfiniteGame}
+                  className="w-full py-3 px-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs tracking-wider shadow-lg shadow-amber-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  EMBARK ON NEW INFINITE VOYAGE
+                </button>
+              ) : (
+                <button
+                  onClick={startInfiniteGame}
+                  className="w-full py-3 px-4 rounded-2xl bg-[#07111e] hover:bg-[#0c1a2d] border border-amber-900/60 hover:border-amber-500/60 text-amber-300 font-bold text-xs tracking-wider active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <InfinityIcon className="w-4 h-4" />
+                  PLAY INFINITE SEA PATROL
+                </button>
+              )}
+
               <button
                 onClick={handleShare}
-                className="w-full py-3 px-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs tracking-wider shadow-lg shadow-amber-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 px-4 rounded-2xl bg-[#07111e] hover:bg-[#0c1a2d] border border-amber-900/60 hover:border-amber-500/60 text-white font-bold text-xs tracking-wider active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
-                <Share2 className="w-4 h-4" />
+                <Share2 className="w-4 h-4 text-amber-400" />
                 TRANSMIT DISPATCH (SHARE RESULT)
               </button>
 

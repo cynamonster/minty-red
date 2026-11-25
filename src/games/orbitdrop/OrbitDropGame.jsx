@@ -1137,7 +1137,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
               )}
 
               <p className="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed">
-                Slingshot micro-probes through progressive celestial gravity wells. Unlimited probes—maximize your score through launch efficiency!
+                Slingshot micro-probes through progressive celestial gravity wells. Unlimited launches. Maximize your score through launch efficiency!
               </p>
 
               {/* Theme / Skins Quick Access Button */}
@@ -1244,7 +1244,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                         </span>
                       </div>
                       <div className="text-[11px] text-slate-400">
-                        Unlimited progressive celestial sectors. Test your endurance!
+                        Unlimited celestial sectors. Test your endurance!
                       </div>
                     </div>
                   </div>
