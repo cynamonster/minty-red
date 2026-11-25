@@ -16,10 +16,14 @@ import {
   Orbit,
   Clock,
   Zap,
+  GamepadDirectional,
   Gamepad2,
   ExternalLink,
   Sparkles,
+  Flag,
+  Anchor,
   Compass,
+  PersonStanding,
 } from 'lucide-react';
 
 const ICON_MAP = {
@@ -29,6 +33,10 @@ const ICON_MAP = {
   Zap,
   Gamepad2,
   Compass,
+  GamepadDirectional,
+  Anchor,
+  Flag,
+  PersonStanding
 };
 
 export function AdBanner({
