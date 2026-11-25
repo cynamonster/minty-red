@@ -8,6 +8,7 @@ import {
   formatYear,
 } from './datasets/artifacts';
 import { RelicLeafletMap } from './components/RelicLeafletMap';
+import { VaneVaultHero } from './components/VaneVaultHero';
 import { calculateDistanceKm } from '../../shared/components/VectorMap';
 import { GameContainer } from '../../shared/components/GameContainer';
 import { NextGameDrawer } from '../../shared/components/NextGameDrawer';
@@ -352,18 +353,11 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
         streak={stats.currentStreak}
         className="bg-[#050a18] select-none"
       >
-        <div className="flex-1 flex flex-col justify-center items-center text-center px-2 py-4">
-          {/* Neon Vault Icon */}
-          <div className="relative mb-4">
-            <div className="w-20 h-20 rounded-2xl bg-cyan-950/40 border-2 border-cyan-400/50 flex items-center justify-center shadow-[0_0_30px_rgba(0,240,255,0.25)]">
-              <Zap className="w-10 h-10 text-cyan-300 animate-pulse" />
-            </div>
-            <div className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-[10px] font-mono font-bold text-cyan-300">
-              VANE VAULT
-            </div>
-          </div>
+        <div className="flex-1 flex flex-col justify-center items-center text-center px-2 py-3">
+          {/* Vane Vault Multi-Pod Stasis Carousel Hero */}
+          <VaneVaultHero className="mb-3" />
 
-          <h2 className="text-2xl font-black tracking-tight text-white uppercase mb-2">
+          <h2 className="text-2xl font-black tracking-tight text-white uppercase mb-1">
             R.E.L.I.C.
           </h2>
           <p className="text-xs font-mono font-bold text-cyan-400 tracking-widest mb-4">
