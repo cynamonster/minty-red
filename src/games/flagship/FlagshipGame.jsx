@@ -185,7 +185,7 @@ function YardarmRigging({ totalRounds, currentIndex, history }) {
           Signal Halyard • Main Yardarm
         </span>
         <span className="text-amber-200/80">
-          Pennants: <strong className="text-white">{correctCount}</strong> / {totalRounds}
+          Flags: <strong className="text-white">{correctCount}</strong> / {totalRounds}
           {isFullDress && (
             <span className="text-amber-400 ml-1.5 font-bold animate-pulse">★ DRESSED SHIP</span>
           )}
@@ -726,11 +726,11 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
     const total = questions.length || 5;
     const correctCount = history.filter((h) => h.correct).length;
     const ratio = correctCount / total;
-    if (ratio === 1) return { title: 'Fleet Admiral • Dressed Ship', color: 'text-amber-400' };
-    if (ratio >= 0.8) return { title: 'Commodore • Master Signalman', color: 'text-emerald-400' };
-    if (ratio >= 0.6) return { title: 'Navigator • Palette Adept', color: 'text-sky-400' };
-    if (ratio >= 0.4) return { title: 'Helmsman • Color Scout', color: 'text-indigo-400' };
-    return { title: 'Deckhand • Flag Cadet', color: 'text-slate-400' };
+    if (ratio === 1) return { title: 'Fleet Admiral', subtitle: 'Dressed Ship', color: 'text-amber-400' };
+    if (ratio >= 0.8) return { title: 'Commodore', subtitle: 'Master Signalman', color: 'text-emerald-400' };
+    if (ratio >= 0.6) return { title: 'Navigator', subtitle: 'Palette Adept', color: 'text-sky-400' };
+    if (ratio >= 0.4) return { title: 'Helmsman', subtitle: 'Color Scout', color: 'text-indigo-400' };
+    return { title: 'Deckhand', subtitle: 'Flag Cadet', color: 'text-slate-400' };
   };
 
   return (
@@ -768,10 +768,10 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                 Naval Command Headquarters
               </div>
               <h1 className="text-2xl font-black text-white uppercase tracking-wider mt-1">
-                Flagship : Admiralty Reflex
+                Flagship
               </h1>
               <p className="text-xs text-slate-400 max-w-xs mx-auto mt-1.5 font-sans leading-relaxed">
-                Identify sovereign naval ensigns from abstract optical color signals before boiler steam pressure vents!
+                You're a naval navigator peering through your eyeglass. Identify national flags by the proportion of their colors before boiler steam pressure vents.
               </p>
             </div>
 
@@ -1017,11 +1017,14 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
               <span className="text-[9px] uppercase font-mono-code font-bold tracking-widest text-amber-400">
                 Voyage Concluded • Dispatch Sealed
               </span>
-              <h2 className="text-3xl font-black text-white uppercase tracking-wider">
-                Admiralty Voyage Log
-              </h2>
-              <p className={`text-sm font-bold tracking-wide ${getRating().color}`}>
+              <p className={`text-sm font-bold tracking-wide text-white`}>
+                Rating:
+              </p>
+              <h2 className={`text-3xl font-black ${getRating().color} uppercase tracking-wider`}>
                 {getRating().title}
+              </h2>
+              <p className={`text-sm ${getRating().color} uppercase tracking-wider`}>
+                {getRating().subtitle}
               </p>
             </div>
 
@@ -1036,7 +1039,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                 </div>
                 <div className="pl-3">
                   <div className="text-[9px] uppercase font-mono-code text-slate-400 font-semibold">
-                    ENSIGNS VERIFIED
+                    FLAGS IDENTIFIED
                   </div>
                   <div className="text-2xl font-black text-emerald-400 font-mono-code">
                     {history.filter((h) => h.correct).length} / {questions.length}
@@ -1070,13 +1073,13 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
               </div>
 
               {/* Signal Emoji Dispatch Sequence */}
-              <div className="p-2 rounded-xl bg-[#040810] border border-amber-900/40 flex items-center justify-center gap-1.5 flex-wrap">
+              {/* <div className="p-2 rounded-xl bg-[#040810] border border-amber-900/40 flex items-center justify-center gap-1.5 flex-wrap">
                 {history.map((h, i) => (
                   <span key={i} className="text-base">
                     {h.correct ? '🟩' : '🟥'}
                   </span>
                 ))}
-              </div>
+              </div> */}
 
               {/* 1v1 Challenge Comparison if playing challenge */}
               {challengeData && (
