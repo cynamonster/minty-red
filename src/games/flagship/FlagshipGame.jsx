@@ -39,7 +39,7 @@ import {
   Check,
 } from 'lucide-react';
 
-const ROUND_TIME_SECONDS = 30;
+const ROUND_TIME_SECONDS = 25;
 const DAILY_ROUNDS = 5;
 const BLITZ_ROUNDS = 10;
 
@@ -99,7 +99,7 @@ function YardarmPennant({ index, isCurrent, isPast, result }) {
               : 'border-dashed border-slate-700 text-slate-500'
           }`}
         >
-          {isCurrent ? 'HOIST' : `0${index + 1}`}
+          {isCurrent ? '' : `0${index + 1}`}
         </div>
       </div>
     );
@@ -320,9 +320,9 @@ function BourdonSteamTube({ timeLeft, maxTime }) {
           <span className={`w-2 h-2 rounded-full ${pingClass}`} />
           <span className={statusColor}>{statusText}</span>
         </span>
-        <span className="text-amber-400 font-bold">
+        {/* <span className="text-amber-400 font-bold">
           +{bonusYield} PTS SPEED YIELD
-        </span>
+        </span> */}
       </div>
     </div>
   );
@@ -332,25 +332,22 @@ function BourdonSteamTube({ timeLeft, maxTime }) {
 // 3. TARGET SWATCH PRESENTATION (ENSIGN vs SPYGLASS)
 // ============================================================================
 
-// Flag image graphic with fallback, rotated 90° for vertical naval ensign presentation
-function FlagGraphic({ flag }) {
+// Flag image graphic with fallback, normal horizontal naval ensign presentation
+function FlagGraphic({ flag, className = '' }) {
   if (!flag) return null;
   const imageSrc = flag.image || `/images/flags/${flag.id}.svg`;
   const fallbackSrc = `https://flagcdn.com/${flag.id}.svg`;
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center p-1 relative overflow-hidden">
+    <div className={`flex flex-col items-center justify-center relative shrink-0 ${className}`}>
       {/* Top yardarm halyard rigging wire */}
-      <div className="w-full max-w-[64px] sm:max-w-[76px] h-[2px] bg-gradient-to-r from-amber-700 via-amber-400 to-amber-700 rounded-full mb-1 shrink-0 relative">
-        <div className="absolute -top-0.5 left-1 w-1.5 h-1.5 rounded-full bg-amber-300 border border-black shadow" />
-        <div className="absolute -top-0.5 right-1 w-1.5 h-1.5 rounded-full bg-amber-300 border border-black shadow" />
-      </div>
+      {/* <div className="w-20 sm:w-24 h-[2px] bg-gradient-to-r from-amber-700 via-amber-400 to-amber-700 rounded-full mb-1 shrink-0 relative">
+        <div className="absolute -top-0.5 left-0.5 w-1.5 h-1.5 rounded-full bg-amber-300 border border-black shadow" />
+        <div className="absolute -top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-amber-300 border border-black shadow" />
+      </div> */}
 
-      {/* Flag rotated 90° */}
-      <div
-        className="rotate-90 shrink-0 flex items-center justify-center my-auto"
-        style={{ width: '104px', height: '68px' }}
-      >
+      {/* Flag normal horizontal (unrotated) */}
+      <div className="w-20 h-14 sm:w-24 sm:h-16 flex items-center justify-center shrink-0">
         <img
           src={imageSrc}
           alt={`Flag of ${flag.country}`}
@@ -359,7 +356,7 @@ function FlagGraphic({ flag }) {
               e.currentTarget.src = fallbackSrc;
             }
           }}
-          className="w-full h-full object-contain rounded-md shadow-2xl border-2 border-amber-400/80 drop-shadow-xl"
+          className="max-w-full max-h-full object-contain rounded-md shadow-2xl border-2 border-amber-400/80 drop-shadow-xl"
           loading="eager"
         />
       </div>
@@ -367,7 +364,7 @@ function FlagGraphic({ flag }) {
   );
 }
 
-// Polished Sextant Minimalist Lens (Proportional Color Pie Chart with Zero Obstructions)
+// Polished Sextant Minimalist Lens (Proportional Color Pie Chart - Guaranteed Circle)
 function SpyglassLensDisplay({ target }) {
   const colors = target.colors || ['#38bdf8'];
   const proportions = target.proportions || [1];
@@ -399,31 +396,39 @@ function SpyglassLensDisplay({ target }) {
 
   return (
     <div className="w-full h-full flex items-center justify-center p-1 relative">
-      {/* Sleek Polished Bevel Casing */}
-      <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto flex items-center justify-center my-auto">
+      {/* Sleek Polished Bevel Casing - aspect-square and shrink-0 to prevent oval distortion */}
+      <div className="relative w-20 h-20 sm:w-24 sm:h-24 aspect-square shrink-0 mx-auto flex items-center justify-center">
         {/* Outer Brushed Bronze Bevel Ring with Micro-Ticks */}
-        <div className="absolute inset-0 rounded-full border-2 border-amber-400/90 shadow-2xl bg-gradient-to-tr from-amber-700 via-amber-400 to-amber-700 p-0.5 flex items-center justify-center">
-          <div className="w-full h-full rounded-full bg-[#050c18] border border-black/60 flex items-center justify-center relative">
-            <div className="absolute inset-1 rounded-full border border-dotted border-amber-400/40 pointer-events-none" />
+        <div className="absolute inset-0 aspect-square rounded-full border-2 border-amber-400/90 shadow-2xl bg-gradient-to-tr from-amber-700 via-amber-400 to-amber-700 p-0.5 flex items-center justify-center">
+          <div className="w-full h-full aspect-square rounded-full bg-[#050c18] border border-black/60 flex items-center justify-center relative">
+            <div className="absolute inset-1 aspect-square rounded-full border border-dotted border-amber-400/40 pointer-events-none" />
           </div>
         </div>
 
         {/* Clean, 100% Unobstructed Glass Lens with Pie Slices */}
-        <div className="relative w-[86%] h-[86%] rounded-full overflow-hidden border border-amber-500/80 shadow-inner flex items-center justify-center">
-          <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow">
-            {slices.map((slice, idx) => (
-              <path
-                key={idx}
-                d={slice.d}
-                fill={slice.color}
-                stroke="#050a14"
-                strokeWidth="0.8"
-              />
-            ))}
+        <div className="relative w-[86%] aspect-square rounded-full overflow-hidden border border-amber-500/80 shadow-inner flex items-center justify-center shrink-0">
+          <svg
+            viewBox="0 0 100 100"
+            className="w-full h-full aspect-square drop-shadow block"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            {slices.length === 1 ? (
+              <circle cx="50" cy="50" r="46" fill={slices[0].color} stroke="#050a14" strokeWidth="0.8" />
+            ) : (
+              slices.map((slice, idx) => (
+                <path
+                  key={idx}
+                  d={slice.d}
+                  fill={slice.color}
+                  stroke="#050a14"
+                  strokeWidth="0.8"
+                />
+              ))
+            )}
           </svg>
           {/* Subtle perimeter lens reflection (leaves colors completely clear) */}
           <div
-            className="absolute inset-0 rounded-full pointer-events-none"
+            className="absolute inset-0 aspect-square rounded-full pointer-events-none"
             style={{
               background: 'radial-gradient(circle, transparent 75%, rgba(255,255,255,0.22) 100%)',
             }}
@@ -871,29 +876,77 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
               </div>
             </div>
 
-            {/* 1. Bourdon Glass Steam Tube (Countdown Timer) */}
-            <BourdonSteamTube timeLeft={timeLeft} maxTime={ROUND_TIME_SECONDS} />
+            {/* Upper Rigging & Engine Console (Yardarm & Steam Tube) with Modal Overlay */}
+            <div className="relative w-full space-y-3">
+              {/* 1. Rigged Yardarm Spar (Signal Pennants String) */}
+              <YardarmRigging
+                totalRounds={questions.length}
+                currentIndex={currentIndex}
+                history={history}
+              />
 
-            {/* 2. Rigged Yardarm Spar (Signal Pennants String) */}
-            <YardarmRigging
-              totalRounds={questions.length}
-              currentIndex={currentIndex}
-              history={history}
-            />
+              {/* 2. Bourdon Glass Steam Tube (Countdown Timer) */}
+              <BourdonSteamTube timeLeft={timeLeft} maxTime={ROUND_TIME_SECONDS} />
 
-            {/* 3. Central Arena: Rotated Flag (90°) & Four Telegraph Keys (On the same line) */}
-            <div className="flex gap-2 sm:gap-2.5 items-stretch w-full min-h-[148px] sm:min-h-[160px]">
-              {/* Left Column: Polished Sextant Spyglass / Sovereign Flag (Rotated 90°) */}
-              <div className="w-24 sm:w-28 md:w-32 shrink-0 rounded-2xl bg-[#060c16] border-2 border-amber-900/60 p-1.5 sm:p-2 shadow-2xl flex flex-col items-center justify-center overflow-hidden relative">
-                {!isRevealed ? (
-                  // UNREVEALED: Polished Sextant Minimalist Lens (Proportional Color Pie Chart)
-                  <SpyglassLensDisplay target={currentQ.target} />
-                ) : (
-                  // REVEALED: Full High-Res Sovereign Ensign (Rotated 90°)
-                  <div className="w-full h-full animate-in zoom-in-95 duration-200 flex flex-col items-center justify-center">
-                    <FlagGraphic flag={currentQ.target} />
+              {/* Reveal Modal: Absolutely positioned on top of the masthead and steam tube */}
+              {isRevealed && (
+                <div className="absolute inset-0 z-30 rounded-2xl bg-[#060c16]/95 backdrop-blur-md border-2 border-amber-400 shadow-2xl p-2.5 sm:p-3.5 sm:pb-5 flex flex-col justify-between animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
+                  {/* Subtle brass corner accents */}
+                  <div className="absolute top-1.5 left-1.5 w-2.5 h-2.5 border-t-2 border-l-2 border-amber-400/80 pointer-events-none" />
+                  <div className="absolute top-1.5 right-1.5 w-2.5 h-2.5 border-t-2 border-r-2 border-amber-400/80 pointer-events-none" />
+                  <div className="absolute bottom-1.5 left-1.5 w-2.5 h-2.5 border-b-2 border-l-2 border-amber-400/80 pointer-events-none" />
+                  <div className="absolute bottom-1.5 right-1.5 w-2.5 h-2.5 border-b-2 border-r-2 border-amber-400/80 pointer-events-none" />
+
+                  {/* Top Left: Verification Status */}
+                  <div className="w-full flex justify-start pt-2">
+                    <div className="flex items-center gap-1.5">
+                      {selectedAnswer && selectedAnswer.id === currentQ.target.id ? (
+                        <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          Correct! +{roundDeltaScore} PTS
+                        </span>
+                      ) : (
+                        <span className="text-xs font-bold text-rose-400 flex items-center gap-1">
+                          <XCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                          {selectedAnswer ? 'Incorrect' : 'Loss of Pressure'}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                )}
+
+                  {/* Middle: Flag Graphic & Country Intelligence */}
+                  <div className="flex items-center gap-3 w-full">
+                    {/* Horizontal Sovereign Ensign Flag */}
+                    <FlagGraphic flag={currentQ.target} />
+
+                    {/* Country Name & Trivia */}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-base sm:text-lg font-black text-white uppercase tracking-wider truncate">
+                        {currentQ.target.country}
+                      </div>
+                      <p className="text-[10px] text-slate-300 italic leading-snug font-sans pt-0.5">
+                        {currentQ.target.trivia}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Bottom: Full Width NEXT Advance Button */}
+                  <button
+                    onClick={handleNextRound}
+                    className="w-full py-2 sm:py-3 rounded-xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm tracking-wider flex items-center justify-center gap-2 transition-all active:scale-[0.99] shadow-lg shadow-amber-500/25 font-mono-code"
+                  >
+                    <span>NEXT STATION</span>
+                    <ArrowRight className="w-4 h-4 text-slate-950 stroke-[2.5]" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* 3. Central Arena: Eyeglass Lens (Left, always circular & never replaced) & Four Telegraph Keys (Right) */}
+            <div className="flex gap-2 sm:gap-2.5 items-stretch w-full min-h-[148px] sm:min-h-[160px]">
+              {/* Left Column: Eyeglass View (Proportional Color Pie Chart - Always circular & visible) */}
+              <div className="w-28 sm:w-32 md:w-36 shrink-0 rounded-2xl bg-[#060c16] border-2 border-amber-900/60 p-1.5 sm:p-2 shadow-2xl flex flex-col items-center justify-center overflow-hidden relative">
+                <SpyglassLensDisplay target={currentQ.target} />
               </div>
 
               {/* Right Column: 4 Country Answer Choices on the same line */}
@@ -946,70 +999,6 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                 })}
               </div>
             </div>
-
-            {/* 4. Post-Reveal Admiralty Deck Log Feedback Entry */}
-            {isRevealed && (
-              <div className="p-2.5 sm:p-3 rounded-2xl bg-[#08121f] border-2 border-amber-900/70 space-y-1.5 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                <div className="flex items-center justify-between pb-1 border-b border-amber-900/40">
-                  <div className="flex items-center gap-1.5">
-                    {selectedAnswer && selectedAnswer.id === currentQ.target.id ? (
-                      <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                        ENSIGN VERIFIED! +{roundDeltaScore} PTS
-                      </span>
-                    ) : (
-                      <span className="text-xs font-bold text-rose-400 flex items-center gap-1">
-                        <XCircle className="w-4 h-4 text-rose-400 shrink-0" />
-                        {selectedAnswer ? 'SIGNAL FOUL' : 'TIME OUT'}
-                      </span>
-                    )}
-                    <span className="text-[10px] text-amber-400/80 font-mono-code">
-                      ({roundDeltaTime.toFixed(2)}s)
-                    </span>
-                  </div>
-
-                  <button
-                    onClick={handleNextRound}
-                    className="px-3 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1 transition-all active:scale-95 shadow shrink-0"
-                  >
-                    <span>NEXT</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                <div className="text-xs text-slate-300">
-                  <div className="flex items-center justify-between text-[11px] font-mono-code">
-                    <span className="font-bold text-white uppercase">{currentQ.target.country}</span>
-                    <span className="text-amber-400 font-semibold">{currentQ.target.continent} Basin</span>
-                  </div>
-                  <p className="text-[10px] text-slate-400 mt-0.5 italic leading-snug font-sans border-t border-slate-900/80 pt-0.5">
-                    "{currentQ.target.trivia}"
-                  </p>
-
-                  {/* Verified Naval Hex Palette Revealed on Round Completion */}
-                  {currentQ.target.colors && (
-                    <div className="flex items-center gap-1 flex-wrap pt-1.5 border-t border-slate-900/80 mt-1">
-                      <span className="text-[9px] font-mono-code text-slate-400 uppercase mr-0.5">Ensign Hex:</span>
-                      {currentQ.target.colors.map((hex, i) => (
-                        <div
-                          key={i}
-                          className="px-1.5 py-0.5 rounded bg-[#050a14] border border-amber-900/60 text-[8px] font-mono-code font-bold text-amber-200 flex items-center gap-1 shadow shrink-0"
-                        >
-                          <span
-                            className="w-1.5 h-1.5 rounded-full border border-black/50 inline-block shadow-sm"
-                            style={{ backgroundColor: hex }}
-                          />
-                          <span>{hex}</span>
-                          <span className="text-[7px] text-slate-400 font-normal">
-                            ({getColorName(hex)})
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
 
             {/* Gameplay Bottom Ad Banner */}
             <div className="pt-1">
