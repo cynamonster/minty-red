@@ -190,7 +190,7 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
         <section className="mb-4 space-y-1.5">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-            <span>100% FREE // NO DOWNLOADS // INSTANT PLAY</span>
+            <span>NO DOWNLOADS // INSTANT PLAY</span>
           </div>
 
           <h2 className="text-2xl font-black text-white tracking-tight uppercase leading-none font-sans">
