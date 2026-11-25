@@ -370,7 +370,7 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
               <strong className="text-white">MISSION BRIEFING:</strong>
             </p>
             <p>
-              Using experimental tachyon chronometry, trillionaire <span className="text-cyan-300">Viktor Vane</span> looted history&apos;s greatest treasures for his private collection.
+              Using tachyon chronometry, trillionaire <span className="text-cyan-300">Viktor Vane</span> looted history&apos;s treasures for his private collection.
             </p>
             <p>  
               He calls it the Vane Vault.<br />
