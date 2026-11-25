@@ -14,23 +14,32 @@ import {
   Sword,
   ChevronLeft,
   ChevronRight,
+  ServerCog,
+  Amphora,
+  RectangleGoggles,
+  Map,
+
 } from 'lucide-react';
 import { soundEngine } from '../../../shared/audio/soundEngine';
 
 // Master relic icon catalog requested for the Vane Vault pods
 const VAULT_ICON_CATALOG = [
-  { id: 'mirror', name: 'Scrying Glass', icon: MirrorRectangular, tag: 'OBS-01' },
-  { id: 'pyramid', name: 'Tachyon Prism', icon: Pyramid, tag: 'GEO-02' },
-  { id: 'feather', name: 'Plumed Relic', icon: Feather, tag: 'BIO-03' },
-  { id: 'lens', name: 'Chronos Lens', icon: Lens, tag: 'OPT-04' },
-  { id: 'cuboid', name: 'Tesseract Cell', icon: Cuboid, tag: 'MAT-05' },
-  { id: 'testTube', name: 'Alchemic Phial', icon: TestTubeDiagonal, tag: 'ALC-06' },
-  { id: 'image', name: 'Engraved Stele', icon: ImageIcon, tag: 'ART-07' },
-  { id: 'snail', name: 'Fossilized Ammonite', icon: Snail, tag: 'PAL-08' },
-  { id: 'bone', name: 'Hominin Talisman', icon: Bone, tag: 'ANT-09' },
-  { id: 'notebook', name: 'Encrypted Codex', icon: Notebook, tag: 'TXT-10' },
-  { id: 'wand', name: 'Scepter of Ra', icon: WandSparkles, tag: 'ARC-11' },
-  { id: 'sword', name: 'Imperial Gladius', icon: Sword, tag: 'MIL-12' },
+  { id: 'mirror', name: 'Scrying Glass', icon: MirrorRectangular, tag: 'OBS-158' },
+  { id: 'pyramid', name: 'Tachyon Prism', icon: Pyramid, tag: 'GEO-299' },
+  { id: 'feather', name: 'Plumed Relic', icon: Feather, tag: 'BIO-400' },
+  { id: 'lens', name: 'Nimrud Lens', icon: Lens, tag: 'OPT-185' },
+  { id: 'cuboid', name: 'Saqqaran Box', icon: Cuboid, tag: 'EGP-024' },
+  { id: 'testTube', name: 'Alchemic Phial', icon: TestTubeDiagonal, tag: 'ALC-079' },
+  { id: 'image', name: 'Engraved Stele', icon: ImageIcon, tag: 'ART-282' },
+  { id: 'snail', name: 'Ammonite Fossil', icon: Snail, tag: 'PAL-180' },
+  { id: 'bone', name: 'Missing Link', icon: Bone, tag: 'ANT-288' },
+  { id: 'notebook', name: 'Encrypted Codex', icon: Notebook, tag: 'TXT-408' },
+  { id: 'wand', name: 'Scepter of Ra', icon: WandSparkles, tag: 'ARC-072' },
+  { id: 'sword', name: 'Imperial Gladius', icon: Sword, tag: 'MIL-015' },
+  { id: 'servercog', name: 'Antikythera Mech', icon: ServerCog, tag: 'GRK-901' },
+  { id: 'amphora', name: 'Predynastic Vase', icon: Amphora, tag: 'EGP-031' },
+  { id: 'rectangleGoggles', name: 'Chronovisor', icon: RectangleGoggles, tag: 'VAT-740' },
+  { id: 'piri', name: 'Piri Reis Map', icon: Map, tag: 'MAP-151' },
 ];
 
 function shuffleArray(array) {
@@ -287,10 +296,10 @@ export function VaneVaultHero({ className = '' }) {
                       isCenter ? 'bg-cyan-400 animate-pulse' : 'bg-slate-600'
                     }`}
                   ></span>
-                  {isCenter ? 'LOCK 99.8%' : item.tag}
+                  {item.tag}
                 </span>
                 <span className="text-[6px] font-mono">
-                  {isCenter ? 'TACHYON-9' : 'STASIS'}
+                  {isCenter ? 'LOCK 99.8%' : 'STASIS'}
                 </span>
               </div>
 
@@ -365,7 +374,7 @@ export function VaneVaultHero({ className = '' }) {
       <div className="w-36 h-2 -mt-1 bg-gradient-to-t from-cyan-500/30 to-transparent rounded-full border-t border-cyan-400/80 blur-[0.5px]"></div>
 
       {/* Micro-Indicators Pagination Dots */}
-      <div className="flex items-center gap-1 mt-2">
+      {/* <div className="flex items-center gap-1 mt-2">
         {items.map((_, i) => (
           <button
             key={i}
@@ -384,7 +393,7 @@ export function VaneVaultHero({ className = '' }) {
             }`}
           />
         ))}
-      </div>
+      </div> */}
 
       {/* Embedded Laser Sweep Keyframe Style */}
       <style>{`
