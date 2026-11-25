@@ -80,7 +80,7 @@ export const HOUSE_ADS = [
     id: 'arcade-hub',
     gameSlug: 'hub',
     title: 'Minty Arcade Pass',
-    tagline: 'Bite-sized web games • Full-sized fun',
+    tagline: 'Bite-sized games • Full-sized fun',
     cta: 'Browse Arcade',
     icon: 'GamepadDirectional',
     accentColor: '#8b5cf6',
