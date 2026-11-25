@@ -2,7 +2,7 @@
 import { trackShare } from '../analytics/analyticsService';
 
 export function formatWordleShare({ gameTitle, score, total, timeSeconds, streak, history, challengeCode }) {
-  const emojiGrid = history.map(item => (item.correct ? '🟩' : '🟥')).join('');
+  const emojiGrid = (history || []).map(item => (item.correct ? '🟩' : '🟥')).join('');
   const slug = (gameTitle || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'https://minty.red';
   const hubUrl = challengeCode
@@ -74,67 +74,89 @@ export async function shareResult({ gameTitle, score, total, timeSeconds, streak
   return { method: 'clipboard', success: copied };
 }
 
-// Generate downloadable 1200x630 social badge via HTML5 Canvas
-export function generateCanvasBadge({ gameTitle, score, total, timeSeconds, rankTitle, history }) {
+// Generate downloadable 1200x630 social score badge via HTML5 Canvas (Style 3 Minimal Bold Typographic)
+export function generateCanvasBadge({ gameTitle, score, total, timeSeconds, rankTitle, history, challengeCode }) {
   const canvas = document.createElement('canvas');
-  canvas.width = 1000;
-  canvas.height = 560;
+  canvas.width = 1200;
+  canvas.height = 630;
   const ctx = canvas.getContext('2d');
 
-  // Background Gradient
-  const bgGrad = ctx.createLinearGradient(0, 0, 1000, 560);
-  bgGrad.addColorStop(0, '#0c0f17');
-  bgGrad.addColorStop(1, '#151d2d');
-  ctx.fillStyle = bgGrad;
-  ctx.fillRect(0, 0, 1000, 560);
+  const slug = (gameTitle || 'game').toLowerCase().replace(/[^a-z0-9]/g, '');
 
-  // Border Glow
-  ctx.strokeStyle = '#10b981';
-  ctx.lineWidth = 4;
-  ctx.strokeRect(20, 20, 960, 520);
+  // Background #07090e
+  ctx.fillStyle = '#07090e';
+  ctx.fillRect(0, 0, 1200, 630);
 
-  // Brand Header
-  ctx.fillStyle = '#10b981';
-  ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-  ctx.fillText('MINTY.RED ARCADE', 60, 80);
+  // Border #1e293b
+  ctx.strokeStyle = '#1e293b';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(1, 1, 1198, 628);
 
-  // Game Title
+  // Top Divider line
+  ctx.strokeStyle = 'rgba(30, 41, 59, 0.8)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(80, 130);
+  ctx.lineTo(1120, 130);
+  ctx.stroke();
+
+  // 1. Top-Left: Direct Game URL
   ctx.fillStyle = '#ffffff';
-  ctx.font = '900 68px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-  ctx.fillText(gameTitle.toUpperCase(), 60, 165);
+  ctx.font = '900 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  ctx.fillText(`MINTY.RED/${slug.toUpperCase()}`, 80, 85);
 
-  // Rank / Subtitle
+  // 2. Top-Right: Score Card / Streak Badge
+  ctx.font = '600 18px monospace';
   ctx.fillStyle = '#94a3b8';
-  ctx.font = '600 30px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-  ctx.fillText(`Rank: ${rankTitle}`, 60, 215);
-
-  // Score Box
-  ctx.fillStyle = '#1e293b';
-  ctx.roundRect(60, 260, 400, 160, 16);
-  ctx.fill();
-
+  ctx.textAlign = 'right';
+  ctx.fillText(`${total} ROUNDS // `, 980, 85);
   ctx.fillStyle = '#38bdf8';
-  ctx.font = '800 72px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-  ctx.fillText(`${score}/${total}`, 90, 355);
+  ctx.fillText('SCORE CARD', 1120, 85);
+
+  // Reset text align
+  ctx.textAlign = 'left';
+
+  // 3. Category / Tag
+  ctx.fillStyle = '#38bdf8';
+  ctx.font = '700 16px monospace';
+  ctx.fillText(`// ${rankTitle ? rankTitle.toUpperCase() : 'EXPEDITION RESULT'}`, 80, 210);
+
+  // 4. Headline
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '900 84px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  ctx.fillText(gameTitle.toUpperCase(), 80, 310);
+
+  // 5. Score Box & Emojis
+  ctx.fillStyle = '#38bdf8';
+  ctx.font = '800 64px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  ctx.fillText(`${score}/${total}`, 80, 410);
 
   ctx.fillStyle = '#94a3b8';
-  ctx.font = '500 24px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-  ctx.fillText(`⚡ ${timeSeconds.toFixed(1)}s elapsed`, 90, 395);
+  ctx.font = '500 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  ctx.fillText(`in ${timeSeconds.toFixed(1)} seconds`, 280, 405);
 
-  // Emojis / Blocks Box
-  ctx.fillStyle = '#1e293b';
-  ctx.roundRect(490, 260, 450, 160, 16);
-  ctx.fill();
+  // History Emoji Blocks
+  if (history && history.length > 0) {
+    ctx.font = '40px monospace';
+    const blockString = history.map(h => (h.correct ? '🟩' : '🟥')).join(' ');
+    ctx.fillText(blockString, 80, 490);
+  }
 
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '48px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-  const blockString = history.map(h => (h.correct ? '🟩' : '🟥')).join(' ');
-  ctx.fillText(blockString, 520, 355);
-
-  // Footer
+  // 6. Footer Challenge
   ctx.fillStyle = '#64748b';
-  ctx.font = '500 22px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-  ctx.fillText('Play free in browser • Zero ads • Zero install', 60, 490);
+  ctx.font = '600 20px monospace';
+  const cta = challengeCode ? `Can you beat me? 👉 minty.red/${slug}?c=${challengeCode}` : `Play free in browser 👉 minty.red/${slug}`;
+  ctx.fillText(cta, 80, 565);
 
   return canvas.toDataURL('image/png');
+}
+
+// Download score badge image to device
+export function downloadScoreBadge(dataUrl, filename = 'minty-score.png') {
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = dataUrl;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }

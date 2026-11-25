@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender-og-routes.js",
+    "generate:og": "swift -module-cache-path /tmp/swift-cache scripts/generate-og-images.swift",
     "preview": "vite preview",
     "deploy:manual": "npm run build && wrangler pages deploy dist --project-name=minty-red",
     "deploy:manual:preview": "npm run build && wrangler pages deploy dist --project-name=minty-red --branch=preview"

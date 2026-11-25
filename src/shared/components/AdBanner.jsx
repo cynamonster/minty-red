@@ -134,7 +134,8 @@ export function AdBanner({
     return (
       <aside
         aria-label="Advertisement"
-        className={`w-full max-w-md mx-auto my-1 flex flex-col items-center justify-center overflow-hidden rounded-2xl bg-slate-950/80 border border-slate-800/80 p-1.5 shadow-md ${className}`}
+        className={`w-full max-w-md mx-auto my-1 flex flex-col items-center justify-center overflow-hidden rounded-2xl bg-slate-950/80 border border-slate-800/80 p-1.5 shadow-md font-sans normal-case text-left tracking-normal [font-variant:normal] ${className}`}
+        style={{ fontVariant: 'normal' }}
       >
         <div className="w-full flex items-center justify-between px-2 pb-1 text-[9px] font-mono text-slate-500 uppercase tracking-widest select-none">
           <span>Sponsored</span>
@@ -163,12 +164,13 @@ export function AdBanner({
   return (
     <aside
       aria-label="Arcade Sponsor Banner"
-      className={`w-full max-w-md mx-auto my-1 flex flex-col justify-center overflow-hidden rounded-2xl bg-gradient-to-r ${houseAd.bgGradient} border ${houseAd.borderColor} p-2 shadow-lg backdrop-blur select-none transition-all hover:border-slate-600 active:scale-[0.99] ${className}`}
+      className={`w-full max-w-md mx-auto my-1 flex flex-col justify-center overflow-hidden rounded-2xl bg-gradient-to-r ${houseAd.bgGradient} border ${houseAd.borderColor} p-2 shadow-lg backdrop-blur select-none transition-all hover:border-slate-600 active:scale-[0.99] font-sans normal-case text-left tracking-normal [font-variant:normal] ${className}`}
+      style={{ fontVariant: 'normal' }}
       onClick={handleHouseAdClick}
     >
-      <div className="flex items-center justify-between gap-2 cursor-pointer">
+      <div className="flex items-center justify-between gap-2 cursor-pointer font-sans normal-case text-left tracking-normal [font-variant:normal]">
         {/* Left: Icon & Game Info */}
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0 font-sans">
           <div
             className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border border-white/10 shadow-inner"
             style={{ backgroundColor: `${houseAd.accentColor}20`, color: houseAd.accentColor }}
@@ -176,24 +178,24 @@ export function AdBanner({
             <IconComponent className="w-4 h-4" />
           </div>
 
-          <div className="min-w-0 flex flex-col">
-            <span className="text-xs font-black text-white truncate tracking-tight">
+          <div className="min-w-0 flex flex-col font-sans">
+            <span className="text-xs font-black text-white truncate font-sans tracking-tight normal-case">
               {houseAd.title}
             </span>
-            <p className="text-[10px] text-slate-300 truncate font-medium">
+            <p className="text-[10px] text-slate-300 truncate font-medium font-sans normal-case">
               {houseAd.tagline}
             </p>
           </div>
         </div>
 
         {/* Right: CTA & Sponsored Label */}
-        <div className="flex flex-col items-end shrink-0">
+        <div className="flex flex-col items-end shrink-0 font-sans">
           <button
             type="button"
-            className="px-2.5 py-1 rounded-lg text-[10px] font-bold text-slate-950 uppercase tracking-wider flex items-center gap-1 shadow transition-all active:scale-95"
+            className="px-2.5 py-1 rounded-lg text-[10px] font-bold text-slate-950 uppercase tracking-wider flex items-center gap-1 shadow transition-all active:scale-95 font-sans"
             style={{ backgroundColor: houseAd.accentColor }}
           >
-            <span>{houseAd.cta}</span>
+            <span className="font-sans">{houseAd.cta}</span>
             <ExternalLink className="w-2.5 h-2.5 stroke-[2.5]" />
           </button>
           <span className="text-[8px] font-mono text-slate-400 uppercase tracking-wider pt-0.5">

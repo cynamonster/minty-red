@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    .card-preview-viewport {
+      width: 100%;
+      aspect-ratio: 1200 / 630;
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #07090e;
+    }
+    .card-canvas {
+      width: 1200px;
+      height: 630px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: top left;
+      user-select: none;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .font-orbitron {
+      font-family: 'Orbitron', sans-serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased p-0 m-0 font-sans">
+  <div class="p-4 space-y-4 max-w-5xl mx-auto">
+    
+    <!-- Top Selector Bar -->
+    <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[var(--card-border)]">
+      <div class="flex items-center gap-2 overflow-x-auto text-xs">
+        <span class="text-[var(--muted-foreground)] font-mono uppercase text-[10px] tracking-wider shrink-0">Game:</span>
+        <button onclick="setGame('orbitdrop')" id="tab-orbitdrop" class="tab-btn px-3 py-1.5 rounded-lg border font-mono font-bold bg-sky-500/20 text-sky-400 border-sky-500/40">OrbitDrop</button>
+        <button onclick="setGame('ethnos')" id="tab-ethnos" class="tab-btn px-3 py-1.5 rounded-lg border font-mono text-[var(--muted-foreground)] border-transparent hover:border-[var(--card-border)]">Ethnos</button>
+        <button onclick="setGame('bearinglock')" id="tab-bearinglock" class="tab-btn px-3 py-1.5 rounded-lg border font-mono text-[var(--muted-foreground)] border-transparent hover:border-[var(--card-border)]">Bearing Lock</button>
+        <button onclick="setGame('relic')" id="tab-relic" class="tab-btn px-3 py-1.5 rounded-lg border font-mono text-[var(--muted-foreground)] border-transparent hover:border-[var(--card-border)]">R.E.L.I.C.</button>
+        <button onclick="setGame('metro')" id="tab-metro" class="tab-btn px-3 py-1.5 rounded-lg border font-mono text-[var(--muted-foreground)] border-transparent hover:border-[var(--card-border)]">Metro</button>
+        <button onclick="setGame('roots')" id="tab-roots" class="tab-btn px-3 py-1.5 rounded-lg border font-mono text-[var(--muted-foreground)] border-transparent hover:border-[var(--card-border)]">Roots</button>
+        <button onclick="setGame('flagship')" id="tab-flagship" class="tab-btn px-3 py-1.5 rounded-lg border font-mono text-[var(--muted-foreground)] border-transparent hover:border-[var(--card-border)]">Flagship</button>
+        <button onclick="setGame('hub')" id="tab-hub" class="tab-btn px-3 py-1.5 rounded-lg border font-mono text-[var(--muted-foreground)] border-transparent hover:border-[var(--card-border)]">Minty.red Hub</button>
+      </div>
+
+      <div class="flex items-center gap-2 text-xs font-mono text-emerald-400 shrink-0">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span>Latest Refinements Applied</span>
+      </div>
+    </div>
+
+    <!-- Live Preview Viewport -->
+    <div id="viewport" class="card-preview-viewport shadow-2xl border border-slate-800">
+      <div id="canvas-container" class="card-canvas"></div>
+    </div>
+
+    <!-- Details Box -->
+    <div class="p-4 rounded-xl bg-[var(--card)] border border-[var(--card-border)] text-xs text-[var(--muted-foreground)] flex items-center justify-between">
+      <div>
+        <strong id="desc-title" class="text-[var(--foreground)] block text-sm mb-0.5 font-mono">OrbitDrop — Clean Typographic Card</strong>
+        <span id="desc-body">Top-left: MINTY.RED/ORBITDROP • Top-right: 5 MISSIONS // DAILY EXPEDITION</span>
+      </div>
+      <div class="shrink-0 pl-4 font-mono text-xs text-emerald-400 font-bold">
+        1200 × 630
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const cardsData = {
+      orbitdrop: {
+        url: "MINTY.RED/ORBITDROP",
+        topRightGrey: "5 MISSIONS",
+        topRightAccent: "DAILY EXPEDITION",
+        category: "GRAVITY PUZZLE",
+        headline: "ORBITDROP",
+        color: "#38bdf8",
+        descriptionHtml: "Slingshot your space probes around the gravity of planets and steer them into the goal portal."
+      },
+      ethnos: {
+        url: "MINTY.RED/ETHNOS",
+        topRightGrey: "5 ROUNDS",
+        topRightAccent: "DAILY CHALLENGE",
+        category: "WORLD FACES & GEOGRAPHY",
+        headline: "ETHNOS",
+        color: "#06b6d4",
+        descriptionHtml: "Look at real composite portraits of people from across the globe and pinpoint their home regions on the world map."
+      },
+      bearinglock: {
+        url: "MINTY.RED/BEARINGLOCK",
+        topRightGrey: "5 CORRIDORS",
+        topRightAccent: "DAILY COMPASS",
+        category: "TACTILE GLOBAL NAVIGATION",
+        headline: "BEARING LOCK",
+        color: "#f59e0b",
+        descriptionHtml: "Spin a 360-degree compass dial to lock onto the exact direction of famous world landmarks."
+      },
+      relic: {
+        url: "MINTY.RED/RELIC",
+        topRightGrey: "5 ARTIFACTS",
+        topRightAccent: "DAILY CHALLENGE",
+        category: "ARCHEOLOGY & GEOGRAPHY",
+        headline: "R.E.L.I.C.",
+        color: "#a855f7",
+        descriptionHtml: "Inspect famous ancient treasures, guess what year they were made, and find where they were discovered before time's up."
+      },
+      metro: {
+        url: "MINTY.RED/METRO",
+        topRightGrey: "5 CITIES",
+        topRightAccent: "DAILY CHALLENGE",
+        category: "SUBWAY MAP REFLEX",
+        headline: "METRO",
+        color: "#10b981",
+        descriptionHtml: "Identify cities by their subway systems."
+      },
+      roots: {
+        url: "MINTY.RED/ROOTS",
+        topRightGrey: "5 NAMES",
+        topRightAccent: "DAILY CHALLENGE",
+        category: "SURNAMES & LANGUAGE",
+        headline: "ROOTS",
+        color: "#f43f5e",
+        descriptionHtml: "Trace last names back to their original languages, countries, and historical meanings."
+      },
+      flagship: {
+        url: "MINTY.RED/FLAGSHIP",
+        topRightGrey: "5 FLAGS",
+        topRightAccent: "DAILY VOYAGE",
+        category: "FLAG RECOGNITION",
+        headline: "FLAGSHIP",
+        color: "#0284c7",
+        descriptionHtml: "Test your vexillology by matching national flags to their color distributions before time runs out."
+      },
+      hub: {
+        url: "MINTY.RED",
+        topRightGrey: "TRY NOW",
+        topRightAccent: "FREE IN BROWSER",
+        category: "MICRO ARCADE",
+        headline: "MINTY.RED",
+        color: "#10b981",
+        descriptionHtml: "Fun, fast, free daily games right in your browser.<br/><span class='mt-1 inline-block'>Find your favorite.</span>"
+      }
+    };
+
+    let activeGame = 'orbitdrop';
+
+    function setGame(slug) {
+      activeGame = slug;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.className = 'tab-btn px-3 py-1.5 rounded-lg border font-mono text-[var(--muted-foreground)] border-transparent hover:border-[var(--card-border)]';
+      });
+      const current = document.getElementById('tab-' + slug);
+      if (current) {
+        current.className = 'tab-btn px-3 py-1.5 rounded-lg border font-mono font-bold bg-sky-500/20 text-sky-400 border-sky-500/40';
+      }
+
+      const d = cardsData[slug];
+      document.getElementById('desc-title').innerText = `${d.headline} — Clean Typographic Card`;
+      document.getElementById('desc-body').innerText = `Top-left: ${d.url} • Top-right: ${d.topRightGrey} // ${d.topRightAccent} • Category: ${d.category}`;
+
+      renderCard();
+    }
+
+    function renderCard() {
+      const container = document.getElementById("canvas-container");
+      if (!container) return;
+      const d = cardsData[activeGame];
+
+      container.innerHTML = `
+        <div class="w-full h-full bg-[#07090e] border border-slate-800/90 flex flex-col justify-between p-20 select-none relative text-slate-100">
+          
+          <!-- Top Header Bar -->
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-8">
+            <div class="text-3xl font-black font-orbitron tracking-tight text-white flex items-center gap-2">
+              <span>${d.url}</span>
+            </div>
+            <div class="font-mono text-lg flex items-center gap-2">
+              <span class="text-slate-400 font-semibold">${d.topRightGrey}</span>
+              <span class="text-slate-600">//</span>
+              <span style="color: ${d.color}; font-weight: 700;">${d.topRightAccent}</span>
+            </div>
+          </div>
+
+          <!-- Center Content: Generous Negative Space & Clean Hierarchy -->
+          <div class="space-y-6 my-auto pr-12">
+            <div class="font-mono text-base font-semibold tracking-widest uppercase" style="color: ${d.color};">
+              // ${d.category}
+            </div>
+
+            <h1 class="text-8xl font-black font-orbitron tracking-tight text-white uppercase leading-none">
+              ${d.headline}
+            </h1>
+
+            <p class="text-3xl text-slate-300 font-normal max-w-4xl leading-relaxed">
+              ${d.descriptionHtml}
+            </p>
+          </div>
+
+        </div>
+      `;
+
+      adjustScale();
+    }
+
+    function adjustScale() {
+      const viewport = document.getElementById("viewport");
+      const container = document.getElementById("canvas-container");
+      if (!viewport || !container) return;
+      const width = viewport.clientWidth;
+      const scale = width / 1200;
+      container.style.transform = `scale(${scale})`;
+    }
+
+    window.addEventListener("resize", adjustScale);
+    window.addEventListener("DOMContentLoaded", () => {
+      renderCard();
+    });
+  </script>
+</body>
+</html>

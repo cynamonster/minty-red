@@ -57,9 +57,9 @@ export const HOUSE_ADS = [
   {
     id: 'orbitdrop-skins',
     gameSlug: 'orbitdrop',
-    title: 'OrbitDrop Daily Slingshot',
-    tagline: 'Keplerian physics with daily global leaderboard',
-    cta: 'Try OrbitDrop',
+    title: 'OrbitDrop',
+    tagline: 'Gravity slingshot',
+    cta: 'Play Now',
     icon: 'Orbit',
     accentColor: '#0ea5e9',
     bgGradient: 'from-sky-950/40 via-cyan-950/30 to-slate-900/60',
