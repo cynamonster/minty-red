@@ -182,13 +182,15 @@ function YardarmRigging({ totalRounds, currentIndex, history }) {
       <div className="flex items-center justify-between text-[10px] font-mono-code uppercase tracking-wider mb-2 px-1">
         <span className="flex items-center gap-1.5 font-bold text-amber-400">
           <Anchor className="w-3.5 h-3.5 text-amber-400" />
-          Signal Halyard • Main Yardarm
+          {isFullDress ? (
+            <span className="text-amber-400 ml-1.5 font-bold animate-pulse">DRESSED SHIP</span>
+          ) : (
+            'Signal Halyard • Main Yardarm'
+          )}
         </span>
         <span className="text-amber-200/80">
           Flags: <strong className="text-white">{correctCount}</strong> / {totalRounds}
-          {isFullDress && (
-            <span className="text-amber-400 ml-1.5 font-bold animate-pulse">★ DRESSED SHIP</span>
-          )}
+          
         </span>
       </div>
 
@@ -726,7 +728,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
     const total = questions.length || 5;
     const correctCount = history.filter((h) => h.correct).length;
     const ratio = correctCount / total;
-    if (ratio === 1) return { title: 'Fleet Admiral', subtitle: 'Dressed Ship', color: 'text-amber-400' };
+    if (ratio === 1) return { title: 'Fleet Admiral', subtitle: 'Perfect Performance', color: 'text-amber-400' };
     if (ratio >= 0.8) return { title: 'Commodore', subtitle: 'Master Signalman', color: 'text-emerald-400' };
     if (ratio >= 0.6) return { title: 'Navigator', subtitle: 'Palette Adept', color: 'text-sky-400' };
     if (ratio >= 0.4) return { title: 'Helmsman', subtitle: 'Color Scout', color: 'text-indigo-400' };
