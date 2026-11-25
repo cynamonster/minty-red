@@ -12,6 +12,7 @@ import {
   Orbit,
   Zap,
   Anchor,
+  GamepadDirectional,
 } from 'lucide-react';
 import { soundEngine } from '../shared/audio/soundEngine';
 import { getGameStats } from '../shared/storage/playerStorage';
@@ -47,21 +48,21 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       title: 'BEARING_LOCK',
       displayTitle: 'Bearing Lock',
       tagline: 'Tactile 360° Compass Blitz',
-      description: 'Lock into true nautical and aerial bearings across global landmarks, cities, and corridors on an interactive 360° tactile compass dial.',
+      description: 'Test your global sense of direction by navigating across global landmarks, cities, and corridors on an interactive 360° tactile compass dial.',
       stats: bearinglockStats,
-      badge: 'LIVE NOW',
-      badgeColor: 'bg-teal-500/20 text-teal-300 border-teal-500/30',
+      badge: 'PRECISION',
+      badgeColor: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
       icon: Compass,
     },
     {
       slug: 'ethnos',
       title: 'ETHNOS',
       displayTitle: 'Ethnos',
-      tagline: 'Micro Ethnoguesser Blitz',
-      description: 'Rapid-fire demographic and phenotype identification rounds inspired by human geography.',
+      tagline: 'Guess where faces come from',
+      description: 'Examine demographic facial composites to pinpoint their historical homelands on the world map.',
       stats: ethnosStats,
-      badge: 'VIRAL',
-      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+      badge: 'Ethno-guesser',
+      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
       icon: Sparkles,
     },
   ];
@@ -145,7 +146,7 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       <header className="w-full max-w-md mx-auto px-4 py-3 flex items-center justify-between border-b border-slate-800/80 bg-slate-950/70 backdrop-blur sticky top-0 z-30">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-emerald-400 flex items-center justify-center font-black text-slate-950 text-sm shadow-md shadow-emerald-500/30">
-            M
+            <GamepadDirectional size={20} />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
@@ -189,26 +190,26 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
         <section className="mb-4 space-y-1.5">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-            <span>ZERO ADS // ZERO DOWNLOADS // 60s ROUNDS</span>
+            <span>100% FREE // NO DOWNLOADS // INSTANT PLAY</span>
           </div>
 
           <h2 className="text-2xl font-black text-white tracking-tight uppercase leading-none font-sans">
-            HIGH-SPEED <br />
+            BITE-SIZED GAMES <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-400 to-sky-400">
-              MICRO WEB GAMES
+              FULL-SIZED FUN
             </span>
           </h2>
 
           <p className="text-xs text-slate-400 leading-relaxed font-sans pt-0.5">
-            Tactile, bite-sized mobile games built for quick brain resets and friendly 1v1 challenges.
+            Daily mobile games built for boredom and bragging rights. 
           </p>
         </section>
 
         {/* SPOTLIGHT CABINET 01: OrbitDrop (100% Clickable Card) */}
         <section className="mb-4">
           <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1.5 px-0.5">
-            <span className="text-emerald-400 font-bold tracking-wider">// SPOTLIGHT CABINET 01</span>
-            <span className="text-slate-500">FREE PLAY ACTIVE</span>
+            <span className="text-emerald-400 font-bold tracking-wider">// TRENDING TODAY</span>
+            {/* <span className="text-slate-500">FREE PLAY ACTIVE</span> */}
           </div>
 
           <div
@@ -249,18 +250,18 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
                     <h3 className="text-lg font-black font-mono text-white tracking-tight uppercase group-hover:text-emerald-300 transition-colors">
                       ORBITDROP
                     </h3>
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold uppercase">
-                      LIVE NOW
-                    </span>
+                    {/* <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold uppercase">
+                      LIVE
+                    </span> */}
                   </div>
-                  <div className="text-[11px] text-slate-400 font-mono">Micro-Gravity Slingshot</div>
+                  <div className="text-[11px] text-slate-400 font-mono">Gravity Slingshot</div>
                 </div>
               </div>
             </div>
 
             {/* Card Description */}
             <p className="relative z-10 text-xs text-slate-300 mt-2.5 leading-relaxed font-sans">
-              Slingshot micro-probes through 2D Keplerian multi-body gravity wells into warp portals.
+              Slingshot around stars and planets while launching your probes through outer space.
             </p>
 
             {/* Marquee Stats Grid */}
@@ -295,8 +296,8 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
         {/* LIVE PRODUCTION CABINETS: Bearing Lock & Ethnos */}
         <section className="mb-4 space-y-2">
           <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1.5 px-0.5">
-            <span className="text-cyan-400 font-bold tracking-wider">// LIVE PRODUCTION CABINETS</span>
-            <span className="text-slate-500 font-semibold">PLAYABLE NOW</span>
+            <span className="text-cyan-400 font-bold tracking-wider">// NOW AVAILABLE</span>
+            {/* <span className="text-slate-500 font-semibold">- - - - - -</span> */}
           </div>
 
           {liveProductionGames.map((g) => {
