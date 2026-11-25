@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   MirrorRectangular,
   Pyramid,
@@ -14,7 +14,6 @@ import {
   Sword,
   ChevronLeft,
   ChevronRight,
-  ShieldAlert,
 } from 'lucide-react';
 import { soundEngine } from '../../../shared/audio/soundEngine';
 
@@ -34,7 +33,6 @@ const VAULT_ICON_CATALOG = [
   { id: 'sword', name: 'Imperial Gladius', icon: Sword, tag: 'MIL-12' },
 ];
 
-// Shuffle helper for randomized ordering on session mount
 function shuffleArray(array) {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -44,52 +42,146 @@ function shuffleArray(array) {
   return arr;
 }
 
+const POD_SPACING = 94; // Horizontal distance between pod centers in px
+const SLOTS = [-2, -1, 0, 1, 2]; // 5 rendered slots for seamless infinite wrap
+const SWIPE_THRESHOLD = 32; // Min drag distance to trigger slide
+
 export function VaneVaultHero({ className = '' }) {
-  // Shuffled icon deck
   const items = useMemo(() => shuffleArray(VAULT_ICON_CATALOG), []);
+  const total = items.length;
+
   const [activeIndex, setActiveIndex] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0); // in px
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+
+  // Gesture tracking refs
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const currentDragRef = useRef(0);
   const pauseTimerRef = useRef(null);
+  const transitionTimerRef = useRef(null);
 
-  // Auto-cycle every 3.5s unless paused by user interaction
-  useEffect(() => {
-    if (isPaused) return;
-
-    const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % items.length);
-    }, 3500);
-
-    return () => clearInterval(interval);
-  }, [isPaused, items.length]);
-
-  const handleUserNavigate = (direction) => {
-    soundEngine.playTap();
+  // Resume auto-cycle timer after user interaction
+  const resetPauseTimer = useCallback(() => {
     setIsPaused(true);
-
-    if (direction === 'prev') {
-      setActiveIndex((prev) => (prev - 1 + items.length) % items.length);
-    } else {
-      setActiveIndex((prev) => (prev + 1) % items.length);
-    }
-
-    // Resume auto-cycling after 6s of inactivity
     if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
     pauseTimerRef.current = setTimeout(() => {
       setIsPaused(false);
     }, 6000);
+  }, []);
+
+  // Programmatic smooth slide to next or previous pod
+  const slideTo = useCallback(
+    (direction, isUserAction = false) => {
+      if (isTransitioning) return;
+
+      if (isUserAction) {
+        soundEngine.playTap();
+        resetPauseTimer();
+      }
+
+      setIsTransitioning(true);
+      const targetOffset = direction === 'next' ? -POD_SPACING : POD_SPACING;
+      setDragOffset(targetOffset);
+
+      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+      transitionTimerRef.current = setTimeout(() => {
+        setActiveIndex((prev) =>
+          direction === 'next'
+            ? (prev + 1) % total
+            : (prev - 1 + total) % total
+        );
+        setDragOffset(0);
+        setIsTransitioning(false);
+      }, 420);
+    },
+    [isTransitioning, total, resetPauseTimer]
+  );
+
+  // Auto-cycle every 3.5s (silent, background)
+  useEffect(() => {
+    if (isPaused || isDraggingRef.current || isTransitioning) return;
+
+    const interval = setInterval(() => {
+      slideTo('next', false);
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [isPaused, isTransitioning, slideTo]);
+
+  // Clean up timers on unmount
+  useEffect(() => {
+    return () => {
+      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+    };
+  }, []);
+
+  // ----------------------------------------------------
+  // TOUCH & POINTER SWIPE HANDLERS (1:1 Direct Tracking)
+  // ----------------------------------------------------
+  const handlePointerDown = (e) => {
+    if (isTransitioning) return;
+    isDraggingRef.current = true;
+    startXRef.current = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
+    currentDragRef.current = 0;
+    setDragOffset(0);
+    resetPauseTimer();
   };
 
-  const total = items.length;
-  const prevIndex = (activeIndex - 1 + total) % total;
-  const nextIndex = (activeIndex + 1) % total;
+  const handlePointerMove = (e) => {
+    if (!isDraggingRef.current) return;
+    const clientX = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
+    const deltaX = clientX - startXRef.current;
 
-  const currentItem = items[activeIndex];
-  const prevItem = items[prevIndex];
-  const nextItem = items[nextIndex];
+    // Apply soft resistance if dragged beyond 1.2 pod lengths
+    const maxDrag = POD_SPACING * 1.25;
+    const clampedDelta = Math.max(-maxDrag, Math.min(maxDrag, deltaX));
 
-  const CurrentIcon = currentItem.icon;
-  const PrevIcon = prevItem.icon;
-  const NextIcon = nextItem.icon;
+    currentDragRef.current = clampedDelta;
+    setDragOffset(clampedDelta);
+  };
+
+  const handlePointerUp = () => {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
+    const finalDelta = currentDragRef.current;
+
+    if (finalDelta < -SWIPE_THRESHOLD) {
+      // Swiped left -> slide next
+      soundEngine.playTap();
+      setIsTransitioning(true);
+      setDragOffset(-POD_SPACING);
+
+      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+      transitionTimerRef.current = setTimeout(() => {
+        setActiveIndex((prev) => (prev + 1) % total);
+        setDragOffset(0);
+        setIsTransitioning(false);
+      }, 350);
+    } else if (finalDelta > SWIPE_THRESHOLD) {
+      // Swiped right -> slide prev
+      soundEngine.playTap();
+      setIsTransitioning(true);
+      setDragOffset(POD_SPACING);
+
+      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+      transitionTimerRef.current = setTimeout(() => {
+        setActiveIndex((prev) => (prev - 1 + total) % total);
+        setDragOffset(0);
+        setIsTransitioning(false);
+      }, 350);
+    } else {
+      // Snap back to center
+      setIsTransitioning(true);
+      setDragOffset(0);
+      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+      transitionTimerRef.current = setTimeout(() => {
+        setIsTransitioning(false);
+      }, 300);
+    }
+  };
 
   return (
     <div className={`relative w-full max-w-sm mx-auto flex flex-col items-center select-none ${className}`}>
@@ -102,98 +194,170 @@ export function VaneVaultHero({ className = '' }) {
         </span>
       </div>
 
-      {/* Multi-Pod Carousel Viewport */}
-      <div className="relative w-full h-36 flex items-center justify-center overflow-visible">
+      {/* Swipable Carousel Track Viewport */}
+      <div
+        className="relative w-full h-36 flex items-center justify-center overflow-hidden touch-pan-y cursor-grab active:cursor-grabbing"
+        onMouseDown={handlePointerDown}
+        onMouseMove={handlePointerMove}
+        onMouseUp={handlePointerUp}
+        onMouseLeave={handlePointerUp}
+        onTouchStart={handlePointerDown}
+        onTouchMove={handlePointerMove}
+        onTouchEnd={handlePointerUp}
+        onTouchCancel={handlePointerUp}
+      >
         
-        {/* Left Nav Button */}
+        {/* Left Nav Arrow Button */}
         <button
-          onClick={() => handleUserNavigate('prev')}
+          onClick={(e) => {
+            e.stopPropagation();
+            slideTo('prev', true);
+          }}
           aria-label="Previous Chamber"
-          className="absolute left-0 z-20 w-7 h-7 rounded-full bg-slate-900/80 border border-slate-700/80 hover:border-cyan-400 text-slate-300 hover:text-cyan-300 flex items-center justify-center transition-all active:scale-90"
+          className="absolute left-1 z-30 w-7 h-7 rounded-full bg-slate-900/80 border border-slate-700/80 hover:border-cyan-400 text-slate-300 hover:text-cyan-300 flex items-center justify-center transition-all active:scale-90"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
 
-        {/* Left Auxiliary Pod (Dimmed, Angled) */}
-        <div
-          onClick={() => handleUserNavigate('prev')}
-          className="absolute left-5 w-20 h-28 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-slate-700/60 opacity-40 hover:opacity-75 scale-90 -rotate-3 flex flex-col items-center justify-between p-1.5 cursor-pointer transition-all duration-300 shadow-md"
-        >
-          <div className="text-[7px] font-mono text-slate-500 font-bold">{prevItem.tag}</div>
-          <div className="text-slate-400 my-auto">
-            <PrevIcon className="w-7 h-7 stroke-[1.5]" />
-          </div>
-          <div className="text-[6px] font-mono text-slate-500 uppercase tracking-tighter truncate w-full text-center">
-            {prevItem.name}
-          </div>
-        </div>
+        {/* Dynamic Continuous Sliding Pods */}
+        {SLOTS.map((slotOffset) => {
+          const itemIndex = (activeIndex + slotOffset + total * 10) % total;
+          const item = items[itemIndex];
+          const IconComponent = item.icon;
 
-        {/* Center Primary Pod (Elevated, Glowing with Sweeping Laser Scanline) */}
-        <div className="relative z-10 w-28 h-36 rounded-2xl bg-gradient-to-b from-cyan-950/50 via-slate-950/80 to-cyan-950/60 border-2 border-cyan-400/80 shadow-[0_0_25px_rgba(0,240,255,0.35)] flex flex-col items-center justify-between p-2 overflow-hidden transition-all duration-300">
+          // Continuous physical position
+          const baseX = slotOffset * POD_SPACING;
+          const currentX = baseX + dragOffset;
+          const distFromCenter = Math.abs(currentX) / POD_SPACING;
+
+          // Smooth interpolation parameters
+          const scale = Math.max(0.78, 1 - distFromCenter * 0.16);
+          const rotation = Math.max(-5, Math.min(5, (currentX / POD_SPACING) * 3));
           
-          {/* Top Magnetic Collar with Status LEDs */}
-          <div className="w-full flex items-center justify-between px-1 text-[7px] font-mono text-cyan-300/90 border-b border-cyan-400/40 pb-0.5">
-            <span className="flex items-center gap-1 font-bold">
-              <span className="w-1 h-1 rounded-full bg-cyan-400 animate-pulse"></span>
-              LOCK 99.8%
-            </span>
-            <span className="text-[6px] text-cyan-400 font-mono tracking-wider">TACHYON-9</span>
-          </div>
+          // Opacity curve: 1.0 at center, 0.45 at primary side slots, fading to 0 at edges
+          let opacity = 1;
+          if (distFromCenter <= 1) {
+            opacity = 1 - distFromCenter * 0.55;
+          } else {
+            opacity = Math.max(0, 0.45 - (distFromCenter - 1) * 0.45);
+          }
 
-          {/* Sweeping Laser Scanline Beam */}
-          <div
-            className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-cyan-300 to-transparent shadow-[0_0_8px_#22d3ee] pointer-events-none z-20"
-            style={{
-              animation: 'relicLaserSweep 3s ease-in-out infinite alternate',
-            }}
-          />
+          const zIndex = distFromCenter < 0.5 ? 20 : distFromCenter < 1.5 ? 10 : 2;
+          const isCenter = distFromCenter < 0.4;
+          const laserOpacity = Math.max(0, 1 - distFromCenter * 2.2);
 
-          {/* Inner Scanline Texture Overlay */}
-          <div className="absolute inset-0 scanlines opacity-30 pointer-events-none"></div>
+          return (
+            <div
+              key={`pod-slot-${slotOffset}-${item.id}`}
+              onClick={(e) => {
+                if (slotOffset === -1) {
+                  e.stopPropagation();
+                  slideTo('prev', true);
+                } else if (slotOffset === 1) {
+                  e.stopPropagation();
+                  slideTo('next', true);
+                }
+              }}
+              style={{
+                transform: `translate3d(${currentX}px, 0, 0) scale(${scale}) rotate(${rotation}deg)`,
+                opacity,
+                zIndex,
+                transition: isTransitioning
+                  ? 'transform 400ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 400ms ease-out'
+                  : 'none',
+              }}
+              className={`absolute w-28 h-36 rounded-2xl p-2 flex flex-col items-center justify-between overflow-hidden shadow-lg select-none ${
+                isCenter
+                  ? 'bg-gradient-to-b from-cyan-950/60 via-slate-950/90 to-cyan-950/70 border-2 border-cyan-400 shadow-[0_0_25px_rgba(0,240,255,0.4)]'
+                  : 'bg-gradient-to-b from-slate-900/95 via-slate-950/95 to-slate-900/90 border border-slate-700/70 shadow-md cursor-pointer'
+              }`}
+            >
+              {/* Top Magnetic Collar */}
+              <div
+                className={`w-full flex items-center justify-between px-1 text-[7px] font-mono border-b pb-0.5 ${
+                  isCenter
+                    ? 'text-cyan-300 border-cyan-400/40'
+                    : 'text-slate-500 border-slate-800'
+                }`}
+              >
+                <span className="flex items-center gap-1 font-bold">
+                  <span
+                    className={`w-1 h-1 rounded-full ${
+                      isCenter ? 'bg-cyan-400 animate-pulse' : 'bg-slate-600'
+                    }`}
+                  ></span>
+                  {isCenter ? 'LOCK 99.8%' : item.tag}
+                </span>
+                <span className="text-[6px] font-mono">
+                  {isCenter ? 'TACHYON-9' : 'STASIS'}
+                </span>
+              </div>
 
-          {/* Floating Relic Lucide Icon */}
-          <div className="relative z-10 my-auto flex flex-col items-center justify-center animate-pulse">
-            <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-400/30 flex items-center justify-center text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.5)]">
-              <CurrentIcon className="w-8 h-8 stroke-[1.75]" />
+              {/* Sweeping Cyan Laser Beam (Visible on Center Pod) */}
+              {laserOpacity > 0 && (
+                <div
+                  className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-cyan-300 to-transparent shadow-[0_0_8px_#22d3ee] pointer-events-none z-20"
+                  style={{
+                    opacity: laserOpacity,
+                    animation: 'relicLaserSweep 2.8s ease-in-out infinite alternate',
+                  }}
+                />
+              )}
+
+              {/* Inner Scanline Overlay */}
+              <div className="absolute inset-0 scanlines opacity-30 pointer-events-none"></div>
+
+              {/* Floating Relic Lucide Icon */}
+              <div className="relative z-10 my-auto flex flex-col items-center justify-center">
+                <div
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                    isCenter
+                      ? 'bg-cyan-500/10 border border-cyan-400/40 text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.5)]'
+                      : 'text-slate-400'
+                  }`}
+                >
+                  <IconComponent className="w-8 h-8 stroke-[1.65]" />
+                </div>
+              </div>
+
+              {/* Bottom Telemetry & Artifact Tag */}
+              <div
+                className={`w-full text-center py-0.5 px-1 rounded border z-10 ${
+                  isCenter
+                    ? 'bg-slate-950/80 border-cyan-500/30'
+                    : 'bg-slate-950/50 border-slate-800'
+                }`}
+              >
+                <div
+                  className={`text-[8px] font-bold font-mono tracking-wide truncate ${
+                    isCenter ? 'text-white' : 'text-slate-400'
+                  }`}
+                >
+                  {item.name}
+                </div>
+                <div
+                  className={`text-[6px] font-mono ${
+                    isCenter ? 'text-cyan-400 font-bold' : 'text-slate-500'
+                  }`}
+                >
+                  CHAMBER {String(itemIndex + 1).padStart(2, '0')}/{total}
+                </div>
+              </div>
             </div>
-          </div>
+          );
+        })}
 
-          {/* Bottom Telemetry & Artifact Tag */}
-          <div className="w-full text-center bg-slate-950/80 py-0.5 px-1 rounded border border-cyan-500/30 z-10">
-            <div className="text-[8px] font-black text-white font-mono tracking-wide truncate">
-              {currentItem.name}
-            </div>
-            <div className="text-[6px] text-cyan-400 font-mono flex items-center justify-center gap-1">
-              <span>CHAMBER {String(activeIndex + 1).padStart(2, '0')}/{total}</span>
-              <span>•</span>
-              <span className="text-emerald-400 font-bold">SECURED</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Auxiliary Pod (Dimmed, Angled) */}
-        <div
-          onClick={() => handleUserNavigate('next')}
-          className="absolute right-5 w-20 h-28 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-slate-700/60 opacity-40 hover:opacity-75 scale-90 rotate-3 flex flex-col items-center justify-between p-1.5 cursor-pointer transition-all duration-300 shadow-md"
-        >
-          <div className="text-[7px] font-mono text-slate-500 font-bold">{nextItem.tag}</div>
-          <div className="text-slate-400 my-auto">
-            <NextIcon className="w-7 h-7 stroke-[1.5]" />
-          </div>
-          <div className="text-[6px] font-mono text-slate-500 uppercase tracking-tighter truncate w-full text-center">
-            {nextItem.name}
-          </div>
-        </div>
-
-        {/* Right Nav Button */}
+        {/* Right Nav Arrow Button */}
         <button
-          onClick={() => handleUserNavigate('next')}
+          onClick={(e) => {
+            e.stopPropagation();
+            slideTo('next', true);
+          }}
           aria-label="Next Chamber"
-          className="absolute right-0 z-20 w-7 h-7 rounded-full bg-slate-900/80 border border-slate-700/80 hover:border-cyan-400 text-slate-300 hover:text-cyan-300 flex items-center justify-center transition-all active:scale-90"
+          className="absolute right-1 z-30 w-7 h-7 rounded-full bg-slate-900/80 border border-slate-700/80 hover:border-cyan-400 text-slate-300 hover:text-cyan-300 flex items-center justify-center transition-all active:scale-90"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
-
       </div>
 
       {/* Holographic Projector Pedestal & Ground Reflection */}
@@ -205,9 +369,11 @@ export function VaneVaultHero({ className = '' }) {
           <button
             key={i}
             onClick={() => {
+              if (i === activeIndex) return;
               soundEngine.playTap();
-              setActiveIndex(i);
-              setIsPaused(true);
+              resetPauseTimer();
+              const dir = i > activeIndex ? 'next' : 'prev';
+              slideTo(dir, true);
             }}
             aria-label={`Jump to chamber ${i + 1}`}
             className={`transition-all duration-300 rounded-full ${
