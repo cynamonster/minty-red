@@ -22,6 +22,14 @@ const ALL_GAMES = [
     accent: 'from-amber-500/20 to-orange-500/20 border-amber-500/30 text-amber-400',
   },
   {
+    slug: 'flagship',
+    title: 'Flagship',
+    subtitle: 'Admiralty Signal Reflex',
+    badge: 'Naval',
+    icon: Anchor,
+    accent: 'from-amber-500/20 to-sky-500/20 border-amber-500/30 text-amber-400',
+  },
+  {
     slug: 'bearinglock',
     title: 'Bearing Lock',
     subtitle: 'Tactile Compass Blitz',
@@ -52,14 +60,6 @@ const ALL_GAMES = [
     badge: 'Lab',
     icon: Compass,
     accent: 'from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-400',
-  },
-  {
-    slug: 'flagship',
-    title: 'Flagship',
-    subtitle: 'Admiralty Signal Reflex',
-    badge: 'Lab',
-    icon: Anchor,
-    accent: 'from-amber-500/20 to-sky-500/20 border-amber-500/30 text-amber-400',
   },
 ];
 

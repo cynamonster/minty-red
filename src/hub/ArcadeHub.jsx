@@ -27,14 +27,14 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
   const orbitdropStats = getGameStats('orbitdrop');
   const ethnosStats = getGameStats('ethnos');
   const bearinglockStats = getGameStats('bearinglock');
+  const flagshipRaw = getGameStats('flagship');
+  const legacyFlaghex = getGameStats('flaghex');
+  const flagshipStats = (flagshipRaw && flagshipRaw.gamesPlayed > 0) ? flagshipRaw : legacyFlaghex;
 
   // Dev Lab Games Stats
   const relicStats = getGameStats('relic');
   const metroStats = getGameStats('metro');
   const rootsStats = getGameStats('roots');
-  const flagshipRaw = getGameStats('flagship');
-  const legacyFlaghex = getGameStats('flaghex');
-  const flagshipStats = (flagshipRaw && flagshipRaw.gamesPlayed > 0) ? flagshipRaw : legacyFlaghex;
 
   const handleToggleSound = () => {
     const isMutedNow = soundEngine.toggleMute();
@@ -44,6 +44,17 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
 
   // Live production games (available on production and dev)
   const liveProductionGames = [
+    {
+      slug: 'flagship',
+      title: 'FLAGSHIP',
+      displayTitle: 'Flagship',
+      tagline: 'Admiralty Signal Reflex',
+      description: 'Identify sovereign naval ensigns from abstract optical color signals before boiler steam pressure vents!',
+      stats: flagshipStats,
+      badge: 'NAVAL',
+      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+      icon: Anchor,
+    },
     {
       slug: 'bearinglock',
       title: 'BEARING_LOCK',
@@ -103,17 +114,6 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
       icon: Compass,
     },
-    {
-      slug: 'flagship',
-      title: 'FLAGSHIP',
-      displayTitle: 'Flagship',
-      tagline: 'Admiralty Signal Reflex',
-      description: 'Identify sovereign naval ensigns from abstract optical color signals before boiler steam pressure vents!',
-      stats: flagshipStats,
-      badge: 'NAVAL',
-      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-      icon: Anchor,
-    },
   ];
 
   // Visible playable game totals
@@ -127,7 +127,8 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       (bearinglockStats?.currentStreak || 0)
     : (orbitdropStats?.currentStreak || 0) +
       (ethnosStats?.currentStreak || 0) +
-      (bearinglockStats?.currentStreak || 0);
+      (bearinglockStats?.currentStreak || 0) +
+      (flagshipStats?.currentStreak || 0);
 
   const totalPlayed = isDev
     ? (relicStats?.gamesPlayed || 0) +
@@ -139,7 +140,8 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       (bearinglockStats?.gamesPlayed || 0)
     : (orbitdropStats?.gamesPlayed || 0) +
       (ethnosStats?.gamesPlayed || 0) +
-      (bearinglockStats?.gamesPlayed || 0);
+      (bearinglockStats?.gamesPlayed || 0) +
+      (flagshipStats?.gamesPlayed || 0);
 
   return (
     <div className="min-h-[100dvh] w-full flex flex-col bg-[#07090e] text-slate-100 select-none">
@@ -294,7 +296,7 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
           </div>
         </section>
 
-        {/* LIVE PRODUCTION CABINETS: Bearing Lock & Ethnos */}
+        {/* LIVE PRODUCTION CABINETS: Flagship, Bearing Lock & Ethnos */}
         <section className="mb-4 space-y-2">
           <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1.5 px-0.5">
             <span className="text-cyan-400 font-bold tracking-wider">// NOW AVAILABLE</span>

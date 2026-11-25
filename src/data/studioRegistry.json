@@ -103,14 +103,21 @@
       "slug": "flagship",
       "title": "Flagship: Admiralty Signal Reflex",
       "version": "2.0.0",
-      "status": "ready_for_review",
-      "rating": null,
+      "status": "shipped",
+      "rating": 5,
       "tagline": "Admiralty Signal Reflex",
       "description": "Identify sovereign naval ensigns from abstract optical color signals before boiler steam pressure vents! Features rigged yardarm halyard, Bourdon steam tube timer, and telegraph keys.",
       "category": "Naval / Geography / Reflex",
       "targetSessionSeconds": 30,
-      "updatedAt": "2026-11-24T14:40:00Z",
-      "feedbackHistory": []
+      "updatedAt": "2026-11-25T11:15:00Z",
+      "feedbackHistory": [
+        {
+          "rating": 5,
+          "verdict": "ship",
+          "notes": "Available on production. Admiralty signal reflex and naval ensign recognition.",
+          "timestamp": "2026-11-25T11:15:00Z"
+        }
+      ]
     },
     {
       "slug": "logicgate",

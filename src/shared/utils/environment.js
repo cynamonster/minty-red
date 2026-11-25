@@ -7,6 +7,7 @@ export const PUBLIC_GAMES = [
   'orbitdrop',
   'ethnos',
   'bearinglock',
+  'flagship',
 ];
 
 /**
@@ -16,7 +17,6 @@ export const LAB_GAMES = [
   'relic',
   'metro',
   'roots',
-  'flagship',
 ];
 
 /**
@@ -28,7 +28,6 @@ export const ALL_GAMES = [
   'relic',
   'metro',
   'roots',
-  'flagship',
   'flaghex', // legacy alias for flagship
 ];
 
@@ -111,7 +110,7 @@ export function normalizeGameSlug(slug) {
 
 /**
  * Returns the list of games available in the current environment.
- * On production minty.red: 'orbitdrop', 'ethnos', 'bearinglock'
+ * On production minty.red: 'orbitdrop', 'ethnos', 'bearinglock', 'flagship'
  * On dev site: production games + dev lab cartridges
  */
 export function getAvailableGames() {

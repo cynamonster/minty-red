@@ -252,7 +252,7 @@ export function App() {
         />
       )}
 
-      {/* 9. Dev Lab Game: Flagship */}
+      {/* 9. Production Game: Flagship */}
       {(activeGame === 'flagship' || activeGame === 'flaghex') && (
         <FlagshipGame
           onHome={handleHome}
