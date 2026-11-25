@@ -209,7 +209,7 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
         {/* SPOTLIGHT CABINET 01: OrbitDrop (100% Clickable Card) */}
         <section className="mb-4">
           <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1.5 px-0.5">
-            <span className="text-emerald-400 font-bold tracking-wider">// TRENDING TODAY</span>
+            <span className="text-emerald-400 font-bold tracking-wider">// FEATURED GAME</span>
             {/* <span className="text-slate-500">FREE PLAY ACTIVE</span> */}
           </div>
 
