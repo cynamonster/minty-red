@@ -374,10 +374,10 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
             </p>
             <p>  
               He calls it the Vane Vault.<br />
-              You've snuck in and are sending these artifacts home!
+              You snuck in and are sending these artifacts home!
             </p>
             <p>
-              Calibrate each artifact&apos;s calendar year and geo-coordinates within <span className="text-amber-400 font-bold">45-seconds</span> its spacetime origin is lost.
+              Tune each artifact&apos;s calendar year and coordinates within <span className="text-amber-400 font-bold">45-seconds</span> before its spacetime origin is lost.
             </p>
           </div>
 
