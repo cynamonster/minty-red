@@ -2,7 +2,7 @@
 // Curated Master Collection: Baked High-Resolution Treasures from The Met Open Access (CC0) and Wikimedia Archives.
 // Zero in-game latency, 100% offline & edge-cached resilient.
 
-import { createPRNG } from '../../../shared/storage/playerStorage';
+import { createPRNG } from '../../../shared/storage/playerStorage.js';
 
 export const RELIC_ARTIFACTS = [
   {
@@ -14,7 +14,7 @@ export const RELIC_ARTIFACTS = [
     coordinates: { lat: 25.74, lng: 32.60 },
     material: 'Repoussé Gold, Lapis Lazuli, Turquoise, Obsidian',
     imageUrl: '/images/relic/tutankhamun-mask.jpg',
-    historicalProvenanceFact: 'Crafted from two beaten sheets of high-carat gold and inlaid with colored glass and semiprecious stones. Discovered intact by Howard Carter in KV62 in 1922.',
+    historicalProvenanceFact: 'Crafted from two beaten sheets of high-carat gold and inlaid with colored glass and semiprecious stones. Discovered intact by Howard Carter in tomb KV62.',
     vaneVaultLog: 'VAULT ENTRY #001: Extracted from KV62 seconds before Carter breached the plaster seal in 1922. The luminescence of 24-karat gold under stasis vacuum remains unmatched.',
   },
   {
@@ -26,7 +26,7 @@ export const RELIC_ARTIFACTS = [
     coordinates: { lat: 49.99, lng: 8.27 },
     material: 'Tinned & Gilded Bronze, Forged Iron, Silver Foil',
     imageUrl: '/images/relic/sword-of-tiberius.jpg',
-    historicalProvenanceFact: 'An ornate legionary gladius Mainz-type presenting Tiberius receiving Germanicus after his Rhine campaign. Recovered from the Rhine gravel in 1848.',
+    historicalProvenanceFact: 'An ornate legionary gladius Mainz-type presenting Tiberius receiving Germanicus after his Rhine campaign. Recovered intact from the Rhine gravel.',
     vaneVaultLog: 'VAULT ENTRY #002: Intercepted along the Rhine riverbed before 19th-century dredging crews discovered it. The tinned bronze relief of Mars Ultor is pristine.',
   },
   {
@@ -38,7 +38,7 @@ export const RELIC_ARTIFACTS = [
     coordinates: { lat: 17.48, lng: -92.04 },
     material: 'Carved Imperial Jadeite, Spondylus Shell, Mother-of-Pearl',
     imageUrl: '/images/relic/pakal-jade-mask.jpg',
-    historicalProvenanceFact: 'Composed of over 340 interlocking polished jade tesserae with obsidian irises. Interred with ruler K\'inich Janaab\' Pakal beneath his funerary pyramid in 683 CE.',
+    historicalProvenanceFact: 'Composed of over 340 interlocking polished jade tesserae with obsidian irises. Interred with ruler K\'inich Janaab\' Pakal beneath his funerary pyramid.',
     vaneVaultLog: 'VAULT ENTRY #003: Sub-crypt salvage beam activated at 2:00 AM local time inside the Temple of Inscriptions. Each mosaic tessera resonates at 14.8 MHz.',
   },
   {
@@ -50,7 +50,7 @@ export const RELIC_ARTIFACTS = [
     coordinates: { lat: 35.67, lng: 139.65 },
     material: 'Forged Steel Cuirass, Lacquer, Gilded Copper, Silk Cord',
     imageUrl: '/images/relic/nanban-samurai-armor.jpg',
-    historicalProvenanceFact: 'A hybrid "Southern Barbarian" (Nanban) armor adapting imported European peascod breastplates for samurai warlords around the pivotal Battle of Sekigahara in 1600.',
+    historicalProvenanceFact: 'A hybrid "Southern Barbarian" (Nanban) armor adapting imported European peascod breastplates for samurai warlords around the pivotal Battle of Sekigahara.',
     vaneVaultLog: 'VAULT ENTRY #004: Secured from a daimyo stronghold outside Kyoto just prior to the Tokugawa siege. The bullet-test indentation on the breastplate is authentic proof of battle.',
   },
   {
@@ -110,7 +110,7 @@ export const RELIC_ARTIFACTS = [
     coordinates: { lat: 47.50, lng: 35.00 },
     material: 'Solid Cast, Chased & Granulated 24K Gold',
     imageUrl: '/images/relic/scythian-gold-pectoral.jpg',
-    historicalProvenanceFact: 'A masterpiece of Graeco-Scythian goldsmithing containing over 48 individual cast figurines of pastoral nomads, pegasi, and mythological beasts. Discovered in 1971.',
+    historicalProvenanceFact: 'A masterpiece of Graeco-Scythian goldsmithing containing over 48 individual cast figurines of pastoral nomads, pegasi, and mythological beasts. Unearthed during barrow excavations.',
     vaneVaultLog: 'VAULT ENTRY #009: Plucked from the central burial mound at Tovsta Mohyla. The micro-sculpted golden grasshoppers on the outer rim require a microscope to appreciate.',
   },
   {
@@ -158,7 +158,7 @@ export const RELIC_ARTIFACTS = [
     coordinates: { lat: 31.40, lng: 30.42 },
     material: 'Granodiorite Monolith, Chiseled Inscription',
     imageUrl: '/images/relic/rosetta-stone.jpg',
-    historicalProvenanceFact: 'A trilingual decree issued at Memphis in 196 BCE on behalf of King Ptolemy V in Ancient Egyptian Hieroglyphic, Demotic script, and Ancient Greek.',
+    historicalProvenanceFact: 'A trilingual decree issued at Memphis on behalf of King Ptolemy V in Ancient Egyptian Hieroglyphic, Demotic script, and Ancient Greek.',
     vaneVaultLog: 'VAULT ENTRY #013: Relocated from Fort Julien in 1799 moments before French engineer Pierre-François Bouchard spotted the black slab in the rubble.',
   },
   {
@@ -170,7 +170,7 @@ export const RELIC_ARTIFACTS = [
     coordinates: { lat: 52.09, lng: 1.34 },
     material: 'Tinned Bronze Foil, Forged Iron, Cloisonné Garnets, Gilt Bronze',
     imageUrl: '/images/relic/sutton-hoo-helmet.jpg',
-    historicalProvenanceFact: 'The centerpiece of an elite 7th-century ship burial, possibly King Rædwald of East Anglia, featuring anthropomorphic dragon and bird motifs across the face mask.',
+    historicalProvenanceFact: 'The centerpiece of an elite Anglo-Saxon ship burial, possibly King Rædwald of East Anglia, featuring anthropomorphic dragon and bird motifs across the face mask.',
     vaneVaultLog: 'VAULT ENTRY #014: Retrieved from Mound 1 at Sutton Hoo in 1939 before Basil Brown began excavation. The garnet dragon eyebrows reflect ambient light like neon embers.',
   },
   {
@@ -194,7 +194,7 @@ export const RELIC_ARTIFACTS = [
     coordinates: { lat: -22.21, lng: 29.37 },
     material: 'Beaten Gold Foil Sheets, Gold Tacks, Carved Wooden Core',
     imageUrl: '/images/relic/golden-rhino-mapungubwe.jpg',
-    historicalProvenanceFact: 'Crafted by beating gold into thin sheets fastened with miniature gold tacks over a wooden core. Excavated from royal grave #10 at Mapungubwe Hill in 1932.',
+    historicalProvenanceFact: 'Crafted by beating gold into thin sheets fastened with miniature gold tacks over a wooden core. Excavated from royal grave #10 at Mapungubwe Hill.',
     vaneVaultLog: 'VAULT ENTRY #016: Snatched from the elite burial terrace on Mapungubwe Hill overlooking the Limpopo. The hammered foil is barely 0.2mm thick.',
   },
   {
@@ -230,7 +230,7 @@ export const RELIC_ARTIFACTS = [
     coordinates: { lat: 37.73, lng: 22.75 },
     material: 'Chased Gold Sheet, Repoussé Detailing',
     imageUrl: '/images/relic/mask-of-agamemnon.jpg',
-    historicalProvenanceFact: 'Unearthed in 1876 by Heinrich Schliemann over the face of a deceased Mycenaean warlord. Predates the Trojan War by approximately 350 years.',
+    historicalProvenanceFact: 'Unearthed by Heinrich Schliemann over the face of a deceased Mycenaean warlord during excavations at Mycenae.',
     vaneVaultLog: 'VAULT ENTRY #019: Beam-harvested from Shaft Grave V at Mycenae right through Schliemann’s spade line. The mustache and distinct ear profiles are entirely genuine.',
   },
   {
@@ -302,7 +302,7 @@ export const RELIC_ARTIFACTS = [
     coordinates: { lat: 32.54, lng: 44.42 },
     material: 'Baked Clay Barrel Cylinder, Akkadian Cuneiform Script',
     imageUrl: '/images/relic/persian-cyrus-cylinder.jpg',
-    historicalProvenanceFact: 'Deposited as a royal foundation deposit in Babylon after Cyrus the Great conquered the city in 539 BCE, freeing exiled peoples and restoring regional sanctuaries.',
+    historicalProvenanceFact: 'Deposited as a royal foundation deposit in Babylon after Cyrus the Great conquered the city, freeing exiled peoples and restoring regional sanctuaries.',
     vaneVaultLog: 'VAULT ENTRY #025: Snatched from the foundation trench of the Esagila temple. Known throughout the quadrant as humanity’s earliest declaration of rights.',
   },
 ];
@@ -358,24 +358,31 @@ export function calculateRelicScore({
   exactYear,
   distanceKm,
 }) {
-  const yearError = Math.abs(guessedYear - exactYear);
   const antiquity = Math.max(100, 2025 - exactYear);
 
   // 1. Year Score (0 - 2,500 pts)
   // Decay exponent k is scaled relative to the antiquity of the artifact
-  const k = 1 / Math.max(30, antiquity * 0.08);
-  const chronoScore = Math.max(0, Math.floor(2500 * Math.exp(-k * yearError)));
+  let chronoScore = 0;
+  let yearError = null;
+  if (guessedYear !== null && guessedYear !== undefined && !Number.isNaN(guessedYear)) {
+    yearError = Math.abs(guessedYear - exactYear);
+    const k = 1 / Math.max(30, antiquity * 0.08);
+    chronoScore = Math.max(0, Math.floor(2500 * Math.exp(-k * yearError)));
+  }
 
   // 2. Geodesic Map Score (0 - 2,500 pts)
   // Distance decay from true cultural origin
-  const geoScore = Math.max(0, Math.floor(2500 * Math.exp(-distanceKm / 1800)));
+  let geoScore = 0;
+  if (distanceKm !== null && distanceKm !== undefined && !Number.isNaN(distanceKm)) {
+    geoScore = Math.max(0, Math.floor(2500 * Math.exp(-distanceKm / 1800)));
+  }
 
   // 3. Temporal Resonance Bonus (+1,000 pts)
   // Both Year and Map within 5% error threshold:
   // - Year error <= 5% of antiquity
   // - Distance <= 1,000 km (approx 5% of half Earth circumference 20,000 km)
-  const isYearResonant = yearError <= Math.max(25, antiquity * 0.05);
-  const isGeoResonant = distanceKm <= 1000;
+  const isYearResonant = yearError !== null && yearError <= Math.max(25, antiquity * 0.05);
+  const isGeoResonant = distanceKm !== null && distanceKm <= 1000;
   const hasResonanceBonus = isYearResonant && isGeoResonant;
   const resonanceBonusPts = hasResonanceBonus ? 1000 : 0;
 

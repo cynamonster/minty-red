@@ -119,10 +119,14 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
   // Auto-resolve round if quantum decoherence timer expires
   const handleTimeExpired = useCallback(() => {
     soundEngine.playParadoxFizzle();
-    const guessedYear = yearInput ? (isBCE ? -Math.abs(parseInt(yearInput, 10)) : Math.abs(parseInt(yearInput, 10))) : 0;
+    setInspectModalOpen(false);
+    const parsedYear = parseInt(yearInput, 10);
+    const guessedYear = yearInput.trim() !== '' && !Number.isNaN(parsedYear)
+      ? (isBCE ? -Math.abs(parsedYear) : Math.abs(parsedYear))
+      : null;
     const distanceKm = userPin
       ? calculateDistanceKm(userPin.lat, userPin.lng, activeRelic.coordinates.lat, activeRelic.coordinates.lng)
-      : 20000;
+      : null;
 
     const outcome = calculateRelicScore({
       guessedYear,
@@ -189,7 +193,7 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
     setIsLocked(false);
     setRoundResult(null);
     setTimeLeft(POD_DECOHERENCE_SECONDS);
-    setInspectModalOpen(false);
+    setInspectModalOpen(true);
   };
 
   // Handle pin placement on map
@@ -463,7 +467,7 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
                   <div className="truncate">
                     <div className="text-xs font-bold text-white truncate">{h.relic.name}</div>
                     <div className="text-[10px] text-slate-400 font-mono truncate">
-                      {formatYear(h.relic.exactYear)} • {Math.round(h.result.distanceKm).toLocaleString()} km error
+                      {formatYear(h.relic.exactYear)} • {h.result.distanceKm !== null ? `${Math.round(h.result.distanceKm).toLocaleString()} km error` : 'Timed out (no pin)'}
                     </div>
                   </div>
                 </div>
@@ -565,231 +569,247 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
         </div>
       </div>
 
-      {/* 2. TOP: Artifact Holo-Viewer */}
-      <div className="relative px-3 pt-2 pb-1 flex-shrink-0 z-10">
-        <div className="relative w-full h-36 rounded-xl overflow-hidden border border-cyan-500/30 bg-slate-950 flex items-center justify-center group shadow-[0_0_15px_rgba(0,240,255,0.15)]">
-          {/* Hologram background & scanlines */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent pointer-events-none z-10" />
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(0,240,255,0.03)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none z-10" />
-
-          {/* Artifact Photo */}
-          <img
-            src={activeRelic.imageUrl}
-            alt={activeRelic.name}
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
-            loading="eager"
-            referrerPolicy="no-referrer"
-          />
-
-          {/* Top Info Overlay */}
-          <div className="absolute top-2 left-2 right-2 flex items-center justify-between z-20 pointer-events-none">
-            <span className="px-2 py-0.5 rounded bg-slate-950/80 border border-cyan-500/40 text-[9px] font-mono font-bold text-cyan-300 uppercase tracking-wider backdrop-blur">
-              {activeRelic.culture}
-            </span>
-
-            <button
-              onClick={() => {
+      {/* Main Play Field: 2 TOP, 3 MIDDLE, 4 BOTTOM + Absolute Inspect Modal */}
+      <div className="relative flex-1 w-full flex flex-col min-h-0">
+        {/* 2. TOP: Artifact Holo-Viewer */}
+        <div className="relative px-3 pt-2 pb-1 flex-shrink-0 z-10">
+          <div
+            onClick={() => {
+              soundEngine.playTap();
+              setInspectModalOpen(true);
+            }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
                 soundEngine.playTap();
                 setInspectModalOpen(true);
-              }}
-              className="p-1 rounded bg-slate-950/80 border border-slate-700 text-slate-300 hover:text-cyan-400 pointer-events-auto backdrop-blur flex items-center gap-1 text-[9px] font-mono"
-              title="Inspect Artifact Details"
-            >
-              <Maximize2 className="w-3 h-3" />
-              <span>INSPECT</span>
-            </button>
-          </div>
+              }
+            }}
+            className="relative w-full h-36 rounded-xl overflow-hidden border border-cyan-500/30 bg-slate-950 flex items-center justify-center group shadow-[0_0_15px_rgba(0,240,255,0.15)] cursor-pointer active:scale-[0.99] transition-transform"
+            title="Tap to Inspect Artifact Details"
+          >
+            {/* Hologram background & scanlines */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent pointer-events-none z-10" />
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(0,240,255,0.03)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none z-10" />
 
-          {/* Bottom Info Overlay: Material Badges & Name */}
-          <div className="absolute bottom-2 left-2 right-2 z-20 pointer-events-none">
-            <h3 className="text-xs font-black text-white truncate drop-shadow-md">
-              {activeRelic.name}
-            </h3>
-            <div className="flex items-center gap-1 mt-0.5 overflow-hidden">
-              <span className="px-1.5 py-0.2 rounded bg-cyan-950/80 border border-cyan-500/40 text-[8px] font-mono text-cyan-200 truncate">
-                {activeRelic.material}
+            {/* Artifact Photo */}
+            <img
+              src={activeRelic.imageUrl}
+              alt={activeRelic.name}
+              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+              loading="eager"
+              referrerPolicy="no-referrer"
+            />
+
+            {/* Top Info Overlay */}
+            <div className="absolute top-2 left-2 right-2 flex items-center justify-between z-20 pointer-events-none">
+              <span className="px-2 py-0.5 rounded bg-slate-950/80 border border-cyan-500/40 text-[9px] font-mono font-bold text-cyan-300 uppercase tracking-wider backdrop-blur">
+                {activeRelic.culture}
               </span>
+
+              <div
+                className="p-1 rounded bg-slate-950/80 border border-slate-700 text-slate-300 group-hover:text-cyan-400 group-hover:border-cyan-500/50 backdrop-blur flex items-center gap-1 text-[9px] font-mono transition-colors"
+              >
+                <Maximize2 className="w-3 h-3" />
+                <span>INSPECT</span>
+              </div>
+            </div>
+
+            {/* Bottom Info Overlay: Material Badges & Name */}
+            <div className="absolute bottom-2 left-2 right-2 z-20 pointer-events-none">
+              <h3 className="text-xs font-black text-white truncate drop-shadow-md">
+                {activeRelic.name}
+              </h3>
+              <div className="flex items-center gap-1 mt-0.5 overflow-hidden">
+                <span className="px-1.5 py-0.2 rounded bg-cyan-950/80 border border-cyan-500/40 text-[8px] font-mono text-cyan-200 truncate">
+                  {activeRelic.material}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* 3. MIDDLE: Interactive Tactical Leaflet Map */}
-      <div className="flex-1 w-full relative px-3 py-1 flex flex-col min-h-0 z-0">
-        <div className="relative w-full h-full rounded-xl overflow-hidden border border-cyan-500/30 bg-[#050a18] shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]">
-          <RelicLeafletMap
-            targetCoords={targetCoords}
-            userPin={userPin}
-            onPinChange={handlePinChange}
-            isLocked={isLocked}
-            className="w-full h-full"
-          />
+        {/* 3. MIDDLE: Interactive Tactical Leaflet Map */}
+        <div className="flex-1 w-full relative px-3 py-1 flex flex-col min-h-0 z-0">
+          <div className="relative w-full h-full rounded-xl overflow-hidden border border-cyan-500/30 bg-[#050a18] shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]">
+            <RelicLeafletMap
+              targetCoords={targetCoords}
+              userPin={userPin}
+              onPinChange={handlePinChange}
+              isLocked={isLocked}
+              className="w-full h-full"
+            />
+          </div>
         </div>
-      </div>
 
-      {/* 4. BOTTOM: Year Calibration & Lock-In OR Round Debrief Card */}
-      <div className="w-full flex-shrink-0 p-3 bg-slate-950/90 border-t border-slate-800/80 z-20 backdrop-blur">
-        {!isLocked ? (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              {/* Native Dialpad Input */}
-              <div className="flex-1 relative">
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={yearInput}
-                  onChange={(e) => setYearInput(e.target.value)}
-                  placeholder="Enter Year (e.g. 1323)"
-                  className="w-full h-11 px-3 bg-slate-900 border border-slate-700 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 rounded-xl text-base font-mono font-bold text-white placeholder-slate-500 outline-none transition-all"
-                />
-                <span className="absolute right-3 top-3 text-xs font-mono text-slate-400 pointer-events-none">
-                  {isBCE ? 'BCE' : 'CE'}
-                </span>
+        {/* 4. BOTTOM: Year Calibration & Lock-In OR Round Debrief Card */}
+        <div className="w-full flex-shrink-0 p-3 bg-slate-950/90 border-t border-slate-800/80 z-20 backdrop-blur">
+          {!isLocked ? (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                {/* Native Dialpad Input */}
+                <div className="flex-1 relative">
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={yearInput}
+                    onChange={(e) => setYearInput(e.target.value)}
+                    placeholder="Enter Year (e.g. 1323)"
+                    className="w-full h-11 px-3 bg-slate-900 border border-slate-700 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 rounded-xl text-base font-mono font-bold text-white placeholder-slate-500 outline-none transition-all"
+                  />
+                  <span className="absolute right-3 top-3 text-xs font-mono text-slate-400 pointer-events-none">
+                    {isBCE ? 'BCE' : 'CE'}
+                  </span>
+                </div>
+
+                {/* 1-Tap [ BCE ] / [ CE ] Toggle */}
+                <button
+                  type="button"
+                  onClick={handleToggleBCE}
+                  className={`h-11 px-3.5 rounded-xl border text-xs font-mono font-black tracking-wider uppercase transition-all flex items-center gap-1 active:scale-95 ${
+                    isBCE
+                      ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                      : 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.2)]'
+                  }`}
+                  title="Toggle BCE (Before Common Era) / CE (Common Era)"
+                >
+                  <span>{isBCE ? 'BCE' : 'CE'}</span>
+                </button>
               </div>
 
-              {/* 1-Tap [ BCE ] / [ CE ] Toggle */}
+              {/* High-Voltage BEAM TO TIMELINE (LOCK IN) Button */}
               <button
-                type="button"
-                onClick={handleToggleBCE}
-                className={`h-11 px-3.5 rounded-xl border text-xs font-mono font-black tracking-wider uppercase transition-all flex items-center gap-1 active:scale-95 ${
-                  isBCE
-                    ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
-                    : 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.2)]'
+                onClick={handleLockIn}
+                disabled={!userPin || !yearInput}
+                className={`w-full h-12 rounded-xl font-black text-xs tracking-wider uppercase flex items-center justify-center gap-2 transition-all ${
+                  !userPin || !yearInput
+                    ? 'bg-slate-900 text-slate-600 border border-slate-800 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 hover:from-cyan-300 hover:to-indigo-500 text-slate-950 shadow-[0_0_25px_rgba(0,240,255,0.4)] active:scale-[0.98]'
                 }`}
-                title="Toggle BCE (Before Common Era) / CE (Common Era)"
               >
-                <span>{isBCE ? 'BCE' : 'CE'}</span>
+                <Zap className="w-4 h-4 fill-current" />
+                <span>⚡ BEAM TO TIMELINE (LOCK IN)</span>
+              </button>
+            </div>
+          ) : (
+            /* Locked In Debrief Card */
+            <div className="space-y-2">
+              <div className="p-2.5 rounded-xl bg-slate-900 border border-cyan-500/40 text-left">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] font-mono font-bold text-cyan-400 uppercase">
+                    RESTITUTION CALIBRATION
+                  </span>
+                  <span className="text-xs font-mono font-black text-white">
+                    +{roundResult.totalRoundScore.toLocaleString()} PTS
+                  </span>
+                </div>
+
+                {/* Accuracy stats */}
+                <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-slate-300">
+                  <div>
+                    <span className="text-slate-500">Origin: </span>
+                    <span className="text-white font-bold">
+                      {roundResult.distanceKm !== null ? `${Math.round(roundResult.distanceKm).toLocaleString()} km` : 'No Pin'}
+                    </span>
+                    <span className="text-cyan-400 text-[10px]"> (+{roundResult.geoScore} pts)</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">Year: </span>
+                    <span className="text-white font-bold">{formatYear(activeRelic.exactYear)}</span>
+                    <span className="text-cyan-400 text-[10px]"> (+{roundResult.chronoScore} pts)</span>
+                  </div>
+                </div>
+
+                {/* Temporal Resonance Multiplier Banner */}
+                {roundResult.hasResonanceBonus && (
+                  <div className="mt-2 py-1 px-2 rounded-lg bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-400/50 flex items-center justify-between text-amber-300 text-xs font-mono font-bold">
+                    <div className="flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <span>TEMPORAL RESONANCE BONUS</span>
+                    </div>
+                    <span>+1,000 PTS</span>
+                  </div>
+                )}
+
+                {/* Viktor Vane's Decrypted Vault Log */}
+                <div className="mt-2 p-2 rounded bg-slate-950/80 border border-slate-800 text-[10px] font-mono text-slate-400 italic leading-snug">
+                  <span className="text-cyan-300 font-bold not-italic">VANE VAULT LOG: </span>
+                  {activeRelic.vaneVaultLog}
+                </div>
+              </div>
+
+              <button
+                onClick={handleNextPod}
+                className="w-full h-11 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(0,240,255,0.3)] active:scale-[0.98] transition-all"
+              >
+                <span>{currentIndex + 1 < ROUNDS_PER_GAME ? 'NEXT STASIS POD' : 'COMPLETE SALVAGE OPERATION'}</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* 5. INSPECT MODAL (Tap-to-Zoom & Provenance Fact) */}
+        {inspectModalOpen && activeRelic && (
+          <div className="absolute inset-0 z-40 bg-slate-950/95 backdrop-blur-md flex flex-col p-3 rounded-xl border border-slate-800 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800 flex-shrink-0">
+              <div>
+                <h4 className="text-sm font-black text-white uppercase">Artifact #{currentIndex + 1}</h4>
+                <p className="text-[10px] text-cyan-400 font-mono">Stasis Pod Opened • Tachyons Leaking Out</p>
+              </div>
+              <button
+                onClick={() => {
+                  soundEngine.playTap();
+                  setInspectModalOpen(false);
+                }}
+                className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"
+                title="Close"
+              >
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* High-Voltage BEAM TO TIMELINE (LOCK IN) Button */}
-            <button
-              onClick={handleLockIn}
-              disabled={!userPin || !yearInput}
-              className={`w-full h-12 rounded-xl font-black text-xs tracking-wider uppercase flex items-center justify-center gap-2 transition-all ${
-                !userPin || !yearInput
-                  ? 'bg-slate-900 text-slate-600 border border-slate-800 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 hover:from-cyan-300 hover:to-indigo-500 text-slate-950 shadow-[0_0_25px_rgba(0,240,255,0.4)] active:scale-[0.98]'
-              }`}
-            >
-              <Zap className="w-4 h-4 fill-current" />
-              <span>⚡ BEAM TO TIMELINE (LOCK IN)</span>
-            </button>
-          </div>
-        ) : (
-          /* Locked In Debrief Card */
-          <div className="space-y-2">
-            <div className="p-2.5 rounded-xl bg-slate-900 border border-cyan-500/40 text-left">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-mono font-bold text-cyan-400 uppercase">
-                  RESTITUTION CALIBRATION
-                </span>
-                <span className="text-xs font-mono font-black text-white">
-                  +{roundResult.totalRoundScore.toLocaleString()} PTS
-                </span>
+            <div className="flex-1 overflow-y-auto py-2.5 flex flex-col items-center min-h-0">
+              <div className="w-full max-h-[35vh] rounded-xl overflow-hidden border border-cyan-500/30 bg-black flex items-center justify-center mb-3 flex-shrink-0">
+                <img
+                  src={activeRelic.imageUrl}
+                  alt={activeRelic.name}
+                  className="w-full h-auto max-h-[35vh] object-contain"
+                  referrerPolicy="no-referrer"
+                />
               </div>
 
-              {/* Accuracy stats */}
-              <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-slate-300">
-                <div>
-                  <span className="text-slate-500">Origin: </span>
-                  <span className="text-white font-bold">{Math.round(roundResult.distanceKm).toLocaleString()} km</span>
-                  <span className="text-cyan-400 text-[10px]"> (+{roundResult.geoScore} pts)</span>
+              <div className="w-full space-y-2.5 text-xs leading-relaxed text-slate-300 text-left">
+                <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <span className="text-[10px] font-mono text-cyan-400 font-bold block mb-1">
+                    VANE VAULT INTEL:
+                  </span>
+                  <p className="text-white font-mono">{activeRelic.historicalProvenanceFact}</p>
                 </div>
-                <div>
-                  <span className="text-slate-500">Year: </span>
-                  <span className="text-white font-bold">{formatYear(activeRelic.exactYear)}</span>
-                  <span className="text-cyan-400 text-[10px]"> (+{roundResult.chronoScore} pts)</span>
-                </div>
-              </div>
 
-              {/* Temporal Resonance Multiplier Banner */}
-              {roundResult.hasResonanceBonus && (
-                <div className="mt-2 py-1 px-2 rounded-lg bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-400/50 flex items-center justify-between text-amber-300 text-xs font-mono font-bold">
-                  <div className="flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    <span>TEMPORAL RESONANCE BONUS</span>
-                  </div>
-                  <span>+1,000 PTS</span>
+                <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <span className="text-[10px] font-mono text-cyan-400 font-bold block mb-1">
+                    MATERIAL & SPECIFICATIONS:
+                  </span>
+                  <p className="text-white font-mono">{activeRelic.material}</p>
                 </div>
-              )}
-
-              {/* Viktor Vane's Decrypted Vault Log */}
-              <div className="mt-2 p-2 rounded bg-slate-950/80 border border-slate-800 text-[10px] font-mono text-slate-400 italic leading-snug">
-                <span className="text-cyan-300 font-bold not-italic">VANE VAULT LOG: </span>
-                {activeRelic.vaneVaultLog}
               </div>
             </div>
 
-            <button
-              onClick={handleNextPod}
-              className="w-full h-11 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(0,240,255,0.3)] active:scale-[0.98] transition-all"
-            >
-              <span>{currentIndex + 1 < ROUNDS_PER_GAME ? 'NEXT STASIS POD' : 'COMPLETE SALVAGE OPERATION'}</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* 5. INSPECT MODAL (Tap-to-Zoom & Provenance Fact) */}
-      {inspectModalOpen && activeRelic && (
-        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col p-4 animate-in fade-in duration-200">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-            <div>
-              <h4 className="text-sm font-black text-white uppercase">Artifact #{currentIndex + 1}</h4>
-              <p className="text-[10px] text-cyan-400 font-mono">Statis Pod Opened • Tachyons Leaking Out</p>
-            </div>
             <button
               onClick={() => {
                 soundEngine.playTap();
                 setInspectModalOpen(false);
               }}
-              className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs uppercase flex-grow-2 tracking-wider shadow-[0_0_15px_rgba(0,240,255,0.25)] active:scale-[0.98] transition-all"
             >
-              <X className="w-4 h-4" />
+              Close Holo-Viewer
             </button>
           </div>
-
-          <div className="flex-1 overflow-y-auto py-4 flex flex-col items-center">
-            <div className="w-full max-h-[50vh] rounded-xl overflow-hidden border border-cyan-500/30 bg-black flex items-center justify-center mb-4">
-              <img
-                src={activeRelic.imageUrl}
-                alt={activeRelic.name}
-                className="w-full h-auto max-h-[50vh] object-contain"
-                referrerPolicy="no-referrer"
-              />
-            </div>
-
-            <div className="w-full space-y-3 text-xs leading-relaxed text-slate-300 text-left">
-              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-                <span className="text-[10px] font-mono text-cyan-400 font-bold block mb-1">
-                  VANE VAULT INTEL:
-                </span>
-                <p className="text-white font-mono">{activeRelic.historicalProvenanceFact}</p>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-                <span className="text-[10px] font-mono text-cyan-400 font-bold block mb-1">
-                  MATERIAL & SPECIFICATIONS:
-                </span>
-                <p className="text-white font-mono">{activeRelic.material}</p>
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={() => {
-              soundEngine.playTap();
-              setInspectModalOpen(false);
-            }}
-            className="w-full py-3 rounded-xl bg-slate-900 border border-slate-700 text-white font-bold text-xs uppercase"
-          >
-            Close Holo-Viewer
-          </button>
-        </div>
-      )}
+        )}
+      </div>
     </GameContainer>
   );
 }
