@@ -362,22 +362,24 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
           <h2 className="text-2xl font-black tracking-tight text-white uppercase mb-2">
             R.E.L.I.C.
           </h2>
-          <p className="text-xs font-mono font-bold text-cyan-400 tracking-widest uppercase mb-4">
-            Recovery & Extrication of Looted Intertemporal Contraband
+          <p className="text-xs font-mono font-bold text-cyan-400 tracking-widest mb-4">
+            Recovery & Extrication of<br/>
+            Looted Intertemporal Contraband
           </p>
 
           <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 text-left text-xs leading-relaxed text-slate-300 mb-6 space-y-2">
             <p>
-              <strong className="text-white">MISSION INTEL:</strong>
+              <strong className="text-white">MISSION BRIEFING:</strong>
             </p>
             <p>
               Using experimental tachyon chronometry, trillionaire <span className="text-cyan-300">Viktor Vane</span> looted history&apos;s greatest treasures for his private collection.
             </p>
             <p>  
-              He calls it the Vane Vault. You've snuck into it and are sending these artifacts home!
+              He calls it the Vane Vault.<br />
+              You've snuck in and are sending these artifacts home!
             </p>
             <p>
-              You have 45 seconds to calibrate each artifact&apos;s exact calendar year and geo-coordinates before the <span className="text-amber-400 font-bold">45-seconds</span> before too leaking too many tachyons to trace their spacetime origin.
+              Calibrate each artifact&apos;s calendar year and geo-coordinates within <span className="text-amber-400 font-bold">45-seconds</span> its spacetime origin is lost.
             </p>
           </div>
 
@@ -388,7 +390,7 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
               className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-sm tracking-wide uppercase flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(0,240,255,0.35)] active:scale-[0.98] transition-all"
             >
               <Calendar className="w-4 h-4" />
-              <span>Initiate Daily Protocol (5 Pods)</span>
+              <span>Begin Mission (5 Artifacts)</span>
             </button>
 
             <button
