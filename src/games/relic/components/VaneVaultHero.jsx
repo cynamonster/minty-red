@@ -78,7 +78,7 @@ export function VaneVaultHero({ className = '' }) {
       if (isTransitioning) return;
 
       if (isUserAction) {
-        soundEngine.playTap();
+        soundEngine.playVaultClamp();
         resetPauseTimer();
       }
 
@@ -151,7 +151,7 @@ export function VaneVaultHero({ className = '' }) {
 
     if (finalDelta < -SWIPE_THRESHOLD) {
       // Swiped left -> slide next
-      soundEngine.playTap();
+      soundEngine.playVaultClamp();
       setIsTransitioning(true);
       setDragOffset(-POD_SPACING);
 
@@ -163,7 +163,7 @@ export function VaneVaultHero({ className = '' }) {
       }, 350);
     } else if (finalDelta > SWIPE_THRESHOLD) {
       // Swiped right -> slide prev
-      soundEngine.playTap();
+      soundEngine.playVaultClamp();
       setIsTransitioning(true);
       setDragOffset(POD_SPACING);
 
@@ -371,7 +371,7 @@ export function VaneVaultHero({ className = '' }) {
             key={i}
             onClick={() => {
               if (i === activeIndex) return;
-              soundEngine.playTap();
+              soundEngine.playVaultClamp();
               resetPauseTimer();
               const dir = i > activeIndex ? 'next' : 'prev';
               slideTo(dir, true);

@@ -334,6 +334,48 @@ class SoundEngine {
     osc.start(now);
     osc.stop(now + 0.42);
   }
+
+  // Vane Vault: Hydraulic Clamp Shutter (heavy sub-bass kick + titanium latch click)
+  playVaultClamp() {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+
+    // Sub-bass hydraulic thud (180Hz -> 55Hz over 50ms)
+    const kick = this.ctx.createOscillator();
+    const kickGain = this.ctx.createGain();
+    kick.type = 'sine';
+    kick.frequency.setValueAtTime(180, now);
+    kick.frequency.exponentialRampToValueAtTime(55, now + 0.05);
+
+    kickGain.gain.setValueAtTime(0.24, now);
+    kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+
+    kick.connect(kickGain);
+    kickGain.connect(this.ctx.destination);
+    kick.start(now);
+    kick.stop(now + 0.06);
+
+    // Dual metallic clamp latch click (1200Hz & 1650Hz)
+    [1200, 1650].forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const t = now + idx * 0.012;
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, t);
+
+      gain.gain.setValueAtTime(0.12, t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.02);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.025);
+    });
+  }
 }
 
 export const soundEngine = new SoundEngine();
