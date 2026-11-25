@@ -12,6 +12,7 @@ import {
   Orbit,
   Zap,
   Anchor,
+  PersonStanding,
   GamepadDirectional,
 } from 'lucide-react';
 import { soundEngine } from '../shared/audio/soundEngine';
@@ -63,7 +64,7 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       stats: ethnosStats,
       badge: 'Ethno-guesser',
       badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-      icon: Sparkles,
+      icon: PersonStanding,
     },
   ];
 

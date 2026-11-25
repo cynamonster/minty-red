@@ -71,7 +71,7 @@ export const HOUSE_ADS = [
     title: 'Flagship: Vexillology',
     tagline: 'Identify flags by their color distributions',
     cta: 'Play Now',
-    icon: 'Anchor',
+    icon: 'Flag',
     accentColor: '#f59e0b',
     bgGradient: 'from-amber-950/40 via-sky-950/30 to-slate-900/60',
     borderColor: 'border-amber-500/30',
