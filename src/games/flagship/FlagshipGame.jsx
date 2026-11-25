@@ -37,9 +37,6 @@ import {
   Anchor,
   Compass,
   Check,
-  Disc,
-  Layers,
-  Sparkles,
 } from 'lucide-react';
 
 const ROUND_TIME_SECONDS = 30;
@@ -370,62 +367,7 @@ function FlagGraphic({ flag }) {
   );
 }
 
-// Option A: Optical Signal Ensign (Canvas with brass grommets & halyard line, rotated 90°)
-function SignalEnsignDisplay({ target }) {
-  const colors = target.colors || ['#38bdf8'];
-  const proportions = target.proportions || [1];
-  const total = proportions.reduce((a, b) => a + b, 0);
-
-  return (
-    <div className="w-full h-full flex flex-col justify-between items-center py-1">
-      {/* Top Halyard Rigging Wire */}
-      <div className="w-full max-w-[64px] sm:max-w-[76px] h-[2px] bg-gradient-to-r from-amber-700 via-amber-400 to-amber-700 rounded-full shrink-0 relative mb-0.5">
-        <div className="absolute -top-0.5 left-1 w-1.5 h-1.5 rounded-full bg-amber-400 border border-black shadow" />
-        <div className="absolute -top-0.5 right-1 w-1.5 h-1.5 rounded-full bg-amber-400 border border-black shadow" />
-      </div>
-
-      {/* Hoisted Canvas Ensign Swatch (Rotated 90°) */}
-      <div className="flex-1 w-full flex items-center justify-center relative my-auto">
-        <div
-          className="rotate-90 shrink-0 flex border-2 border-amber-400/80 rounded-md overflow-hidden shadow-2xl relative canvas-texture"
-          style={{ width: '90px', height: '56px' }}
-        >
-          {colors.map((color, idx) => {
-            const widthPct = (proportions[idx] / total) * 100;
-            return (
-              <div
-                key={idx}
-                className="h-full relative border-r border-black/20 last:border-r-0 transition-all"
-                style={{
-                  width: `${widthPct}%`,
-                  backgroundColor: color,
-                }}
-              />
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Brass Hex Callout Plaques (Upright & readable) */}
-      <div className="flex items-center justify-center gap-1 flex-wrap pt-1 w-full shrink-0">
-        {colors.map((hex, i) => (
-          <div
-            key={i}
-            className="px-1.5 py-0.5 rounded bg-[#050a14] border border-amber-900/60 text-[7px] font-mono-code font-bold text-amber-200 flex items-center gap-1 shadow shrink-0"
-          >
-            <span
-              className="w-1.5 h-1.5 rounded-full border border-black/50 inline-block shadow-sm"
-              style={{ backgroundColor: hex }}
-            />
-            <span>{hex}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// Option B: Naval Spyglass Lens (Circular brass viewport with degree ticks)
+// Polished Sextant Minimalist Lens (Proportional Color Pie Chart with Zero Obstructions)
 function SpyglassLensDisplay({ target }) {
   const colors = target.colors || ['#38bdf8'];
   const proportions = target.proportions || [1];
@@ -438,7 +380,7 @@ function SpyglassLensDisplay({ target }) {
     const endAngle = accumulatedAngle + fraction * 360;
     accumulatedAngle = endAngle;
 
-    const r = 45;
+    const r = 46;
     const cx = 50;
     const cy = 50;
     const startRad = (startAngle - 90) * (Math.PI / 180);
@@ -456,53 +398,37 @@ function SpyglassLensDisplay({ target }) {
   });
 
   return (
-    <div className="w-full h-full flex flex-col justify-between items-center py-1">
-      {/* Spyglass Viewport Dial */}
+    <div className="w-full h-full flex items-center justify-center p-1 relative">
+      {/* Sleek Polished Bevel Casing */}
       <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto flex items-center justify-center my-auto">
-        {/* Brass Bezel Ring with Degree Markings */}
-        <div className="absolute inset-0 rounded-full border-2 border-amber-500 shadow-2xl bg-[#060e18] flex items-center justify-center">
-          <div className="absolute top-0.5 text-[6px] font-mono-code text-amber-400 font-bold">000°</div>
-          <div className="absolute right-0.5 text-[6px] font-mono-code text-amber-400 font-bold">090°</div>
-          <div className="absolute bottom-0.5 text-[6px] font-mono-code text-amber-400 font-bold">180°</div>
-          <div className="absolute left-0.5 text-[6px] font-mono-code text-amber-400 font-bold">270°</div>
+        {/* Outer Brushed Bronze Bevel Ring with Micro-Ticks */}
+        <div className="absolute inset-0 rounded-full border-2 border-amber-400/90 shadow-2xl bg-gradient-to-tr from-amber-700 via-amber-400 to-amber-700 p-0.5 flex items-center justify-center">
+          <div className="w-full h-full rounded-full bg-[#050c18] border border-black/60 flex items-center justify-center relative">
+            <div className="absolute inset-1 rounded-full border border-dotted border-amber-400/40 pointer-events-none" />
+          </div>
         </div>
 
-        {/* Glass Lens with Color Arc Sectors */}
-        <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border border-amber-600/80 shadow-inner flex items-center justify-center">
+        {/* Clean, 100% Unobstructed Glass Lens with Pie Slices */}
+        <div className="relative w-[86%] h-[86%] rounded-full overflow-hidden border border-amber-500/80 shadow-inner flex items-center justify-center">
           <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow">
             {slices.map((slice, idx) => (
-              <path key={idx} d={slice.d} fill={slice.color} stroke="#050a14" strokeWidth="1" />
+              <path
+                key={idx}
+                d={slice.d}
+                fill={slice.color}
+                stroke="#050a14"
+                strokeWidth="0.8"
+              />
             ))}
           </svg>
-          {/* Etched Crosshairs */}
-          <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-            <div className="w-full h-[1px] bg-black/40" />
-            <div className="absolute h-full w-[1px] bg-black/40" />
-            <div className="w-4 h-4 rounded-full border border-black/40" />
-          </div>
-          {/* Lens Glare */}
-          <div className="absolute inset-0 lens-glare pointer-events-none" />
-          {/* Center Brass Hub */}
-          <div className="absolute w-2.5 h-2.5 rounded-full bg-amber-500 border border-amber-900 shadow flex items-center justify-center">
-            <div className="w-1 h-1 rounded-full bg-white" />
-          </div>
-        </div>
-      </div>
-
-      {/* Brass Hex Callout Plaques */}
-      <div className="flex items-center justify-center gap-1 flex-wrap pt-0.5 w-full shrink-0">
-        {colors.map((hex, i) => (
+          {/* Subtle perimeter lens reflection (leaves colors completely clear) */}
           <div
-            key={i}
-            className="px-1.5 py-0.5 rounded bg-[#050a14] border border-amber-900/60 text-[8px] font-mono-code font-bold text-amber-200 flex items-center gap-1 shadow"
-          >
-            <span
-              className="w-1.5 h-1.5 rounded-full border border-black/50 inline-block shadow-sm"
-              style={{ backgroundColor: hex }}
-            />
-            <span>{hex}</span>
-          </div>
-        ))}
+            className="absolute inset-0 rounded-full pointer-events-none"
+            style={{
+              background: 'radial-gradient(circle, transparent 75%, rgba(255,255,255,0.22) 100%)',
+            }}
+          />
+        </div>
       </div>
     </div>
   );
@@ -532,7 +458,6 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
   const [streak, setStreak] = useState(0);
   const [maxRoundStreak, setMaxRoundStreak] = useState(0);
   const [history, setHistory] = useState([]); // array of { correct, target, picked, timeSpent, points }
-  const [displayStyle, setDisplayStyle] = useState('ensign'); // 'ensign' | 'spyglass'
 
   // Current round timer state
   const [timeLeft, setTimeLeft] = useState(ROUND_TIME_SECONDS);
@@ -940,33 +865,9 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                 )}
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
-                {/* Visual Style Toggle (Ensign vs Spyglass Dial) */}
-                <button
-                  onClick={() => {
-                    soundEngine.playTap();
-                    setDisplayStyle((prev) => (prev === 'ensign' ? 'spyglass' : 'ensign'));
-                  }}
-                  className="px-2 py-0.5 rounded-lg bg-[#07111e] border border-amber-900/60 hover:border-amber-400/80 text-amber-300 text-[10px] font-mono-code flex items-center gap-1 shadow transition-colors active:scale-95"
-                  title="Toggle Swatch Style (Ensign / Spyglass)"
-                >
-                  {displayStyle === 'ensign' ? (
-                    <>
-                      <Disc className="w-3.5 h-3.5 text-sky-400" />
-                      <span>SPYGLASS</span>
-                    </>
-                  ) : (
-                    <>
-                      <Layers className="w-3.5 h-3.5 text-amber-400" />
-                      <span>ENSIGN</span>
-                    </>
-                  )}
-                </button>
-
-                <div className="text-right shrink-0">
-                  <span className="text-[10px] text-slate-400 uppercase font-mono-code">HONORS: </span>
-                  <span className="text-sm font-black text-amber-400 font-mono-code">{totalScore}</span>
-                </div>
+              <div className="text-right shrink-0">
+                <span className="text-[10px] text-slate-400 uppercase font-mono-code">HONORS: </span>
+                <span className="text-sm font-black text-amber-400 font-mono-code">{totalScore}</span>
               </div>
             </div>
 
@@ -982,15 +883,11 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
 
             {/* 3. Central Arena: Rotated Flag (90°) & Four Telegraph Keys (On the same line) */}
             <div className="flex gap-2 sm:gap-2.5 items-stretch w-full min-h-[148px] sm:min-h-[160px]">
-              {/* Left Column: Sovereign Flag / Signal Ensign Frame (Rotated 90°) */}
-              <div className="w-24 sm:w-28 md:w-32 shrink-0 rounded-2xl bg-[#060c16] border-2 border-amber-900/60 p-1.5 sm:p-2 shadow-2xl flex flex-col items-center justify-between overflow-hidden relative">
+              {/* Left Column: Polished Sextant Spyglass / Sovereign Flag (Rotated 90°) */}
+              <div className="w-24 sm:w-28 md:w-32 shrink-0 rounded-2xl bg-[#060c16] border-2 border-amber-900/60 p-1.5 sm:p-2 shadow-2xl flex flex-col items-center justify-center overflow-hidden relative">
                 {!isRevealed ? (
-                  // UNREVEALED: Dual Mode Optical Signal Swatch (Rotated 90°)
-                  displayStyle === 'spyglass' ? (
-                    <SpyglassLensDisplay target={currentQ.target} />
-                  ) : (
-                    <SignalEnsignDisplay target={currentQ.target} />
-                  )
+                  // UNREVEALED: Polished Sextant Minimalist Lens (Proportional Color Pie Chart)
+                  <SpyglassLensDisplay target={currentQ.target} />
                 ) : (
                   // REVEALED: Full High-Res Sovereign Ensign (Rotated 90°)
                   <div className="w-full h-full animate-in zoom-in-95 duration-200 flex flex-col items-center justify-center">
@@ -1088,6 +985,28 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                   <p className="text-[10px] text-slate-400 mt-0.5 italic leading-snug font-sans border-t border-slate-900/80 pt-0.5">
                     "{currentQ.target.trivia}"
                   </p>
+
+                  {/* Verified Naval Hex Palette Revealed on Round Completion */}
+                  {currentQ.target.colors && (
+                    <div className="flex items-center gap-1 flex-wrap pt-1.5 border-t border-slate-900/80 mt-1">
+                      <span className="text-[9px] font-mono-code text-slate-400 uppercase mr-0.5">Ensign Hex:</span>
+                      {currentQ.target.colors.map((hex, i) => (
+                        <div
+                          key={i}
+                          className="px-1.5 py-0.5 rounded bg-[#050a14] border border-amber-900/60 text-[8px] font-mono-code font-bold text-amber-200 flex items-center gap-1 shadow shrink-0"
+                        >
+                          <span
+                            className="w-1.5 h-1.5 rounded-full border border-black/50 inline-block shadow-sm"
+                            style={{ backgroundColor: hex }}
+                          />
+                          <span>{hex}</span>
+                          <span className="text-[7px] text-slate-400 font-normal">
+                            ({getColorName(hex)})
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
