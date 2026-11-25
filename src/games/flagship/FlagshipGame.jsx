@@ -27,6 +27,7 @@ import {
   Flame,
   Trophy,
   RotateCcw,
+  Flag,
   Share2,
   Swords,
   Play,
@@ -37,6 +38,8 @@ import {
   Anchor,
   Compass,
   Check,
+  Ship,
+  ShipWheel
 } from 'lucide-react';
 
 const ROUND_TIME_SECONDS = 25;
@@ -758,22 +761,21 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
               }}
             >
               <div className="w-full h-full bg-[#060c16] rounded-2xl flex flex-col items-center justify-center border border-amber-400/40 relative overflow-hidden">
-                <Compass className="w-10 h-10 text-amber-400 animate-spin" style={{ animationDuration: '40s' }} />
-                <span className="text-[8px] font-mono-code text-amber-300 font-bold uppercase tracking-widest mt-1">
-                  FLAGSHIP
-                </span>
+                <ShipWheel className="w-10 h-10 text-amber-400 animate-spin" 
+                  style={{ animationDuration: '20s' }} 
+                />
               </div>
             </div>
 
             <div>
               <div className="text-[9px] font-mono-code text-amber-400 uppercase tracking-widest font-bold">
-                Naval Command Headquarters
+                Flag Identification
               </div>
               <h1 className="text-2xl font-black text-white uppercase tracking-wider mt-1">
                 Flagship
               </h1>
               <p className="text-xs text-slate-400 max-w-xs mx-auto mt-1.5 font-sans leading-relaxed">
-                You're a naval navigator peering through your eyeglass. Identify national flags by the proportion of their colors before boiler steam pressure vents.
+                You're a crew member peering through your eyeglass at approaching vessels. Identify their flags by their <span className="text-amber-400">color proportions</span> before boiler steam pressure vents.
               </p>
             </div>
 
@@ -801,7 +803,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                 <div className="flex items-center gap-2.5 text-left">
                   <Anchor className="w-5 h-5 text-slate-950" />
                   <div>
-                    <div className="text-sm font-black leading-none">DAILY FLEET DISPATCH</div>
+                    <div className="text-sm font-black leading-none">DAILY VOYAGE</div>
                     <div className="text-[10px] text-amber-950/80 font-mono-code font-bold mt-0.5">
                       {stats.todayCompleted ? 'Completed Today • Replay Voyage' : '5 Seeded Global Signals • Global Honor Roll'}
                     </div>

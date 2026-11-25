@@ -207,7 +207,7 @@ export function AdBanner({
             <ExternalLink className="w-2.5 h-2.5 stroke-[2.5]" />
           </button>
           <span className="text-[8px] font-mono text-slate-400 uppercase tracking-wider pt-0.5">
-            Sponsored
+            free on Minty.Red
           </span>
         </div>
       </div>
