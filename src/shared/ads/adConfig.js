@@ -109,17 +109,17 @@ export const HOUSE_ADS = [
     bgGradient: 'from-amber-950/40 via-orange-950/30 to-slate-900/60',
     borderColor: 'border-amber-500/30',
   },
-  {
-    id: 'roots-origins',
-    gameSlug: 'roots',
-    title: 'Roots: Surname Origins',
-    tagline: 'Trace last names back to their origins',
-    cta: 'Play Now',
-    icon: 'Compass',
-    accentColor: '#10b981',
-    bgGradient: 'from-emerald-950/40 via-teal-950/30 to-slate-900/60',
-    borderColor: 'border-emerald-500/30',
-  },
+  // {
+  //   id: 'roots-origins',
+  //   gameSlug: 'roots',
+  //   title: 'Roots: Surname Origins',
+  //   tagline: 'Trace last names back to their origins',
+  //   cta: 'Play Now',
+  //   icon: 'Compass',
+  //   accentColor: '#10b981',
+  //   bgGradient: 'from-emerald-950/40 via-teal-950/30 to-slate-900/60',
+  //   borderColor: 'border-emerald-500/30',
+  // },
 ];
 
 /**
