@@ -64,6 +64,25 @@ export function VaneVaultHero({ className = '' }) {
   const [dragOffset, setDragOffset] = useState(0); // in px
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [badgeText, setBadgeText] = useState('VANE VAULT // INTRUDER DETECTED');
+
+  // Occasional 140ms character decode scramble synchronized with the micro-jitter
+  useEffect(() => {
+    const scrambleStates = [
+      'V4N3 V4ULT // 1NTRUD3R D3T3CT3D',
+      'VANE V4ULT // 1NTRUDER DETECTED',
+      'V4NE VAULT // INTRUD3R D3TECTED',
+    ];
+    const interval = setInterval(() => {
+      const pick = scrambleStates[Math.floor(Math.random() * scrambleStates.length)];
+      setBadgeText(pick);
+      setTimeout(() => {
+        setBadgeText('VANE VAULT // INTRUDER DETECTED');
+      }, 140);
+    }, 4200);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Gesture tracking refs
   const isDraggingRef = useRef(false);
@@ -197,10 +216,10 @@ export function VaneVaultHero({ className = '' }) {
     <div className={`relative w-full max-w-sm mx-auto flex flex-col items-center select-none ${className}`}>
       
       {/* Top Vault Status Badge */}
-      <div className="flex items-center gap-2 mb-2 px-3 py-0.5 rounded-full bg-cyan-950/60 border border-cyan-400/40 shadow-[0_0_12px_rgba(0,240,255,0.2)]">
-        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
-        <span className="text-[10px] font-mono font-bold text-cyan-300 tracking-widest uppercase">
-          VANE VAULT // TACHYON STASIS
+      <div className="badge-alarm-pulse flex items-center gap-2 mb-3 px-3 py-0.5 rounded-full bg-red-950/70 border border-red-500/50">
+        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
+        <span className="anim-pure-jitter text-[10px] font-mono font-bold text-red-200 tracking-widest uppercase inline-block">
+          {badgeText}
         </span>
       </div>
 
@@ -402,6 +421,46 @@ export function VaneVaultHero({ className = '' }) {
           20% { opacity: 0.95; }
           80% { opacity: 0.95; }
           100% { top: 84%; opacity: 0.2; }
+        }
+
+        @keyframes alarmPulseGlow {
+          0%, 100% {
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.35), inset 0 0 6px rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.45);
+          }
+          50% {
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.75), inset 0 0 12px rgba(239, 68, 68, 0.3);
+            border-color: rgba(239, 68, 68, 0.9);
+          }
+        }
+        .badge-alarm-pulse {
+          animation: alarmPulseGlow 1.8s ease-in-out infinite;
+        }
+
+        @keyframes pureMicroJitter {
+          0%, 88%, 100% {
+            transform: translate(0, 0);
+            filter: brightness(1);
+          }
+          89% {
+            transform: translate(-0.75px, 0.25px);
+            filter: brightness(1.25);
+          }
+          90.5% {
+            transform: translate(0.75px, -0.25px);
+            filter: brightness(1.15);
+          }
+          92% {
+            transform: translate(-0.5px, 0);
+            filter: brightness(0.95);
+          }
+          93% {
+            transform: translate(0, 0);
+            filter: brightness(1);
+          }
+        }
+        .anim-pure-jitter {
+          animation: pureMicroJitter 4.2s infinite;
         }
       `}</style>
     </div>
