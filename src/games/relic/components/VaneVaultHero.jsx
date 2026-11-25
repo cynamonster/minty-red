@@ -47,7 +47,8 @@ const SLOTS = [-2, -1, 0, 1, 2]; // 5 rendered slots for seamless infinite wrap
 const SWIPE_THRESHOLD = 32; // Min drag distance to trigger slide
 
 export function VaneVaultHero({ className = '' }) {
-  const items = useMemo(() => shuffleArray(VAULT_ICON_CATALOG), []);
+  // Randomly select only four relic icons from the 12-icon catalog per screen load
+  const [items] = useState(() => shuffleArray(VAULT_ICON_CATALOG).slice(0, 4));
   const total = items.length;
 
   const [activeIndex, setActiveIndex] = useState(0);
@@ -340,7 +341,7 @@ export function VaneVaultHero({ className = '' }) {
                     isCenter ? 'text-cyan-400 font-bold' : 'text-slate-500'
                   }`}
                 >
-                  CHAMBER {String(itemIndex + 1).padStart(2, '0')}/{total}
+                  CHAMBER {String(itemIndex + 1).padStart(2, '0')}/{String(total).padStart(2, '0')}
                 </div>
               </div>
             </div>
