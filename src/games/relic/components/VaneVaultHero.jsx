@@ -90,6 +90,7 @@ export function VaneVaultHero({ className = '' }) {
   const currentDragRef = useRef(0);
   const pauseTimerRef = useRef(null);
   const transitionTimerRef = useRef(null);
+  const isTransitioningRef = useRef(false);
 
   // Resume auto-cycle timer after user interaction
   const resetPauseTimer = useCallback(() => {
@@ -103,13 +104,14 @@ export function VaneVaultHero({ className = '' }) {
   // Programmatic smooth slide to next or previous pod
   const slideTo = useCallback(
     (direction, isUserAction = false) => {
-      if (isTransitioning) return;
+      if (isTransitioningRef.current) return;
 
       if (isUserAction) {
         soundEngine.playVaultClamp();
         resetPauseTimer();
       }
 
+      isTransitioningRef.current = true;
       setIsTransitioning(true);
       const targetOffset = direction === 'next' ? -POD_SPACING : POD_SPACING;
       setDragOffset(targetOffset);
@@ -122,11 +124,26 @@ export function VaneVaultHero({ className = '' }) {
             : (prev - 1 + total) % total
         );
         setDragOffset(0);
+        isTransitioningRef.current = false;
         setIsTransitioning(false);
       }, 420);
     },
-    [isTransitioning, total, resetPauseTimer]
+    [total, resetPauseTimer]
   );
+
+  // Keyboard navigation support for arrow keys (Left / Right)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+      if (e.key === 'ArrowLeft') {
+        slideTo('prev', true);
+      } else if (e.key === 'ArrowRight') {
+        slideTo('next', true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [slideTo]);
 
   // Auto-cycle every 3.5s (silent, background)
   useEffect(() => {
@@ -151,7 +168,7 @@ export function VaneVaultHero({ className = '' }) {
   // TOUCH & POINTER SWIPE HANDLERS (1:1 Direct Tracking)
   // ----------------------------------------------------
   const handlePointerDown = (e) => {
-    if (isTransitioning) return;
+    if (isTransitioningRef.current) return;
     isDraggingRef.current = true;
     startXRef.current = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
     currentDragRef.current = 0;
@@ -180,6 +197,7 @@ export function VaneVaultHero({ className = '' }) {
     if (finalDelta < -SWIPE_THRESHOLD) {
       // Swiped left -> slide next
       soundEngine.playVaultClamp();
+      isTransitioningRef.current = true;
       setIsTransitioning(true);
       setDragOffset(-POD_SPACING);
 
@@ -187,11 +205,13 @@ export function VaneVaultHero({ className = '' }) {
       transitionTimerRef.current = setTimeout(() => {
         setActiveIndex((prev) => (prev + 1) % total);
         setDragOffset(0);
+        isTransitioningRef.current = false;
         setIsTransitioning(false);
       }, 350);
     } else if (finalDelta > SWIPE_THRESHOLD) {
       // Swiped right -> slide prev
       soundEngine.playVaultClamp();
+      isTransitioningRef.current = true;
       setIsTransitioning(true);
       setDragOffset(POD_SPACING);
 
@@ -199,16 +219,22 @@ export function VaneVaultHero({ className = '' }) {
       transitionTimerRef.current = setTimeout(() => {
         setActiveIndex((prev) => (prev - 1 + total) % total);
         setDragOffset(0);
+        isTransitioningRef.current = false;
         setIsTransitioning(false);
       }, 350);
-    } else {
-      // Snap back to center
+    } else if (Math.abs(finalDelta) > 5) {
+      // Dragged slightly but below threshold -> Snap back to center
+      isTransitioningRef.current = true;
       setIsTransitioning(true);
       setDragOffset(0);
       if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
       transitionTimerRef.current = setTimeout(() => {
+        isTransitioningRef.current = false;
         setIsTransitioning(false);
       }, 300);
+    } else {
+      // Direct click or tap with no drag gesture
+      setDragOffset(0);
     }
   };
 
@@ -238,14 +264,18 @@ export function VaneVaultHero({ className = '' }) {
         
         {/* Left Nav Arrow Button */}
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             slideTo('prev', true);
           }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
           aria-label="Previous Chamber"
-          className="absolute left-1 z-30 w-7 h-7 rounded-full bg-slate-900/80 border border-slate-700/80 hover:border-cyan-400 text-slate-300 hover:text-cyan-300 flex items-center justify-center transition-all active:scale-90"
+          className="absolute left-1.5 z-30 w-10 h-10 rounded-full bg-slate-900/90 border border-slate-700/80 hover:border-cyan-400 active:border-cyan-400 text-slate-300 hover:text-cyan-300 active:text-cyan-300 flex items-center justify-center transition-all active:scale-90 shadow-md touch-manipulation cursor-pointer"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className="w-5 h-5" />
         </button>
 
         {/* Dynamic Continuous Sliding Pods */}
@@ -378,14 +408,18 @@ export function VaneVaultHero({ className = '' }) {
 
         {/* Right Nav Arrow Button */}
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             slideTo('next', true);
           }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
           aria-label="Next Chamber"
-          className="absolute right-1 z-30 w-7 h-7 rounded-full bg-slate-900/80 border border-slate-700/80 hover:border-cyan-400 text-slate-300 hover:text-cyan-300 flex items-center justify-center transition-all active:scale-90"
+          className="absolute right-1.5 z-30 w-10 h-10 rounded-full bg-slate-900/90 border border-slate-700/80 hover:border-cyan-400 active:border-cyan-400 text-slate-300 hover:text-cyan-300 active:text-cyan-300 flex items-center justify-center transition-all active:scale-90 shadow-md touch-manipulation cursor-pointer"
         >
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-5 h-5" />
         </button>
       </div>
 

@@ -365,6 +365,28 @@ function BourdonSteamTube({ timeLeft, maxTime }) {
 // 3. TARGET SWATCH PRESENTATION (ENSIGN vs SPYGLASS)
 // ============================================================================
 
+// Global cache of preloaded flag image URLs to avoid duplicate network requests
+const preloadedFlagUrls = new Set();
+
+function preloadFlag(flag) {
+  if (!flag) return;
+  const imageSrc = flag.image || `/images/flags/${flag.id}.svg`;
+  const fallbackSrc = `https://flagcdn.com/${flag.id}.svg`;
+
+  if (!preloadedFlagUrls.has(imageSrc)) {
+    preloadedFlagUrls.add(imageSrc);
+    const img = new Image();
+    img.src = imageSrc;
+    img.onerror = () => {
+      if (!preloadedFlagUrls.has(fallbackSrc)) {
+        preloadedFlagUrls.add(fallbackSrc);
+        const fallback = new Image();
+        fallback.src = fallbackSrc;
+      }
+    };
+  }
+}
+
 // Flag image graphic with fallback, normal horizontal naval ensign presentation
 function FlagGraphic({ flag, className = '' }) {
   if (!flag) return null;
@@ -373,12 +395,6 @@ function FlagGraphic({ flag, className = '' }) {
 
   return (
     <div className={`flex flex-col items-center justify-center relative shrink-0 ${className}`}>
-      {/* Top yardarm halyard rigging wire */}
-      {/* <div className="w-20 sm:w-24 h-[2px] bg-gradient-to-r from-amber-700 via-amber-400 to-amber-700 rounded-full mb-1 shrink-0 relative">
-        <div className="absolute -top-0.5 left-0.5 w-1.5 h-1.5 rounded-full bg-amber-300 border border-black shadow" />
-        <div className="absolute -top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-amber-300 border border-black shadow" />
-      </div> */}
-
       {/* Flag normal horizontal (unrotated) */}
       <div className="w-20 h-14 sm:w-24 sm:h-16 flex items-center justify-center shrink-0">
         <img
@@ -391,6 +407,7 @@ function FlagGraphic({ flag, className = '' }) {
           }}
           className="max-w-full max-h-full object-contain rounded-md shadow-2xl border-2 border-amber-400/80 drop-shadow-xl"
           loading="eager"
+          decoding="sync"
         />
       </div>
     </div>
@@ -399,9 +416,15 @@ function FlagGraphic({ flag, className = '' }) {
 
 // Polished Sextant Minimalist Lens (Proportional Color Pie Chart - Guaranteed Circle)
 function SpyglassLensDisplay({ target }) {
-  const colors = target.colors || ['#38bdf8'];
-  const proportions = target.proportions || [1];
+  if (!target) return null;
+
+  const colors = target.colors && target.colors.length > 0 ? target.colors : ['#38bdf8'];
+  const proportions = target.proportions && target.proportions.length > 0 ? target.proportions : [1];
   const total = proportions.reduce((a, b) => a + b, 0);
+
+  const cx = 50;
+  const cy = 50;
+  const r = 38.5;
 
   let accumulatedAngle = 0;
   const slices = colors.map((color, i) => {
@@ -410,9 +433,6 @@ function SpyglassLensDisplay({ target }) {
     const endAngle = accumulatedAngle + fraction * 360;
     accumulatedAngle = endAngle;
 
-    const r = 46;
-    const cx = 50;
-    const cy = 50;
     const startRad = (startAngle - 90) * (Math.PI / 180);
     const endRad = (endAngle - 90) * (Math.PI / 180);
 
@@ -428,25 +448,91 @@ function SpyglassLensDisplay({ target }) {
   });
 
   return (
-    <div className="w-full h-full flex items-center justify-center p-1 relative">
-      {/* Sleek Polished Bevel Casing - aspect-square and shrink-0 to prevent oval distortion */}
-      <div className="relative w-20 h-20 sm:w-24 sm:h-24 aspect-square shrink-0 mx-auto flex items-center justify-center">
-        {/* Outer Brushed Bronze Bevel Ring with Micro-Ticks */}
-        <div className="absolute inset-0 aspect-square rounded-full border-2 border-amber-400/90 shadow-2xl bg-gradient-to-tr from-amber-700 via-amber-400 to-amber-700 p-0.5 flex items-center justify-center">
-          <div className="w-full h-full aspect-square rounded-full bg-[#050c18] border border-black/60 flex items-center justify-center relative">
-            <div className="absolute inset-1 aspect-square rounded-full border border-dotted border-amber-400/40 pointer-events-none" />
-          </div>
-        </div>
+    <div className="w-full h-full flex items-center justify-center p-1 relative select-none">
+      {/* Precision Circular Eyeglass Lens Casing - guaranteed 1:1 concentric alignment */}
+      <div className="w-20 h-20 sm:w-24 sm:h-24 max-w-full max-h-full aspect-square shrink-0 flex items-center justify-center">
+        <svg
+          viewBox="0 0 100 100"
+          className="w-full h-full aspect-square block drop-shadow-2xl"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <defs>
+            {/* Outer Brushed Bronze Bevel Casing */}
+            <radialGradient id="spyglassOuterBevel" cx="30%" cy="25%" r="75%">
+              <stop offset="0%" stopColor="#fef08a" />
+              <stop offset="20%" stopColor="#f59e0b" />
+              <stop offset="50%" stopColor="#b45309" />
+              <stop offset="80%" stopColor="#78350f" />
+              <stop offset="100%" stopColor="#451a03" />
+            </radialGradient>
 
-        {/* Clean, 100% Unobstructed Glass Lens with Pie Slices */}
-        <div className="relative w-[86%] aspect-square rounded-full overflow-hidden border border-amber-500/80 shadow-inner flex items-center justify-center shrink-0">
-          <svg
-            viewBox="0 0 100 100"
-            className="w-full h-full aspect-square drop-shadow block"
-            preserveAspectRatio="xMidYMid meet"
-          >
+            {/* Inner Polished Brass Bezel Rim */}
+            <linearGradient id="spyglassInnerBevel" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#92400e" />
+              <stop offset="50%" stopColor="#fbbf24" />
+              <stop offset="100%" stopColor="#451a03" />
+            </linearGradient>
+
+            {/* Convex Optical Glass Lens Glare */}
+            <radialGradient id="spyglassLensGlare" cx="32%" cy="28%" r="65%">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.32" />
+              <stop offset="35%" stopColor="#ffffff" stopOpacity="0.08" />
+              <stop offset="70%" stopColor="#ffffff" stopOpacity="0" />
+              <stop offset="100%" stopColor="#ffffff" stopOpacity="0.2" />
+            </radialGradient>
+
+            {/* Guaranteed Circular Mask for Slices */}
+            <clipPath id="spyglassLensClip">
+              <circle cx={cx} cy={cy} r={r} />
+            </clipPath>
+          </defs>
+
+          {/* 1. Heavy Outer Brass Bevel Ring */}
+          <circle
+            cx={cx}
+            cy={cy}
+            r="48"
+            fill="url(#spyglassOuterBevel)"
+            stroke="#291203"
+            strokeWidth="1"
+          />
+
+          {/* 2. Inner Brass Bevel Rim */}
+          <circle
+            cx={cx}
+            cy={cy}
+            r="44.5"
+            fill="#040914"
+            stroke="url(#spyglassInnerBevel)"
+            strokeWidth="1.2"
+          />
+
+          {/* 3. Nautical Compass Micro-Ticks / Dotted Signal Ring */}
+          <circle
+            cx={cx}
+            cy={cy}
+            r="41.5"
+            fill="none"
+            stroke="#f59e0b"
+            strokeWidth="0.8"
+            strokeDasharray="1.2 2"
+            opacity="0.65"
+          />
+
+          {/* 4. Deep Navy Lens Seat Housing */}
+          <circle
+            cx={cx}
+            cy={cy}
+            r="39.2"
+            fill="#030712"
+            stroke="#78350f"
+            strokeWidth="0.8"
+          />
+
+          {/* 5. Circular Flag Signal (Proportional Color Pie Slices) - Always 100% Concentric */}
+          <g clipPath="url(#spyglassLensClip)">
             {slices.length === 1 ? (
-              <circle cx="50" cy="50" r="46" fill={slices[0].color} stroke="#050a14" strokeWidth="0.8" />
+              <circle cx={cx} cy={cy} r={r} fill={slices[0].color} />
             ) : (
               slices.map((slice, idx) => (
                 <path
@@ -458,15 +544,39 @@ function SpyglassLensDisplay({ target }) {
                 />
               ))
             )}
-          </svg>
-          {/* Subtle perimeter lens reflection (leaves colors completely clear) */}
-          <div
-            className="absolute inset-0 aspect-square rounded-full pointer-events-none"
-            style={{
-              background: 'radial-gradient(circle, transparent 75%, rgba(255,255,255,0.22) 100%)',
-            }}
+          </g>
+
+          {/* 6. Precision Brass Lens Retaining Ring */}
+          <circle
+            cx={cx}
+            cy={cy}
+            r={r}
+            fill="none"
+            stroke="#d97706"
+            strokeWidth="1"
+            opacity="0.9"
           />
-        </div>
+
+          {/* 7. Convex Optical Glass Glare Overlay */}
+          <circle
+            cx={cx}
+            cy={cy}
+            r={r}
+            fill="url(#spyglassLensGlare)"
+            pointerEvents="none"
+          />
+
+          {/* 8. Specular Glass Edge Highlight */}
+          <circle
+            cx={cx}
+            cy={cy}
+            r={r - 0.5}
+            fill="none"
+            stroke="rgba(255,255,255,0.28)"
+            strokeWidth="0.6"
+            pointerEvents="none"
+          />
+        </svg>
       </div>
     </div>
   );
@@ -524,6 +634,38 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
       }
     }
   }, [challengeCode]);
+
+  // Preload daily voyage flags immediately on mount so they are cached in memory
+  useEffect(() => {
+    try {
+      const seed = getDailySeed();
+      const prng = createPRNG(seed);
+      const dailyQuestions = generateGameRound(DAILY_ROUNDS, FLAGS_DATASET, prng);
+      dailyQuestions.forEach((q) => {
+        if (q?.target) preloadFlag(q.target);
+      });
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Preload all flags in the active questions queue
+  useEffect(() => {
+    if (!questions || questions.length === 0) return;
+    questions.forEach((q) => {
+      if (q?.target) preloadFlag(q.target);
+    });
+  }, [questions]);
+
+  // Preload current target and lookahead next target on index change
+  useEffect(() => {
+    if (questions[currentIndex]?.target) {
+      preloadFlag(questions[currentIndex].target);
+    }
+    if (questions[currentIndex + 1]?.target) {
+      preloadFlag(questions[currentIndex + 1].target);
+    }
+  }, [currentIndex, questions]);
 
   // Round Timer Loop
   useEffect(() => {
@@ -997,6 +1139,18 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
 
               {/* 2. Bourdon Glass Steam Tube (Countdown Timer) */}
               <BourdonSteamTube timeLeft={timeLeft} maxTime={ROUND_TIME_SECONDS} />
+
+              {/* Hidden preload element for current target so it displays instantly on reveal */}
+              {currentQ?.target && (
+                <div className="hidden" aria-hidden="true">
+                  <img
+                    src={currentQ.target.image || `/images/flags/${currentQ.target.id}.svg`}
+                    alt=""
+                    loading="eager"
+                    decoding="sync"
+                  />
+                </div>
+              )}
 
               {/* Reveal Modal: Absolutely positioned on top of the masthead and steam tube */}
               {isRevealed && (
