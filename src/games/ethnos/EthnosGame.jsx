@@ -432,13 +432,13 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
           <div className="w-full text-center mt-2">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold mb-3">
               <Target className="w-3.5 h-3.5 text-amber-400" />
-              Vector Map Pinpointing • 0-5,000 Pts
+              Anthropological Identification
             </div>
             <h2 className="text-4xl font-black text-white tracking-tight uppercase">
-              Micro Ethnoguesser
+              Ethnoguesser
             </h2>
             <p className="text-xs text-slate-400 mt-2 max-w-xs mx-auto leading-relaxed">
-              Examine the facial composite from humanphenotypes.org and drop your pin on its historical homeland.
+              Examine facial composites from humanphenotypes.org and drop your pin on its historical homeland.
             </p>
           </div>
 
