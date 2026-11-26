@@ -32,7 +32,12 @@ import {
   getDailySeed,
   saveGameScore,
   getGameStats,
+  canPlayInfiniteMode,
+  incrementDailyInfinitePlays,
+  saveArchiveScore,
 } from '../../shared/storage/playerStorage';
+import { useArcadePass } from '../../shared/context/ArcadePassContext';
+import { GameArchivePicker } from '../../shared/components/GameArchivePicker';
 import { isDevSite } from '../../shared/utils/environment';
 import {
   shareResult,
@@ -68,6 +73,7 @@ import {
   Lock,
   Unlock,
   Infinity as InfinityIcon,
+  Calendar,
   X,
 } from 'lucide-react';
 
@@ -165,6 +171,9 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
   }, []);
 
   const [gameState, setGameState] = useState('menu'); // 'menu' | 'playing' | 'gameover'
+  const { isPassHolder, openPassModal } = useArcadePass();
+  const [showArchive, setShowArchive] = useState(false);
+  const [activeDateKey, setActiveDateKey] = useState(null);
   const [currentMissionIdx, setCurrentMissionIdx] = useState(0);
   const [missionsList, setMissionsList] = useState([]);
   const [totalProbesUsed, setTotalProbesUsed] = useState(0);
@@ -232,15 +241,17 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
 
   // Initialize mission set based on mode
   const initGameSession = useCallback(
-    (chosenMode = mode) => {
+    (chosenMode = mode, customDateKey = null) => {
       let missions = [];
 
       if (chosenMode === 'daily') {
-        const seed = getDailySeed();
+        const seed = getDailySeed(customDateKey);
         missions = generateDailyMissions(seed);
+        setActiveDateKey(customDateKey);
       } else {
         // Infinite mode starts at Mission 1
         missions = [generateInfiniteMission(0)];
+        setActiveDateKey(null);
       }
 
       setMode(chosenMode);
@@ -366,8 +377,12 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
         }
       }
 
-      saveGameScore('orbitdrop', finalScore, isDaily, correctCount);
-      setStats(getGameStats('orbitdrop'));
+      if (activeDateKey) {
+        saveArchiveScore('orbitdrop', activeDateKey, finalScore);
+      } else {
+        saveGameScore('orbitdrop', finalScore, isDaily, correctCount);
+        setStats(getGameStats('orbitdrop'));
+      }
 
       // Check customization unlocks for streak and infinite sectors
       checkThemeUnlocks(
@@ -1212,6 +1227,19 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                           ? `Completed for today • Resets in ${getTimeUntilMidnightUTC()}`
                           : '5 curated daily missions. Scored on precision & probe efficiency.'}
                       </div>
+                      <div className="flex items-center gap-1.5 mt-1.5">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowArchive(true);
+                          }}
+                          className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[10px] font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+                        >
+                          <Calendar className="w-3 h-3 text-amber-400" />
+                          <span>Daily Archive</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-slate-400" />
@@ -1275,6 +1303,12 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                 </div>
                 <button
                   onClick={() => {
+                    const check = canPlayInfiniteMode('orbitdrop', isPassHolder);
+                    if (!check.allowed) {
+                      openPassModal('plans', "You've used today's free Infinite sector. Unlock unlimited Infinite play with the Arcade Pass.");
+                      return;
+                    }
+                    incrementDailyInfinitePlays('orbitdrop');
                     setMode('infinite');
                     initGameSession('infinite');
                   }}
@@ -1289,7 +1323,17 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
               </div>
             ) : (
               <button
-                onClick={() => initGameSession(mode)}
+                onClick={() => {
+                  if (mode === 'infinite') {
+                    const check = canPlayInfiniteMode('orbitdrop', isPassHolder);
+                    if (!check.allowed) {
+                      openPassModal('plans', "You've used today's free Infinite sector. Unlock unlimited Infinite play with the Arcade Pass.");
+                      return;
+                    }
+                    incrementDailyInfinitePlays('orbitdrop');
+                  }
+                  initGameSession(mode);
+                }}
                 className={`w-full py-4 rounded-2xl bg-gradient-to-r ${currentTheme.buttonGrad || 'from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400'} text-slate-950 font-black text-sm uppercase tracking-wider shadow-lg active:scale-98 transition-all flex items-center justify-center gap-2`}
                 style={{
                   boxShadow: `0 0 20px ${currentTheme.shadowColor}35`,
@@ -1772,6 +1816,16 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
           </div>
         </div>
       )}
+      {/* Daily Archive Picker Modal */}
+      <GameArchivePicker
+        gameSlug="orbitdrop"
+        isOpen={showArchive}
+        onClose={() => setShowArchive(false)}
+        onSelectDate={(date) => {
+          setMode('daily');
+          initGameSession('daily', date);
+        }}
+      />
     </div>
   );
 }

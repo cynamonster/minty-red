@@ -9,6 +9,8 @@ import { BearingLockGame } from './games/bearinglock/BearingLockGame';
 import { MetroGame } from './games/metro/MetroGame';
 import { RelicGame } from './games/relic/RelicGame';
 import { ReviewDrawer } from './shared/components/ReviewDrawer';
+import { ArcadePassProvider } from './shared/context/ArcadePassContext';
+import { ArcadePassModal } from './shared/components/ArcadePassModal';
 import { ALL_GAMES, getAvailableGames, isDevSite, normalizeGameSlug } from './shared/utils/environment';
 import { initAnalytics, trackPageView, trackGameView } from './shared/analytics/analyticsService';
 
@@ -181,8 +183,9 @@ export function App() {
   };
 
   return (
-    <div className="w-full min-h-[100dvh] bg-[#07090e] font-sans antialiased text-slate-100 flex justify-center relative">
-      {/* 1. Studio Review Dashboard (dash.minty.red) */}
+    <ArcadePassProvider>
+      <div className="w-full min-h-[100dvh] bg-[#07090e] font-sans antialiased text-slate-100 flex justify-center relative">
+        {/* 1. Studio Review Dashboard (dash.minty.red) */}
       {activeGame === 'dash' && (
         <StudioDashboard
           onLaunchGame={(slug, reviewMode) => handleSelectGame(slug, reviewMode)}
@@ -271,7 +274,11 @@ export function App() {
           }}
         />
       )}
+
+      {/* Minty Arcade Pass Modal */}
+      <ArcadePassModal />
     </div>
+  </ArcadePassProvider>
   );
 }
 

@@ -12,7 +12,12 @@ import {
   createPRNG,
   saveGameScore,
   getGameStats,
+  canPlayInfiniteMode,
+  incrementDailyInfinitePlays,
+  saveArchiveScore,
 } from '../../shared/storage/playerStorage';
+import { useArcadePass } from '../../shared/context/ArcadePassContext';
+import { GameArchivePicker } from '../../shared/components/GameArchivePicker';
 import {
   formatWordleShare,
   shareResult,
@@ -28,6 +33,7 @@ import {
   Trophy,
   RotateCcw,
   Flag,
+  Calendar,
   Share2,
   Swords,
   Play,
@@ -588,6 +594,9 @@ function SpyglassLensDisplay({ target }) {
 
 export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
   const [mode, setMode] = useState('menu'); // 'menu' | 'daily' | 'infinite' | 'challenge'
+  const { isPassHolder, openPassModal } = useArcadePass();
+  const [showArchive, setShowArchive] = useState(false);
+  const [activeDateKey, setActiveDateKey] = useState(null);
   const [stats, setStats] = useState(() => {
     const s = getGameStats('flagship');
     // Seamless fallback to legacy flaghex stats if flagship has no games played yet
@@ -822,10 +831,14 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
     const isDaily = mode === 'daily';
     const totalCount = mode === 'infinite' ? Math.max(1, history.length) : (questions.length || 5);
 
-    saveGameScore('flagship', finalScore, isDaily, correctCount);
-    // Also update legacy storage for player backward compatibility
-    saveGameScore('flaghex', finalScore, isDaily, correctCount);
-    setStats(getGameStats('flagship'));
+    if (activeDateKey) {
+      saveArchiveScore('flagship', activeDateKey, finalScore);
+    } else {
+      saveGameScore('flagship', finalScore, isDaily, correctCount);
+      // Also update legacy storage for player backward compatibility
+      saveGameScore('flaghex', finalScore, isDaily, correctCount);
+      setStats(getGameStats('flagship'));
+    }
 
     const won =
       mode === 'infinite'
@@ -839,9 +852,10 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
   };
 
   // Start Daily Game (5 Seeded Flags)
-  const startDailyGame = () => {
+  const startDailyGame = (customDateKey = null) => {
     soundEngine.playTap();
-    const seed = getDailySeed();
+    const seed = getDailySeed(customDateKey);
+    setActiveDateKey(customDateKey);
     const prng = createPRNG(seed);
     const roundQuestions = generateGameRound(DAILY_ROUNDS, FLAGS_DATASET, prng);
 
@@ -863,6 +877,14 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
   // Start Infinite Game (Continuous Sea Patrol with 3 Strikes)
   const startInfiniteGame = () => {
     soundEngine.playTap();
+    const check = canPlayInfiniteMode('flagship', isPassHolder);
+    if (!check.allowed) {
+      openPassModal('plans', "You've used today's free Infinite sea patrol. Unlock unlimited Infinite play with the Arcade Pass.");
+      return;
+    }
+    incrementDailyInfinitePlays('flagship');
+    setActiveDateKey(null);
+
     const shuffled = [...FLAGS_DATASET].sort(() => Math.random() - 0.5);
     infinitePoolRef.current = shuffled;
 
@@ -1036,6 +1058,18 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                 </div>
                 <Play className="w-4 h-4 fill-slate-950 text-slate-950" />
               </button>
+
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10px] font-mono-code text-slate-400">Past Daily Voyages</span>
+                <button
+                  type="button"
+                  onClick={() => setShowArchive(true)}
+                  className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-amber-500/40 text-amber-300 text-[10px] font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+                >
+                  <Calendar className="w-3 h-3 text-amber-400" />
+                  <span>Signals Archive</span>
+                </button>
+              </div>
 
               <button
                 onClick={startInfiniteGame}
@@ -1451,6 +1485,14 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
             </div>
           </div>
         )}
+
+      {/* Daily Archive Picker Modal */}
+      <GameArchivePicker
+        gameSlug="flagship"
+        isOpen={showArchive}
+        onClose={() => setShowArchive(false)}
+        onSelectDate={(date) => startDailyGame(date)}
+      />
     </GameContainer>
   );
 }

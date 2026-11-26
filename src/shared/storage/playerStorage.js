@@ -1,5 +1,6 @@
 // Player persistence & deterministic daily seed generator.
 import { trackGameEnd, trackDailyChallenge } from '../analytics/analyticsService';
+import { isDevSite } from '../utils/environment';
 
 export function getTodayKey() {
   const now = new Date();
@@ -17,8 +18,8 @@ export function createPRNG(seed) {
   };
 }
 
-export function getDailySeed() {
-  const key = getTodayKey();
+export function getDailySeed(customDateKey) {
+  const key = customDateKey || getTodayKey();
   let hash = 0;
   for (let i = 0; i < key.length; i++) {
     hash = (hash << 5) - hash + key.charCodeAt(i);
@@ -90,4 +91,73 @@ export function saveGameScore(gameSlug, score, isDaily = false, correctCount = 0
   } catch {}
 
   return stats;
+}
+
+/**
+ * Get the number of infinite runs played today by gameSlug
+ */
+export function getDailyInfinitePlays(gameSlug) {
+  const today = getTodayKey();
+  const raw = localStorage.getItem(`minty_infinite_${gameSlug}`);
+  if (!raw) return 0;
+  try {
+    const data = JSON.parse(raw);
+    if (data.date === today) return data.count || 0;
+    return 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Increment and return the updated count of infinite runs played today
+ */
+export function incrementDailyInfinitePlays(gameSlug) {
+  const today = getTodayKey();
+  const count = getDailyInfinitePlays(gameSlug) + 1;
+  try {
+    localStorage.setItem(`minty_infinite_${gameSlug}`, JSON.stringify({ date: today, count }));
+  } catch {}
+  return count;
+}
+
+/**
+ * Check whether infinite mode can be played:
+ * Free players get 1 free run/day; Pass holders & Dev Mode (?dev=true, ?pass=true) get unlimited.
+ */
+export function canPlayInfiniteMode(gameSlug, isPassHolder = false) {
+  if (isPassHolder || isDevSite()) {
+    return { allowed: true, remaining: Infinity, isDev: isDevSite() };
+  }
+  const plays = getDailyInfinitePlays(gameSlug);
+  const remaining = Math.max(0, 1 - plays);
+  return { allowed: remaining > 0, remaining };
+}
+
+/**
+ * Get archive completions map for a game { "2026-10-15": { score: 120, completedAt: ... } }
+ */
+export function getArchiveHistory(gameSlug) {
+  const raw = localStorage.getItem(`minty_archive_${gameSlug}`);
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw) || {};
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Save an archive puzzle completion
+ */
+export function saveArchiveScore(gameSlug, dateKey, score) {
+  const history = getArchiveHistory(gameSlug);
+  history[dateKey] = {
+    score,
+    completedAt: Date.now(),
+  };
+  try {
+    localStorage.setItem(`minty_archive_${gameSlug}`, JSON.stringify(history));
+  } catch {}
+  return history;
 }

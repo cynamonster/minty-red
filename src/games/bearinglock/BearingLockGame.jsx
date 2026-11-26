@@ -18,7 +18,12 @@ import {
   getDailySeed,
   saveGameScore,
   getGameStats,
+  canPlayInfiniteMode,
+  incrementDailyInfinitePlays,
+  saveArchiveScore,
 } from '../../shared/storage/playerStorage';
+import { useArcadePass } from '../../shared/context/ArcadePassContext';
+import { GameArchivePicker } from '../../shared/components/GameArchivePicker';
 import { copyShareText } from '../../shared/share/shareService';
 import {
   encodeChallenge,
@@ -51,6 +56,9 @@ const BLITZ_ACCURACY_BONUS = 8; // +8s bonus time for locks within 15°
 
 export function BearingLockGame({ onHome, onSelectGame, challengeCode }) {
   const [mode, setMode] = useState('menu'); // 'menu' | 'daily' | 'blitz' | 'challenge'
+  const { isPassHolder, openPassModal } = useArcadePass();
+  const [showArchive, setShowArchive] = useState(false);
+  const [activeDateKey, setActiveDateKey] = useState(null);
   const [stats, setStats] = useState(() => getGameStats('bearinglock'));
   const [challengeData, setChallengeData] = useState(null);
 
@@ -105,9 +113,10 @@ export function BearingLockGame({ onHome, onSelectGame, challengeCode }) {
   }, [mode, gameOver]);
 
   // Start Daily Mode
-  const startDaily = () => {
+  const startDaily = (customDateKey = null) => {
     soundEngine.playTap();
-    const seed = getDailySeed();
+    const seed = getDailySeed(customDateKey);
+    setActiveDateKey(customDateKey);
     activeSeedRef.current = seed;
     const deck = getDailyWaypoints(seed);
     setWaypointsDeck(deck);
@@ -128,6 +137,14 @@ export function BearingLockGame({ onHome, onSelectGame, challengeCode }) {
   // Start Blitz Mode
   const startBlitz = () => {
     soundEngine.playTap();
+    const check = canPlayInfiniteMode('bearinglock', isPassHolder);
+    if (!check.allowed) {
+      openPassModal('plans', "You've used today's free Radar Blitz flight. Unlock unlimited flights with the Arcade Pass.");
+      return;
+    }
+    incrementDailyInfinitePlays('bearinglock');
+    setActiveDateKey(null);
+
     const seed = Date.now();
     activeSeedRef.current = seed;
     // Pre-populate with first waypoint
@@ -274,8 +291,12 @@ export function BearingLockGame({ onHome, onSelectGame, challengeCode }) {
     setShowConfetti(true);
 
     const correctCount = history.filter((h) => h.delta <= 15).length;
-    saveGameScore('bearinglock', totalScore, mode === 'daily', correctCount);
-    setStats(getGameStats('bearinglock'));
+    if (activeDateKey) {
+      saveArchiveScore('bearinglock', activeDateKey, totalScore);
+    } else {
+      saveGameScore('bearinglock', totalScore, mode === 'daily', correctCount);
+      setStats(getGameStats('bearinglock'));
+    }
   };
 
   // Generate shareable Wordle-style summary
@@ -410,6 +431,18 @@ Play now: ${window.location.origin}/bearinglock`;
                 </div>
                 <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-sky-400 transition-colors" />
               </button>
+
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10px] font-mono text-slate-400">Past Daily Flights</span>
+                <button
+                  type="button"
+                  onClick={() => setShowArchive(true)}
+                  className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-sky-500/40 text-sky-300 text-[10px] font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+                >
+                  <Calendar className="w-3 h-3 text-sky-400" />
+                  <span>Flight Archive</span>
+                </button>
+              </div>
 
               {/* Radar Blitz */}
               <button
@@ -740,6 +773,14 @@ Play now: ${window.location.origin}/bearinglock`;
 
       {/* Studio Review Drawer (dash.minty.red / ?review=true) */}
       <ReviewDrawer gameSlug="bearinglock" />
+
+      {/* Daily Archive Picker Modal */}
+      <GameArchivePicker
+        gameSlug="bearinglock"
+        isOpen={showArchive}
+        onClose={() => setShowArchive(false)}
+        onSelectDate={(date) => startDaily(date)}
+      />
     </GameContainer>
   );
 }

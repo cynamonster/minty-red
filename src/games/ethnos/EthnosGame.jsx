@@ -13,7 +13,12 @@ import {
   createPRNG,
   saveGameScore,
   getGameStats,
+  canPlayInfiniteMode,
+  incrementDailyInfinitePlays,
+  saveArchiveScore,
 } from '../../shared/storage/playerStorage';
+import { useArcadePass } from '../../shared/context/ArcadePassContext';
+import { GameArchivePicker } from '../../shared/components/GameArchivePicker';
 import {
   shareResult,
   generateCanvasBadge,
@@ -38,6 +43,9 @@ import {
 
 export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
   const [mode, setMode] = useState('menu'); // 'menu' | 'daily' | 'blitz' | 'challenge'
+  const { isPassHolder, openPassModal } = useArcadePass();
+  const [showArchive, setShowArchive] = useState(false);
+  const [activeDateKey, setActiveDateKey] = useState(null);
   const [stats, setStats] = useState(() => getGameStats('ethnos'));
   const [challengeData, setChallengeData] = useState(null);
 
@@ -199,9 +207,10 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
     }
   }, [challengeCode]);
 
-  const startDailyGame = () => {
+  const startDailyGame = (customDateKey = null) => {
     soundEngine.playTap();
-    const seed = getDailySeed();
+    const seed = getDailySeed(customDateKey);
+    setActiveDateKey(customDateKey);
     const prng = createPRNG(seed);
     const pool = [...ETHNOS_DATASET];
 
@@ -226,6 +235,14 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
 
   const startBlitzGame = () => {
     soundEngine.playTap();
+    const check = canPlayInfiniteMode('ethnos', isPassHolder);
+    if (!check.allowed) {
+      openPassModal('plans', "You've used today's free Practice round. Unlock unlimited play with the Arcade Pass.");
+      return;
+    }
+    incrementDailyInfinitePlays('ethnos');
+    setActiveDateKey(null);
+
     const prng = Math.random;
     const pool = [...ETHNOS_DATASET];
     for (let i = pool.length - 1; i > 0; i--) {
@@ -334,9 +351,13 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
 
   const finishGame = (finalHistory, finalScore) => {
     setGameOver(true);
-    const isDaily = mode === 'daily';
-    const updated = saveGameScore('ethnos', finalScore, isDaily, finalScore);
-    setStats(updated);
+    if (activeDateKey) {
+      saveArchiveScore('ethnos', activeDateKey, finalScore);
+    } else {
+      const isDaily = mode === 'daily';
+      const updated = saveGameScore('ethnos', finalScore, isDaily, finalScore);
+      setStats(updated);
+    }
 
     if (finalScore >= 18000) {
       soundEngine.playStreak();
@@ -439,6 +460,18 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
               </div>
             </button>
 
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[10px] font-mono text-slate-400">Past Daily Ethnos</span>
+              <button
+                type="button"
+                onClick={() => setShowArchive(true)}
+                className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-amber-500/40 text-amber-300 text-[10px] font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+              >
+                <Calendar className="w-3 h-3 text-amber-400" />
+                <span>Daily Archive</span>
+              </button>
+            </div>
+
             <button
               onClick={startBlitzGame}
               className="w-full p-4 rounded-2xl bg-gradient-to-br from-rose-950/30 via-slate-900 to-slate-900 border border-rose-500/30 hover:border-rose-400 active:scale-[0.98] transition-all text-left shadow-lg"
@@ -478,6 +511,13 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
               <div className="text-lg font-black text-white">{stats.gamesPlayed}</div>
             </div>
           </div>
+
+          <GameArchivePicker
+            gameSlug="ethnos"
+            isOpen={showArchive}
+            onClose={() => setShowArchive(false)}
+            onSelectDate={(date) => startDailyGame(date)}
+          />
         </div>
       </GameContainer>
     );

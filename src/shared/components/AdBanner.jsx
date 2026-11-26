@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useArcadePass } from '../context/ArcadePassContext';
 import {
   ADSENSE_CLIENT_ID,
   getAdSlot,
@@ -45,6 +46,11 @@ export function AdBanner({
   className = '',
   onSelectGame,
 }) {
+  const { isPassHolder } = useArcadePass();
+  if (isPassHolder) {
+    return null;
+  }
+
   const [adSenseReady, setAdSenseReady] = useState(false);
   const [adSenseFailed, setAdSenseFailed] = useState(false);
   const [houseAd] = useState(() => getHouseAd(game));

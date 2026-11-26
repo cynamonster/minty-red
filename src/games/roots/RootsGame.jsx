@@ -9,7 +9,12 @@ import {
   createPRNG,
   saveGameScore,
   getGameStats,
+  canPlayInfiniteMode,
+  incrementDailyInfinitePlays,
+  saveArchiveScore,
 } from '../../shared/storage/playerStorage';
+import { useArcadePass } from '../../shared/context/ArcadePassContext';
+import { GameArchivePicker } from '../../shared/components/GameArchivePicker';
 import {
   shareResult,
   generateCanvasBadge,
@@ -29,6 +34,9 @@ import {
 
 export function RootsGame({ onHome, onSelectGame, challengeCode }) {
   const [mode, setMode] = useState('menu'); // 'menu' | 'daily' | 'blitz' | 'challenge'
+  const { isPassHolder, openPassModal } = useArcadePass();
+  const [showArchive, setShowArchive] = useState(false);
+  const [activeDateKey, setActiveDateKey] = useState(null);
   const [stats, setStats] = useState(() => getGameStats('roots'));
   const [challengeData, setChallengeData] = useState(null);
 
@@ -57,9 +65,10 @@ export function RootsGame({ onHome, onSelectGame, challengeCode }) {
     }
   }, [challengeCode]);
 
-  const startDailyGame = () => {
+  const startDailyGame = (customDateKey = null) => {
     soundEngine.playTap();
-    const seed = getDailySeed();
+    const seed = getDailySeed(customDateKey);
+    setActiveDateKey(customDateKey);
     const prng = createPRNG(seed);
     const pool = [...SURNAMES_DATASET];
 
@@ -84,6 +93,14 @@ export function RootsGame({ onHome, onSelectGame, challengeCode }) {
 
   const startBlitzGame = () => {
     soundEngine.playTap();
+    const check = canPlayInfiniteMode('roots', isPassHolder);
+    if (!check.allowed) {
+      openPassModal('plans', "You've used today's free Practice round. Unlock unlimited practice with the Arcade Pass.");
+      return;
+    }
+    incrementDailyInfinitePlays('roots');
+    setActiveDateKey(null);
+
     const prng = Math.random;
     const pool = [...SURNAMES_DATASET];
     for (let i = pool.length - 1; i > 0; i--) {
@@ -184,9 +201,13 @@ export function RootsGame({ onHome, onSelectGame, challengeCode }) {
 
   const finishGame = (finalHistory, finalScore) => {
     setGameOver(true);
-    const isDaily = mode === 'daily';
-    const updated = saveGameScore('roots', finalScore, isDaily, finalScore);
-    setStats(updated);
+    if (activeDateKey) {
+      saveArchiveScore('roots', activeDateKey, finalScore);
+    } else {
+      const isDaily = mode === 'daily';
+      const updated = saveGameScore('roots', finalScore, isDaily, finalScore);
+      setStats(updated);
+    }
 
     if (finalScore >= 18000) {
       soundEngine.playStreak();
@@ -289,6 +310,18 @@ export function RootsGame({ onHome, onSelectGame, challengeCode }) {
               </div>
             </button>
 
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[10px] font-mono text-slate-400">Past Daily Surnames</span>
+              <button
+                type="button"
+                onClick={() => setShowArchive(true)}
+                className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-500/40 text-emerald-300 text-[10px] font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+              >
+                <Calendar className="w-3 h-3 text-emerald-400" />
+                <span>Daily Archive</span>
+              </button>
+            </div>
+
             <button
               onClick={startBlitzGame}
               className="w-full p-4 rounded-2xl bg-gradient-to-br from-sky-950/30 via-slate-900 to-slate-900 border border-sky-500/30 hover:border-sky-400 active:scale-[0.98] transition-all text-left shadow-lg"
@@ -332,6 +365,13 @@ export function RootsGame({ onHome, onSelectGame, challengeCode }) {
           <div className="w-full pt-3">
             <AdBanner game="roots" onSelectGame={onSelectGame} />
           </div>
+
+          <GameArchivePicker
+            gameSlug="roots"
+            isOpen={showArchive}
+            onClose={() => setShowArchive(false)}
+            onSelectDate={(date) => startDailyGame(date)}
+          />
         </div>
       </GameContainer>
     );

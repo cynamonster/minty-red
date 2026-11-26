@@ -18,9 +18,11 @@ import {
 import { soundEngine } from '../shared/audio/soundEngine';
 import { getGameStats } from '../shared/storage/playerStorage';
 import { isDevSite } from '../shared/utils/environment';
+import { useArcadePass } from '../shared/context/ArcadePassContext';
 
 export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
   const [muted, setMuted] = useState(soundEngine.isMuted());
+  const { isPassHolder, openPassModal } = useArcadePass();
   const isDev = isDevSite();
 
   // Production Games Stats
@@ -169,6 +171,24 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
         </div>
 
         <div className="flex items-center gap-2">
+          {isPassHolder ? (
+            <button
+              onClick={() => openPassModal('plans')}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/50 text-amber-300 text-[10px] font-black tracking-wider uppercase shadow-sm active:scale-95 transition-all"
+            >
+              <Trophy className="w-3 h-3 text-amber-400" />
+              <span>PASS</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => openPassModal('plans', 'Upgrade to Minty Arcade Pass')}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 text-[10px] font-black tracking-wider uppercase shadow-md shadow-amber-500/20 active:scale-95 transition-all"
+            >
+              <Trophy className="w-3 h-3 text-slate-950 fill-slate-950" />
+              <span>PASS</span>
+            </button>
+          )}
+
           {totalStreak > 0 && (
             <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold font-mono">
               <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
@@ -207,6 +227,35 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
             Daily mobile games built for boredom and bragging rights. 
           </p>
         </section>
+
+        {/* Arcade Pass Banner (for free users) */}
+        {!isPassHolder && (
+          <div
+            onClick={() => openPassModal('plans', 'Lock in $9.99/yr')}
+            className="cursor-pointer mb-4 p-3 rounded-2xl bg-gradient-to-r from-amber-950/40 via-orange-950/30 to-slate-900 border border-amber-500/30 hover:border-amber-400/50 shadow-lg flex items-center justify-between gap-3 active:scale-[0.99] transition-all"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-400/20 border border-amber-400/40 text-amber-300 flex items-center justify-center shrink-0">
+                <Trophy className="w-4 h-4 animate-pulse" />
+              </div>
+              <div>
+                <div className="text-xs font-black text-white flex items-center gap-1.5">
+                  <span>Minty Arcade Pass</span>
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-bold uppercase">
+                    New
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-300 font-medium">
+                  100% Ad-Free • Infinite Play • Daily Archives
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col items-end shrink-0">
+              <span className="text-xs font-black text-amber-400 font-mono">$9.99/yr</span>
+              <span className="text-[8px] text-slate-400 uppercase tracking-wider">$0.19/week</span>
+            </div>
+          </div>
+        )}
 
         {/* SPOTLIGHT CABINET 01: OrbitDrop (100% Clickable Card) */}
         <section className="mb-4">

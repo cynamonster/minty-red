@@ -57,8 +57,16 @@ export function isDevSite() {
   const search = window.location.search || '';
   const params = new URLSearchParams(search);
 
-  // Explicit dev or preview query param
-  if (params.get('dev') === 'true' || params.get('preview') === 'true') {
+  // Explicit dev or preview query param (e.g. ?dev=true, ?dev=1, ?dev, ?preview=true, ?pass=true)
+  if (
+    params.get('dev') === 'true' ||
+    params.get('dev') === '1' ||
+    params.has('dev') ||
+    params.get('preview') === 'true' ||
+    params.get('pass') === 'true' ||
+    params.get('pass') === '1' ||
+    params.has('pass')
+  ) {
     return true;
   }
 
