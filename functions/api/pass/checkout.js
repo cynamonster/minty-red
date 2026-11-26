@@ -35,7 +35,6 @@ export async function onRequestPost(context) {
 
     const params = new URLSearchParams();
     params.append('mode', 'subscription');
-    params.append('payment_method_types[]', 'card');
     params.append('line_items[0][price]', selectedPriceId);
     params.append('line_items[0][quantity]', '1');
     params.append('success_url', successUrl);

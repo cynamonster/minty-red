@@ -12,6 +12,7 @@ const ArcadePassContext = createContext({
   setPassToken: () => {},
   clearPass: () => {},
   restorePurchase: async () => {},
+  cancelSubscription: async () => {},
 });
 
 const STORAGE_KEY = 'minty_arcade_pass';
@@ -59,6 +60,9 @@ export function ArcadePassProvider({ children }) {
       token: info.token || null,
       expiresAt: info.expiresAt || null,
       activatedAt: info.activatedAt || Date.now(),
+      subscriptionId: info.subscriptionId || null,
+      customerId: info.customerId || null,
+      cancelAtPeriodEnd: Boolean(info.cancelAtPeriodEnd),
     };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -125,6 +129,8 @@ export function ArcadePassProvider({ children }) {
             email: data.email,
             token: data.token,
             expiresAt: data.expiresAt,
+            subscriptionId: data.subscriptionId,
+            customerId: data.customerId,
           });
         })
         .catch(() => {
@@ -153,6 +159,30 @@ export function ArcadePassProvider({ children }) {
     return res.json();
   }, []);
 
+  const cancelSubscription = useCallback(async () => {
+    const email = passInfo?.email;
+    const subscriptionId = passInfo?.subscriptionId;
+
+    const res = await fetch('/api/pass/cancel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, subscriptionId }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.message || 'Unable to cancel subscription. Please contact pass@minty.red');
+    }
+
+    savePassState({
+      ...passInfo,
+      cancelAtPeriodEnd: true,
+      expiresAt: data.currentPeriodEnd || passInfo?.expiresAt,
+    });
+
+    return data;
+  }, [passInfo, savePassState]);
+
   return (
     <ArcadePassContext.Provider
       value={{
@@ -167,6 +197,7 @@ export function ArcadePassProvider({ children }) {
         setPassToken: savePassState,
         clearPass,
         restorePurchase,
+        cancelSubscription,
       }}
     >
       {children}

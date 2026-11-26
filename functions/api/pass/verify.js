@@ -69,6 +69,8 @@ export async function onRequestGet(context) {
         tier: plan,
         email,
         expiresAt,
+        subscriptionId: session.subscription || null,
+        customerId: session.customer || null,
         token: `minty_${session.subscription || sessionId}`,
       }),
       { headers: { 'Content-Type': 'application/json' } }
