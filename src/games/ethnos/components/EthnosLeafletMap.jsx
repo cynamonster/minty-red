@@ -792,9 +792,11 @@ export function EthnosLeafletMap({
         <div className="absolute bottom-3 left-3 z-30 pointer-events-none select-none max-w-[70%]">
           <div className={`px-2.5 py-1 rounded-md bg-slate-950/90 backdrop-blur-md border ${currentTheme.hudBorder} shadow-xl text-[11px] font-mono text-slate-200 truncate`}>
             {/* <span className="text-slate-500 text-[10px] mr-1">HOMELAND:</span> */}
+            {targetCoords.macroRegion && (
+              <span className="text-slate-400 text-[10px] mr-1">HOMELAND:</span>
+            )}
             <span className="font-extrabold text-white text-[10px]">
-              {targetCoords.homeland || 'Centroid'}
-              {/* {currentQ?.homeland || 'oops'} */}
+              {targetCoords.macroRegion}
             </span>
           </div>
         </div>

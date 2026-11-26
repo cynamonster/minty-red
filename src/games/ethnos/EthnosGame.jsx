@@ -330,6 +330,7 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
     const newHistoryEntry = {
       name: currentQ.name,
       homeland: currentQ.homeland,
+      macroRegion: currentQ.macroRegion,
       distanceKm,
       points,
       correct: points >= 3000,
@@ -603,7 +604,7 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
               <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
                 Round Analysis
               </div>
-              <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto pr-1">
+              <div className="flex flex-col gap-1.5 pr-1">
                 {history.map((h, i) => (
                   <div
                     key={i}
@@ -611,7 +612,7 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
                   >
                     <div>
                       <div className="font-bold text-white">{h.name}</div>
-                      <div className="text-[10px] text-slate-400">{h.homeland}</div>
+                      <div className="text-[10px] text-slate-400">{h.macroRegion}</div>
                     </div>
                     <div className="text-right">
                       <div className="font-black text-amber-400">+{h.points} pts</div>
@@ -623,10 +624,6 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
             </div>
           </div>
 
-          <div className="w-full pt-1">
-            <AdBanner game="ethnos" onSelectGame={onSelectGame} />
-          </div>
-
           <button
             onClick={() => setMode('menu')}
             className="w-full mt-3 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-[0.98] border border-slate-800 font-bold text-xs text-slate-300 flex items-center justify-center gap-2 transition-all"
@@ -634,6 +631,11 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
             <RotateCcw className="w-4 h-4" />
             Play Again / Choose Mode
           </button>
+
+
+          <div className="w-full pt-6">
+            <AdBanner game="ethnos" onSelectGame={onSelectGame} />
+          </div>
         </div>
       </GameContainer>
     );
@@ -741,14 +743,14 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
                     lat: roundResult.closestPoint.lat,
                     lng: roundResult.closestPoint.lng,
                     label: currentQ?.name,
-                    homeland: currentQ?.homeland,
+                    macroRegion: currentQ?.macroRegion,
                     isInsideCore: roundResult.isInsideCore,
                   }
                 : {
                     lat: currentQ?.lat,
                     lng: currentQ?.lng,
                     label: currentQ?.name,
-                    homeland: currentQ?.homeland,
+                    macroRegion: currentQ?.macroRegion,
                   }
             }
             userPin={userPin}
@@ -767,9 +769,9 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
                 <div className="text-sm font-extrabold text-white">
                   {currentQ?.name}
                 </div>
-                <div className="text-xs font-bold text-amber-400">
-                  {currentQ?.name}
-                </div>
+                {/* <div className="text-xs font-bold text-amber-400"> */}
+                  {/* {currentQ?.macroRegion} */}
+                {/* </div> */}
               </div>
               <div className="text-right">
                 <div className="text-base font-black text-amber-400">
@@ -995,7 +997,7 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
                   setIsImageZoomed(false);
                   roundStartTimeRef.current = Date.now();
                 }}
-                className="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-[0.98] text-slate-950 font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md shadow-amber-500/20"
+                className="w-full py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-slate-950 font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md shadow-amber-500/20"
               >
                 Start
               </button>
