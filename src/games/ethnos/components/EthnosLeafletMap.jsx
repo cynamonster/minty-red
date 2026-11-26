@@ -268,12 +268,12 @@ export function EthnosLeafletMap({
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
 
-  // Theme selection state ('crt' | 'amber')
+  // Theme selection state ('crt' | 'amber') - defaults to amber
   const [activeTheme, setActiveTheme] = useState(() => {
     try {
-      return localStorage.getItem('ethnos_theme') === 'amber' ? 'amber' : 'crt';
+      return localStorage.getItem('ethnos_theme') === 'crt' ? 'crt' : 'amber';
     } catch (e) {
-      return 'crt';
+      return 'amber';
     }
   });
 
@@ -288,7 +288,7 @@ export function EthnosLeafletMap({
     }
   });
 
-  const currentTheme = THEMES[activeTheme] || THEMES.crt;
+  const currentTheme = THEMES[activeTheme] || THEMES.amber;
 
   const toggleTheme = useCallback(() => {
     setActiveTheme((prev) => {
@@ -717,7 +717,7 @@ export function EthnosLeafletMap({
                 : 'bg-emerald-400'
             }`}
           />
-          <span className={`${currentTheme.hudText} font-bold uppercase text-[10px]`}>
+          {/* <span className={`${currentTheme.hudText} font-bold uppercase text-[10px]`}>
             {isLocked
               ? targetCoords?.isInsideCore
                 ? 'CORE HIT 🎯'
@@ -725,7 +725,7 @@ export function EthnosLeafletMap({
               : userPin
               ? 'PIN SET 📍'
               : 'ACQUIRING 🌐'}
-          </span>
+          </span> */}
           <span className="text-slate-600">|</span>
           <span className="text-slate-300 font-medium">
             {userPin
@@ -745,22 +745,22 @@ export function EthnosLeafletMap({
 
       {/* Touch & Navigation Controls Overlay: top-right cluster avoiding bottom attribution */}
       <div className="absolute top-2.5 right-3 z-30 flex items-center gap-1.5 select-none">
-        <button
+        {/* <button
           onClick={cyclePinStyle}
           className="h-7 px-2 rounded-md bg-slate-950/85 backdrop-blur-md border border-slate-700 hover:border-slate-500 text-[10px] font-mono font-bold flex items-center gap-1 shadow-lg active:scale-95 transition-all text-slate-200"
           title={`Cycle Pin Style (Current: ${PIN_OPTIONS.find((p) => p.id === pinStyle)?.name || 'Neon Teardrop'})`}
           aria-label="Cycle Pin Style"
         >
           <span>{PIN_OPTIONS.find((p) => p.id === pinStyle)?.label || '📍 PIN'}</span>
-        </button>
-        <button
+        </button> */}
+        {/* <button
           onClick={toggleTheme}
           className="h-7 px-2 rounded-md bg-slate-950/85 backdrop-blur-md border border-slate-700 hover:border-slate-500 text-[10px] font-mono font-bold flex items-center gap-1 shadow-lg active:scale-95 transition-all"
           title={`Switch Theme (Current: ${currentTheme.name})`}
           aria-label="Toggle Theme"
         >
           <span>{currentTheme.toggleLabel}</span>
-        </button>
+        </button> */}
         <button
           onClick={handleZoomIn}
           className="w-7 h-7 rounded-md bg-slate-950/85 backdrop-blur-md border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white flex items-center justify-center shadow-lg active:scale-95 transition-all"
@@ -791,9 +791,10 @@ export function EthnosLeafletMap({
       {isLocked && targetCoords && (
         <div className="absolute bottom-3 left-3 z-30 pointer-events-none select-none max-w-[70%]">
           <div className={`px-2.5 py-1 rounded-md bg-slate-950/90 backdrop-blur-md border ${currentTheme.hudBorder} shadow-xl text-[11px] font-mono text-slate-200 truncate`}>
-            <span className="text-slate-500 text-[10px] mr-1">HOMELAND:</span>
-            <span className="font-extrabold text-white">
-              {targetCoords.label || 'Centroid'}
+            {/* <span className="text-slate-500 text-[10px] mr-1">HOMELAND:</span> */}
+            <span className="font-extrabold text-white text-[10px]">
+              {targetCoords.homeland || 'Centroid'}
+              {/* {currentQ?.homeland || 'oops'} */}
             </span>
           </div>
         </div>

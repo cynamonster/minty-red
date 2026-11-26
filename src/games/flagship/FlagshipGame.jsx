@@ -1067,7 +1067,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
                   className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-amber-500/40 text-amber-300 text-[10px] font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
                 >
                   <Calendar className="w-3 h-3 text-amber-400" />
-                  <span>Signals Archive</span>
+                  <span>Voyage Archive</span>
                 </button>
               </div>
 

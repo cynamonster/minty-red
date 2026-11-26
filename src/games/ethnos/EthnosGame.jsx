@@ -36,6 +36,8 @@ import {
   CheckCircle2,
   HelpCircle,
   User,
+  Mars,
+  Venus,
   ZoomIn,
   X,
   ExternalLink,
@@ -735,12 +737,14 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
                     lat: roundResult.closestPoint.lat,
                     lng: roundResult.closestPoint.lng,
                     label: currentQ?.name,
+                    homeland: currentQ?.homeland,
                     isInsideCore: roundResult.isInsideCore,
                   }
                 : {
                     lat: currentQ?.lat,
                     lng: currentQ?.lng,
-                    label: currentQ?.homeland,
+                    label: currentQ?.name,
+                    homeland: currentQ?.homeland,
                   }
             }
             userPin={userPin}
@@ -920,10 +924,10 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
                         : 'bg-slate-950/70 text-slate-400'
                     }`}
                   >
-                    ♀ Female
+                    <Venus className="w-3 h-3 inline-block" />
                   </span>
                   <span className="text-[9px] bg-slate-950/75 backdrop-blur-sm px-2 py-0.5 rounded-md text-slate-300 border border-slate-800">
-                    Swipe ⟷
+                    « Swipe »
                   </span>
                   <span
                     className={`px-2 py-0.5 rounded-md transition-all ${
@@ -932,7 +936,7 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
                         : 'bg-slate-950/70 text-slate-400'
                     }`}
                   >
-                    ♂ Male
+                    <Mars className="w-3 h-3 inline-block" />
                   </span>
                 </div>
               </div>

@@ -1227,19 +1227,6 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                           ? `Completed for today • Resets in ${getTimeUntilMidnightUTC()}`
                           : '5 curated daily missions. Scored on precision & probe efficiency.'}
                       </div>
-                      <div className="flex items-center gap-1.5 mt-1.5">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShowArchive(true);
-                          }}
-                          className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[10px] font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
-                        >
-                          <Calendar className="w-3 h-3 text-amber-400" />
-                          <span>Daily Archive</span>
-                        </button>
-                      </div>
                     </div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-slate-400" />
@@ -1351,6 +1338,16 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                 </span>
               </button>
             )}
+
+            {/* Secondary Action: Daily Archive */}
+            <button
+              type="button"
+              onClick={() => setShowArchive(true)}
+              className="w-full py-3.5 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-amber-500/40 text-slate-300 hover:text-white font-bold text-xs uppercase tracking-wider shadow transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+            >
+              <Calendar className="w-4 h-4 text-amber-400" />
+              <span>Daily Archive</span>
+            </button>
 
             {/* Menu Bottom Ad Banner */}
             <div className="pt-2">

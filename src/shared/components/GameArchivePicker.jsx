@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useArcadePass } from '../context/ArcadePassContext';
 import { getArchiveHistory, getTodayKey } from '../storage/playerStorage';
 import { isDevSite } from '../utils/environment';
@@ -28,24 +28,44 @@ export function GameArchivePicker({
 }) {
   const { isPassHolder, openPassModal } = useArcadePass();
   const todayKey = getTodayKey();
-  const [todayYear, todayMonthNum, todayDayNum] = todayKey.split('-').map(Number);
+  const [todayYear, todayMonthNum, todayDayNum] = todayKey ? todayKey.split('-').map(Number) : [2026, 11, 26];
 
   const [currentYear, setCurrentYear] = useState(todayYear);
   const [currentMonth, setCurrentMonth] = useState(todayMonthNum - 1); // 0-indexed
 
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentYear(todayYear);
+      setCurrentMonth(todayMonthNum - 1);
+    }
+  }, [isOpen, todayYear, todayMonthNum]);
+
+  // Handle escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && onClose) onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
-  const archiveHistory = getArchiveHistory(gameSlug);
+  const archiveHistory = getArchiveHistory(gameSlug) || {};
+
+  const safeYear = Number.isFinite(currentYear) ? currentYear : todayYear;
+  const safeMonth = Number.isFinite(currentMonth) ? currentMonth : (todayMonthNum - 1);
 
   // Month navigation bounds
   const canGoBack =
-    currentYear > launchYear || (currentYear === launchYear && currentMonth > launchMonth);
+    safeYear > launchYear || (safeYear === launchYear && safeMonth > launchMonth);
   const canGoForward =
-    currentYear < todayYear || (currentYear === todayYear && currentMonth < todayMonthNum - 1);
+    safeYear < todayYear || (safeYear === todayYear && safeMonth < todayMonthNum - 1);
 
   const handlePrevMonth = () => {
     if (!canGoBack) return;
-    if (currentMonth === 0) {
+    if (safeMonth === 0) {
       setCurrentMonth(11);
       setCurrentYear((y) => y - 1);
     } else {
@@ -55,7 +75,7 @@ export function GameArchivePicker({
 
   const handleNextMonth = () => {
     if (!canGoForward) return;
-    if (currentMonth === 11) {
+    if (safeMonth === 11) {
       setCurrentMonth(0);
       setCurrentYear((y) => y + 1);
     } else {
@@ -64,11 +84,11 @@ export function GameArchivePicker({
   };
 
   // Generate calendar days
-  const daysInMonth = new Date(Date.UTC(currentYear, currentMonth + 1, 0)).getUTCDate();
-  const firstDayOfWeek = new Date(Date.UTC(currentYear, currentMonth, 1)).getUTCDay();
+  const daysInMonth = Math.max(0, Math.min(31, new Date(Date.UTC(safeYear, safeMonth + 1, 0)).getUTCDate() || 30));
+  const firstDayOfWeek = Math.max(0, Math.min(6, new Date(Date.UTC(safeYear, safeMonth, 1)).getUTCDay() || 0));
 
   const handleDateClick = (day) => {
-    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const dateStr = `${safeYear}-${String(safeMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
     if (dateStr > todayKey) return; // Future date
 
@@ -86,16 +106,6 @@ export function GameArchivePicker({
     onSelectDate(dateStr);
     onClose();
   };
-
-  // Handle escape key
-  React.useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && onClose) onClose();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
 
   return (
     <div
@@ -142,7 +152,7 @@ export function GameArchivePicker({
             <ChevronLeft className="w-4 h-4" />
           </button>
           <span className="text-xs font-bold text-white tracking-wide">
-            {MONTH_NAMES[currentMonth]} {currentYear}
+            {MONTH_NAMES[safeMonth] || 'Month'} {safeYear}
           </span>
           <button
             onClick={handleNextMonth}
@@ -174,7 +184,7 @@ export function GameArchivePicker({
           {/* Calendar Days */}
           {Array.from({ length: daysInMonth }).map((_, i) => {
             const day = i + 1;
-            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dateStr = `${safeYear}-${String(safeMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const isToday = dateStr === todayKey;
             const isFuture = dateStr > todayKey;
             const completedRecord = archiveHistory[dateStr];

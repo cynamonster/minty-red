@@ -14,6 +14,7 @@ import {
   Anchor,
   PersonStanding,
   GamepadDirectional,
+  Crown,
 } from 'lucide-react';
 import { soundEngine } from '../shared/audio/soundEngine';
 import { getGameStats } from '../shared/storage/playerStorage';
@@ -171,24 +172,6 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
         </div>
 
         <div className="flex items-center gap-2">
-          {isPassHolder ? (
-            <button
-              onClick={() => openPassModal('plans')}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/50 text-amber-300 text-[10px] font-black tracking-wider uppercase shadow-sm active:scale-95 transition-all"
-            >
-              <Trophy className="w-3 h-3 text-amber-400" />
-              <span>PASS</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => openPassModal('plans', 'Upgrade to Minty Arcade Pass')}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 text-[10px] font-black tracking-wider uppercase shadow-md shadow-amber-500/20 active:scale-95 transition-all"
-            >
-              <Trophy className="w-3 h-3 text-slate-950 fill-slate-950" />
-              <span>PASS</span>
-            </button>
-          )}
-
           {totalStreak > 0 && (
             <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold font-mono">
               <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
@@ -229,7 +212,7 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
         </section>
 
         {/* Arcade Pass Banner (for free users) */}
-        {!isPassHolder && (
+        {/* {!isPassHolder && (
           <div
             onClick={() => openPassModal('plans', 'Lock in $9.99/yr')}
             className="cursor-pointer mb-4 p-3 rounded-2xl bg-gradient-to-r from-amber-950/40 via-orange-950/30 to-slate-900 border border-amber-500/30 hover:border-amber-400/50 shadow-lg flex items-center justify-between gap-3 active:scale-[0.99] transition-all"
@@ -255,7 +238,7 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
               <span className="text-[8px] text-slate-400 uppercase tracking-wider">$0.19/week</span>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* SPOTLIGHT CABINET 01: OrbitDrop (100% Clickable Card) */}
         <section className="mb-4">
@@ -466,20 +449,25 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
 
         {/* Global Footer Stats & Studio Workbench Link */}
         <footer className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-500">
-          {isDev ? (
+          <div className="flex items-center gap-3">
             <button
-              onClick={() => {
-                soundEngine.playTap();
-                if (onOpenDashboard) onOpenDashboard();
-              }}
-              className="text-slate-500 hover:text-sky-400 font-semibold transition-colors flex items-center gap-1"
+              onClick={() => openPassModal(isPassHolder ? 'member' : 'plans')}
+              className="text-[11px] text-amber-400 hover:text-amber-500 font-sans flex items-center gap-1 transition-colors"
+              title={isPassHolder ? 'Arcade Pass Settings' : 'Arcade Pass'}
             >
-              <span>dash.minty.red</span>
-              <ExternalLink className="w-3 h-3" />
+              {isPassHolder ? (
+                <>
+                  <Crown className="w-3 h-3 text-amber-400/80" />
+                  <span>Arcade Pass</span>
+                </>
+              ) : (
+                <>
+                  <Trophy className="w-3 h-3 text-amber-400/70" />
+                  <span>Arcade Pass</span>
+                </>
+              )}
             </button>
-          ) : (
-            <span className="text-[11px] text-slate-600 tracking-tight">minty.red</span>
-          )}
+          </div>
 
           <span className="flex items-center gap-1 text-slate-400 font-medium">
             <Trophy className="w-3.5 h-3.5 text-amber-400" />
