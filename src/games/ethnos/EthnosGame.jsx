@@ -693,7 +693,7 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
             <p className="text-[11px] text-slate-300 mt-1 leading-snug line-clamp-2">
               {isLocked
                 ? currentQ?.homeland
-                : 'Where are these people from?'}
+                : 'HumanPhenotypes illustrates pre-colonial anthropological traits.'}
             </p>
             <div className="text-[9px] text-slate-500 mt-1 flex items-center justify-center gap-1">
               <ZoomIn className="w-2.5 h-2.5 text-amber-400/70" />
@@ -870,7 +870,7 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
 
               {!isLocked && (
                 <span className="text-[11px] leading-tight text-slate-400">
-                  HumanPhenotypes illustrates pre-colonial anthropology.
+                  Where does this ethnic group come from?
                 </span>
               )}
 
