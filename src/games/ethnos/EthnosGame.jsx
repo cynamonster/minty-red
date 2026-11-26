@@ -232,6 +232,7 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
     setGameOver(false);
     totalGameTimeRef.current = 0;
     roundStartTimeRef.current = Date.now();
+    setIsImageZoomed(true);
     setMode('daily');
   };
 
@@ -263,6 +264,7 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
     setGameOver(false);
     totalGameTimeRef.current = 0;
     roundStartTimeRef.current = Date.now();
+    setIsImageZoomed(true);
     setMode('blitz');
   };
 
@@ -285,6 +287,7 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
     setGameOver(false);
     totalGameTimeRef.current = 0;
     roundStartTimeRef.current = Date.now();
+    setIsImageZoomed(true);
     setMode('challenge');
   };
 
@@ -348,6 +351,7 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
       setIsLocked(false);
       setRoundResult(null);
       roundStartTimeRef.current = Date.now();
+      setIsImageZoomed(true);
     }
   };
 
@@ -689,7 +693,7 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
             <p className="text-[11px] text-slate-300 mt-1 leading-snug line-clamp-2">
               {isLocked
                 ? currentQ?.homeland
-                : 'Examine facial traits to locate the ancestral homeland.'}
+                : 'Where are these people from?'}
             </p>
             <div className="text-[9px] text-slate-500 mt-1 flex items-center justify-center gap-1">
               <ZoomIn className="w-2.5 h-2.5 text-amber-400/70" />
@@ -849,7 +853,7 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
             onClick={() => setIsImageZoomed(false)}
           >
             <div
-              className="bg-slate-900 border border-slate-700 rounded-3xl p-4 max-w-sm w-full shadow-2xl relative flex flex-col items-center gap-3"
+              className="bg-slate-900 border border-slate-700 rounded-3xl p-4 max-w-sm w-full shadow-2xl relative flex flex-col items-left gap-3"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="w-full flex items-center justify-between">
@@ -863,6 +867,12 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
                   <X className="w-4 h-4" />
                 </button>
               </div>
+
+              {!isLocked && (
+                <span className="text-[11px] leading-tight text-slate-400">
+                  HumanPhenotypes illustrates pre-colonial anthropology.
+                </span>
+              )}
 
               <div
                 onTouchStart={handleModalTouchStart}
@@ -954,7 +964,6 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
                       : 'bg-slate-800 text-slate-400 hover:text-slate-200'
                   }`}
                 >
-                  <span className="inline-flex items-center justify-center leading-none text-sm font-black">♀</span>
                   <span className="leading-none">Female</span>
                 </button>
                 <button
@@ -968,7 +977,6 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
                       : 'bg-slate-800 text-slate-400 hover:text-slate-200'
                   }`}
                 >
-                  <span className="inline-flex items-center justify-center leading-none text-sm font-black">♂</span>
                   <span className="leading-none">Male</span>
                 </button>
               </div>
@@ -978,6 +986,19 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
                   {currentQ?.archetype}
                 </div>
               ) : ('')}
+
+              {/* Start Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  soundEngine.playTap();
+                  setIsImageZoomed(false);
+                  roundStartTimeRef.current = Date.now();
+                }}
+                className="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-[0.98] text-slate-950 font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md shadow-amber-500/20"
+              >
+                Start
+              </button>
             </div>
           </div>
         )}
