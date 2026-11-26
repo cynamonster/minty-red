@@ -11,7 +11,7 @@ import {
   pushAdSense,
   isAdSenseBlocked,
 } from '../ads/adLoader';
-import { isDevSite } from '../utils/environment';
+import { isDevSite, shouldHideAds } from '../utils/environment';
 import {
   Swords,
   Orbit,
@@ -47,7 +47,7 @@ export function AdBanner({
   onSelectGame,
 }) {
   const { isPassHolder } = useArcadePass();
-  if (isPassHolder) {
+  if (isPassHolder || shouldHideAds()) {
     return null;
   }
 

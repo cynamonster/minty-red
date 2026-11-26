@@ -1,4 +1,5 @@
 // Ad Configuration & Monetization Settings for Minty.red Arcade Games
+export { shouldHideAds } from '../utils/environment';
 
 export const ADSENSE_CLIENT_ID =
   (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ADSENSE_CLIENT_ID) ||

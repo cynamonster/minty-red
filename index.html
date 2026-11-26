@@ -44,9 +44,22 @@
         } catch (e) {}
       })();
     </script>
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3700914218529429"
-     crossorigin="anonymous"></script>
+    <!-- Google AdSense (disabled on dev.minty.red) -->
+    <script>
+      (function() {
+        try {
+          var host = (window.location.hostname || '').toLowerCase();
+          if (host === 'dev.minty.red' || host.endsWith('.dev.minty.red')) {
+            return;
+          }
+          var script = document.createElement('script');
+          script.async = true;
+          script.crossOrigin = 'anonymous';
+          script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3700914218529429';
+          document.head.appendChild(script);
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body class="bg-[#07090e] text-slate-100 select-none overflow-x-hidden">
     <div id="root"></div>

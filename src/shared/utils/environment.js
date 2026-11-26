@@ -105,6 +105,16 @@ export function isDevSite() {
 }
 
 /**
+ * Checks if advertisements should be hidden.
+ * Ads (both AdSense and arcade house ads) are hidden on dev.minty.red.
+ */
+export function shouldHideAds() {
+  if (typeof window === 'undefined') return false;
+  const host = (window.location.hostname || '').toLowerCase();
+  return host === 'dev.minty.red' || host.endsWith('.dev.minty.red');
+}
+
+/**
  * Normalizes game slug aliases (e.g. bearing_lock -> bearinglock, flaghex -> flagship).
  */
 export function normalizeGameSlug(slug) {

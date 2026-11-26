@@ -1,4 +1,5 @@
 // Google AdSense Dynamic Script Loader & Error Guard
+import { shouldHideAds } from '../utils/environment';
 
 let isScriptInjected = false;
 let isScriptLoaded = false;
@@ -11,6 +12,10 @@ let loadPromise = null;
  */
 export function loadAdSenseScript(clientId) {
   if (typeof window === 'undefined') {
+    return Promise.resolve(false);
+  }
+
+  if (shouldHideAds()) {
     return Promise.resolve(false);
   }
 

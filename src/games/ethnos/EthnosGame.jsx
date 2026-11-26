@@ -16,7 +16,9 @@ import {
   canPlayInfiniteMode,
   incrementDailyInfinitePlays,
   saveArchiveScore,
+  getTodayKey,
 } from '../../shared/storage/playerStorage';
+import { isDevSite } from '../../shared/utils/environment';
 import { useArcadePass } from '../../shared/context/ArcadePassContext';
 import { GameArchivePicker } from '../../shared/components/GameArchivePicker';
 import {
@@ -50,6 +52,34 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
   const [activeDateKey, setActiveDateKey] = useState(null);
   const [stats, setStats] = useState(() => getGameStats('ethnos'));
   const [challengeData, setChallengeData] = useState(null);
+
+  const isDailyLocked = stats.todayCompleted && !isDevSite();
+
+  // Disable body and document y-scrolling when inspection modal is open
+  useEffect(() => {
+    if (isImageZoomed) {
+      const originalBodyOverflow = document.body.style.overflow;
+      const originalBodyTouchAction = document.body.style.touchAction;
+      const originalHtmlOverflow = document.documentElement.style.overflow;
+
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+      document.documentElement.style.overflow = 'hidden';
+
+      return () => {
+        document.body.style.overflow = originalBodyOverflow;
+        document.body.style.touchAction = originalBodyTouchAction;
+        document.documentElement.style.overflow = originalHtmlOverflow;
+      };
+    }
+  }, [isImageZoomed]);
+
+  // Keep stats fresh on returning to menu
+  useEffect(() => {
+    if (mode === 'menu') {
+      setStats(getGameStats('ethnos'));
+    }
+  }, [mode]);
 
   // Active game state
   const [questions, setQuestions] = useState([]);
@@ -95,6 +125,9 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
 
   const handleModalTouchMove = (e) => {
     if (!modalTouchRef.current.isDragging || e.touches.length !== 1) return;
+    if (e.cancelable) {
+      e.preventDefault();
+    }
     const clientX = e.touches[0].clientX;
     const clientY = e.touches[0].clientY;
     modalTouchRef.current.lastX = clientX;
@@ -110,6 +143,14 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
         offset = diffX * 0.25;
       }
       setModalDragOffset(offset);
+    }
+  };
+
+  const handleModalTouchCancel = () => {
+    if (modalTouchRef.current.isDragging) {
+      modalTouchRef.current.isDragging = false;
+      setIsModalDragging(false);
+      setModalDragOffset(0);
     }
   };
 
@@ -210,6 +251,12 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
   }, [challengeCode]);
 
   const startDailyGame = (customDateKey = null) => {
+    const today = getTodayKey();
+    const isToday = !customDateKey || customDateKey === today;
+    if (isToday && stats.todayCompleted && !isDevSite()) {
+      soundEngine.playWrong();
+      return;
+    }
     soundEngine.playTap();
     const seed = getDailySeed(customDateKey);
     setActiveDateKey(customDateKey);
@@ -444,24 +491,35 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
 
           <div className="w-full flex flex-col gap-3 my-auto">
             <button
-              onClick={startDailyGame}
-              className="w-full p-4 rounded-2xl bg-gradient-to-br from-amber-950/40 via-slate-900 to-slate-900 border border-amber-500/40 hover:border-amber-400 active:scale-[0.98] transition-all text-left shadow-lg shadow-amber-950/20"
+              onClick={() => startDailyGame()}
+              disabled={isDailyLocked}
+              className={`w-full p-4 rounded-2xl bg-gradient-to-br from-amber-950/40 via-slate-900 to-slate-900 border text-left shadow-lg shadow-amber-950/20 transition-all ${
+                isDailyLocked
+                  ? 'border-amber-500/20 opacity-70 cursor-not-allowed'
+                  : 'border-amber-500/40 hover:border-amber-400 active:scale-[0.98]'
+              }`}
             >
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                <div className={`p-2.5 rounded-xl border ${
+                  isDailyLocked
+                    ? 'bg-amber-500/10 text-amber-500/60 border-amber-500/20'
+                    : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                }`}>
                   <Calendar className="w-6 h-6" />
                 </div>
                 <div>
                   <div className="text-base font-extrabold text-white flex items-center gap-2">
                     Daily 5 Ethnos
                     {stats.todayCompleted && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold">
-                        Completed
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">
+                        ✓ Completed
                       </span>
                     )}
                   </div>
                   <div className="text-xs text-slate-400">
-                    5 daily composites. Maximum 25,000 points.
+                    {isDailyLocked
+                      ? 'Played for today • Resets at 00:00 UTC'
+                      : '5 daily composites. Maximum 25,000 points.'}
                   </div>
                 </div>
               </div>
@@ -851,11 +909,16 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
         {/* Image Zoom Modal */}
         {isImageZoomed && (
           <div
-            className="fixed inset-0 z-[1000] bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
+            className="fixed inset-0 z-[1000] bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn touch-none overscroll-none"
+            style={{ touchAction: 'none', overscrollBehavior: 'none' }}
             onClick={() => setIsImageZoomed(false)}
+            onTouchMove={(e) => {
+              if (e.cancelable) e.preventDefault();
+            }}
           >
             <div
-              className="bg-slate-900 border border-slate-700 rounded-3xl p-4 max-w-sm w-full shadow-2xl relative flex flex-col items-left gap-3"
+              className="bg-slate-900 border border-slate-700 rounded-3xl p-4 max-w-sm w-full shadow-2xl relative flex flex-col items-left gap-3 touch-none overscroll-none"
+              style={{ touchAction: 'none', overscrollBehavior: 'none' }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="w-full flex items-center justify-between">
@@ -880,11 +943,13 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
                 onTouchStart={handleModalTouchStart}
                 onTouchMove={handleModalTouchMove}
                 onTouchEnd={handleModalTouchEnd}
+                onTouchCancel={handleModalTouchCancel}
                 onMouseDown={handleModalMouseDown}
                 onMouseMove={handleModalMouseMove}
                 onMouseUp={handleModalMouseUp}
                 onMouseLeave={handleModalMouseUp}
-                className="relative w-full h-[52vh] min-h-[300px] max-h-[420px] rounded-2xl overflow-hidden border border-slate-700/80 bg-slate-950 cursor-grab active:cursor-grabbing select-none"
+                style={{ touchAction: 'none', overscrollBehavior: 'none' }}
+                className="relative w-full h-[52vh] min-h-[300px] max-h-[420px] rounded-2xl overflow-hidden border border-slate-700/80 bg-slate-950 cursor-grab active:cursor-grabbing select-none touch-none overscroll-none"
               >
                 {/* Side-by-side Track for Female (left, index 0) and Male (right, index 1) */}
                 <div
