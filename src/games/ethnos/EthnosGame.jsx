@@ -55,25 +55,6 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
 
   const isDailyLocked = stats.todayCompleted && !isDevSite();
 
-  // Disable body and document y-scrolling when inspection modal is open
-  useEffect(() => {
-    if (isImageZoomed) {
-      const originalBodyOverflow = document.body.style.overflow;
-      const originalBodyTouchAction = document.body.style.touchAction;
-      const originalHtmlOverflow = document.documentElement.style.overflow;
-
-      document.body.style.overflow = 'hidden';
-      document.body.style.touchAction = 'none';
-      document.documentElement.style.overflow = 'hidden';
-
-      return () => {
-        document.body.style.overflow = originalBodyOverflow;
-        document.body.style.touchAction = originalBodyTouchAction;
-        document.documentElement.style.overflow = originalHtmlOverflow;
-      };
-    }
-  }, [isImageZoomed]);
-
   // Keep stats fresh on returning to menu
   useEffect(() => {
     if (mode === 'menu') {
@@ -96,6 +77,25 @@ export function EthnosGame({ onHome, onSelectGame, challengeCode }) {
   // Gender composite toggle ('male' | 'female')
   const [selectedGender, setSelectedGender] = useState('male');
   const [isImageZoomed, setIsImageZoomed] = useState(false);
+
+  // Disable body and document y-scrolling when inspection modal is open
+  useEffect(() => {
+    if (isImageZoomed) {
+      const originalBodyOverflow = document.body.style.overflow;
+      const originalBodyTouchAction = document.body.style.touchAction;
+      const originalHtmlOverflow = document.documentElement.style.overflow;
+
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+      document.documentElement.style.overflow = 'hidden';
+
+      return () => {
+        document.body.style.overflow = originalBodyOverflow;
+        document.body.style.touchAction = originalBodyTouchAction;
+        document.documentElement.style.overflow = originalHtmlOverflow;
+      };
+    }
+  }, [isImageZoomed]);
 
   // Modal swipe gesture tracking
   const [modalDragOffset, setModalDragOffset] = useState(0);
