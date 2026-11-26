@@ -40,6 +40,7 @@ export function ArcadePassModal() {
   const [errorMsg, setErrorMsg] = useState('');
   const [restoreEmail, setRestoreEmail] = useState('');
   const [restoreSuccess, setRestoreSuccess] = useState(false);
+  const [previewLink, setPreviewLink] = useState(null);
 
   // Sync tab/view whenever modal opens
   React.useEffect(() => {
@@ -102,8 +103,11 @@ export function ArcadePassModal() {
     setLoading(true);
     setErrorMsg('');
     try {
-      await restorePurchase(restoreEmail.trim());
+      const res = await restorePurchase(restoreEmail.trim());
       setRestoreSuccess(true);
+      if (res?.previewLink) {
+        setPreviewLink(res.previewLink);
+      }
     } catch (err) {
       setErrorMsg(err.message || 'Failed to restore. Please verify your purchase email.');
     } finally {
@@ -573,6 +577,16 @@ export function ArcadePassModal() {
                 <p className="text-xs text-slate-300">
                   We've sent a magic restore link to <strong>{restoreEmail}</strong>. Tap it on this device to activate your pass immediately.
                 </p>
+                {previewLink && (
+                  <div className="pt-1">
+                    <a
+                      href={previewLink}
+                      className="inline-block px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs"
+                    >
+                      Instant Restore (1-Click)
+                    </a>
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={handleClose}

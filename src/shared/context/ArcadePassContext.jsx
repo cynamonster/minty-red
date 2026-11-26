@@ -105,7 +105,8 @@ export function ArcadePassProvider({ children }) {
     } else if (passToken) {
       // Magic link direct restore
       try {
-        const payload = JSON.parse(atob(passToken.split('.')[1] || ''));
+        const rawJson = passToken.includes('.') ? atob(passToken.split('.')[1]) : atob(passToken);
+        const payload = JSON.parse(rawJson);
         savePassState({
           token: passToken,
           email: payload.email,
