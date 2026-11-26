@@ -96,10 +96,16 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
   const [isDevMode, setIsDevMode] = useState(() => isDevSite());
   const devTapCountRef = useRef(0);
 
+  // Custom Themes Feature Flag
+  // Set to true to re-enable custom orbital themes and skins
+  const ENABLE_CUSTOM_THEMES = false;
+
   // Customization & Unlocked Themes (stored in localStorage)
   const [customization, setCustomization] = useState(() => {
     const isDev = isDevSite();
     const allThemeKeys = Object.keys(ORBIT_THEMES);
+    const initialStats = getGameStats('orbitdrop');
+    const dayStreak = Math.max(initialStats.currentStreak || 0, initialStats.maxStreak || 0);
     try {
       const raw = localStorage.getItem('bobby_orbitdrop_customization');
       if (raw) {
@@ -108,7 +114,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
           activeTheme: parsed.activeTheme || 'default',
           unlockedThemes: isDev ? allThemeKeys : (parsed.unlockedThemes || ['default']),
           maxInfiniteSector: parsed.maxInfiniteSector || 0,
-          maxStreak: parsed.maxStreak || 0,
+          maxStreak: dayStreak,
         };
       }
     } catch (_) {}
@@ -116,22 +122,24 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
       activeTheme: 'default',
       unlockedThemes: isDev ? allThemeKeys : ['default'],
       maxInfiniteSector: 0,
-      maxStreak: 0,
+      maxStreak: dayStreak,
     };
   });
   const [showSettings, setShowSettings] = useState(false);
   const [unlockToast, setUnlockToast] = useState(null);
 
-  // Active theme definition
-  const currentTheme = ORBIT_THEMES[customization.activeTheme] || ORBIT_THEMES.default;
+  // Active theme definition (defaults to Cosmic Void while custom themes are disabled)
+  const currentTheme = ENABLE_CUSTOM_THEMES
+    ? (ORBIT_THEMES[customization.activeTheme] || ORBIT_THEMES.default)
+    : ORBIT_THEMES.default;
 
-  // Check and unlock themes based on streak & sector milestones
-  const checkThemeUnlocks = useCallback((streakVal = 0, sectorVal = 0) => {
+  // Check and unlock themes based on daily streak (days) & sector milestones
+  const checkThemeUnlocks = useCallback((streakDaysVal = 0, sectorVal = 0) => {
     setCustomization((prev) => {
       const isDev = isDevMode || isDevSite();
       const unlocked = new Set(isDev ? Object.keys(ORBIT_THEMES) : (prev.unlockedThemes || ['default']));
       const maxSector = Math.max(prev.maxInfiniteSector || 0, sectorVal || 0);
-      const maxStrk = Math.max(prev.maxStreak || 0, streakVal || 0);
+      const maxStrk = Math.max(prev.maxStreak || 0, streakDaysVal || 0);
 
       let newlyUnlocked = null;
 
@@ -160,7 +168,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
         localStorage.setItem('bobby_orbitdrop_customization', JSON.stringify(updated));
       } catch (_) {}
 
-      if (newlyUnlocked) {
+      if (ENABLE_CUSTOM_THEMES && newlyUnlocked) {
         soundEngine.playBullseye();
         setUnlockToast(newlyUnlocked);
         setTimeout(() => setUnlockToast(null), 4500);
@@ -168,7 +176,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
 
       return updated;
     });
-  }, []);
+  }, [isDevMode]);
 
   const [gameState, setGameState] = useState('menu'); // 'menu' | 'playing' | 'gameover'
   const { isPassHolder, openPassModal } = useArcadePass();
@@ -377,16 +385,18 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
         }
       }
 
+      let updatedStats = stats;
       if (activeDateKey) {
         saveArchiveScore('orbitdrop', activeDateKey, finalScore);
       } else {
-        saveGameScore('orbitdrop', finalScore, isDaily, correctCount);
-        setStats(getGameStats('orbitdrop'));
+        updatedStats = saveGameScore('orbitdrop', finalScore, isDaily, correctCount);
+        setStats(updatedStats);
       }
 
-      // Check customization unlocks for streak and infinite sectors
+      // Check customization unlocks for daily streak (streak of days) and infinite sectors
+      const dayStreak = Math.max(updatedStats.currentStreak || 0, updatedStats.maxStreak || 0);
       checkThemeUnlocks(
-        streakCountRef.current,
+        dayStreak,
         mode === 'infinite' ? correctCount : 0
       );
 
@@ -701,9 +711,10 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
       soundEngine.playStreak();
     }
 
-    // Check unlocks for current streak and infinite sectors
+    // Check unlocks for infinite sectors (theme streak unlocks use daily streak of days)
     const currentCompleted = currentMissionIdxRef.current + 1;
-    checkThemeUnlocks(newStreak, mode === 'infinite' ? currentCompleted : 0);
+    const currentDayStreak = Math.max(stats.currentStreak || 0, stats.maxStreak || 0);
+    checkThemeUnlocks(currentDayStreak, mode === 'infinite' ? currentCompleted : 0);
 
     const historyItem = {
       mission,
@@ -1103,7 +1114,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
       <ConfettiCanvas active={showConfetti} />
 
       {/* Celebratory Theme Unlock Notification Toast */}
-      {unlockToast && (
+      {ENABLE_CUSTOM_THEMES && unlockToast && (
         <div className="fixed top-14 z-50 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-2xl bg-[#0c101a]/95 border-2 border-amber-400/90 shadow-[0_0_25px_rgba(251,191,36,0.5)] backdrop-blur text-white flex items-center gap-3 animate-in slide-in-from-top-4 duration-300">
           <Sparkles className="w-5 h-5 text-amber-400 animate-spin" />
           <div className="text-left">
@@ -1167,19 +1178,21 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
               </p>
 
               {/* Theme / Skins Quick Access Button */}
-              <div className="pt-1">
-                <button
-                  onClick={() => setShowSettings(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border text-xs font-semibold text-slate-200 transition-all active:scale-95 shadow-md"
-                  style={{
-                    borderColor: `${currentTheme.accentColor}55`,
-                    boxShadow: `0 0 14px ${currentTheme.shadowColor}22`,
-                  }}
-                >
-                  <Sparkles className="w-3.5 h-3.5" style={{ color: currentTheme.probeColor }} />
-                  <span>Theme: {currentTheme.name}</span>
-                </button>
-              </div>
+              {ENABLE_CUSTOM_THEMES && (
+                <div className="pt-1">
+                  <button
+                    onClick={() => setShowSettings(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border text-xs font-semibold text-slate-200 transition-all active:scale-95 shadow-md"
+                    style={{
+                      borderColor: `${currentTheme.accentColor}55`,
+                      boxShadow: `0 0 14px ${currentTheme.shadowColor}22`,
+                    }}
+                  >
+                    <Sparkles className="w-3.5 h-3.5" style={{ color: currentTheme.probeColor }} />
+                    <span>Theme: {currentTheme.name}</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Mode Selection Cards */}
@@ -1632,15 +1645,37 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                 <span>Share Flight Log</span>
               </button>
 
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setShowSettings(true)}
-                  className="py-3 px-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
-                >
-                  <Sparkles className="w-4 h-4 text-sky-400" />
-                  <span>Skins & Themes</span>
-                </button>
+              {ENABLE_CUSTOM_THEMES ? (
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setShowSettings(true)}
+                    className="py-3 px-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                  >
+                    <Sparkles className="w-4 h-4 text-sky-400" />
+                    <span>Skins & Themes</span>
+                  </button>
 
+                  <button
+                    onClick={() => {
+                      if (mode === 'daily' && !(isDevMode || isDevSite())) {
+                        initGameSession('infinite');
+                      } else {
+                        initGameSession(mode);
+                      }
+                    }}
+                    className="py-3 px-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>
+                      {mode === 'daily'
+                        ? (isDevMode || isDevSite())
+                          ? 'Replay Daily'
+                          : 'Play Infinite'
+                        : 'Play Again'}
+                    </span>
+                  </button>
+                </div>
+              ) : (
                 <button
                   onClick={() => {
                     if (mode === 'daily' && !(isDevMode || isDevSite())) {
@@ -1649,7 +1684,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                       initGameSession(mode);
                     }
                   }}
-                  className="py-3 px-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                  className="w-full py-3 px-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
                 >
                   <RotateCcw className="w-4 h-4" />
                   <span>
@@ -1660,7 +1695,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                       : 'Play Again'}
                   </span>
                 </button>
-              </div>
+              )}
 
               {shareNotice && (
                 <div className="text-xs text-emerald-400 font-semibold animate-in fade-in">
@@ -1678,7 +1713,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
       </div>
 
       {/* --- SKINS & CUSTOMIZATION MODAL --- */}
-      {showSettings && (
+      {ENABLE_CUSTOM_THEMES && showSettings && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-sm rounded-3xl bg-[#0c101a] border border-slate-800 p-5 space-y-4 shadow-2xl relative text-left">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -1689,7 +1724,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                     Orbital Themes & Skins
                   </h3>
                   <div className="text-[10px] text-slate-400">
-                    Unlock themes through Infinite sectors & streak milestones
+                    Unlock themes through Infinite sectors & daily streak milestones
                   </div>
                 </div>
               </div>
@@ -1770,7 +1805,7 @@ export function OrbitDropGame({ onHome, onSelectGame, challengeCode }) {
                                 {t.unlockDesc} (
                                 {t.unlockType === 'sector'
                                   ? `Best Sector: ${customization.maxInfiniteSector || 0}/${t.unlockReq}`
-                                  : `Best Streak: ${customization.maxStreak || 0}/${t.unlockReq}`}
+                                  : `Daily Streak: ${customization.maxStreak || 0}/${t.unlockReq} days`}
                                 )
                               </span>
                             </div>
