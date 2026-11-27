@@ -56,7 +56,7 @@ const ALL_GAMES = [
   {
     slug: 'roots',
     title: 'Roots',
-    subtitle: 'Name where last names are from',
+    subtitle: 'Name where last names come from',
     badge: 'Lab',
     icon: DiagramFlowVertical,
     accent: 'from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-400',
