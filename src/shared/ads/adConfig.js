@@ -119,7 +119,7 @@ export const HOUSE_ADS = [
   //   title: 'Roots: Surname Origins',
   //   tagline: 'Trace last names back to their origins',
   //   cta: 'Play Now',
-  //   icon: 'Compass',
+  //   icon: 'DiagramFlowVertical',
   //   accentColor: '#10b981',
   //   bgGradient: 'from-emerald-950/40 via-teal-950/30 to-slate-900/60',
   //   borderColor: 'border-emerald-500/30',

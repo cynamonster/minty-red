@@ -15,6 +15,7 @@ import {
   PersonStanding,
   GamepadDirectional,
   Crown,
+  DiagramFlowVertical,
 } from 'lucide-react';
 import { soundEngine } from '../shared/audio/soundEngine';
 import { getGameStats } from '../shared/storage/playerStorage';
@@ -84,40 +85,46 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
     },
   ];
 
-  // Prototypes only visible on dev in the lab cartridges list
-  const labCartridges = [
+  // Coming Soon games in active pipeline
+  const comingSoonGames = [
     {
       slug: 'relic',
       title: 'R.E.L.I.C.',
       displayTitle: 'RELIC',
-      tagline: 'Temporal Restitution Protocol',
+      tagline: 'Forensic Archeology Challenge',
       description: 'The automated Vane Vault is decaying in orbit. Crack vacuum stasis pods, calibrate year and map coordinates, and beam relics to history in 45s.',
       stats: relicStats,
-      badge: 'NEW',
-      badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+      statusLabel: 'IN TESTING',
+      statusColor: 'bg-purple-500/10 text-purple-300 border-purple-500/30',
+      dotColor: 'bg-purple-400',
+      iconBg: 'bg-purple-500/10 border-purple-500/30 text-purple-400',
       icon: RotateCcwClock,
     },
     {
       slug: 'metro',
       title: 'METRO',
       displayTitle: 'Metro Topology',
-      tagline: 'Neon Transit Topology Reflex',
+      tagline: 'Spot cities by their subway maps',
       description: 'Stripped-down neon rapid transit diagrams from OpenStreetMap. 25-second countdown with high-voltage speed bonuses.',
       stats: metroStats,
-      badge: 'PROTOTYPE',
-      badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+      statusLabel: 'IN REVIEW',
+      statusColor: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30',
+      dotColor: 'bg-cyan-400',
+      iconBg: 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400',
       icon: TrainFront,
     },
     {
       slug: 'roots',
       title: 'ROOTS',
       displayTitle: 'Roots',
-      tagline: 'Surname Origins Blitz',
+      tagline: 'Name where last names come from',
       description: 'Can you identify the linguistic roots of 150+ global surnames? Instant etymology reveals.',
       stats: rootsStats,
-      badge: 'ORIGINS',
-      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-      icon: Compass,
+      statusLabel: 'IN PROGRESS',
+      statusColor: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
+      dotColor: 'bg-amber-400',
+      iconBg: 'bg-amber-500/10 border-amber-500/30 text-amber-400',
+      icon: DiagramFlowVertical,
     },
   ];
 
@@ -390,64 +397,63 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
           })}
         </section>
 
-        {/* SECTION: Lab Cartridges (DEV SITE ONLY) */}
-        {isDev && (
-          <section className="mb-4">
-            <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-2 px-0.5">
-              <span className="text-amber-400 font-bold tracking-wider">
-                // LAB CARTRIDGES (DEV UNLOCKED)
-              </span>
-              <span className="text-slate-500 font-semibold">
-                STAGE QUEUE
-              </span>
-            </div>
+        {/* COMING SOON CABINETS: In-Progress Games */}
+        <section className="mb-4 space-y-2">
+          <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1.5 px-0.5">
+            <span className="text-amber-400 font-bold tracking-wider">// COMING SOON</span>
+            <span className="text-slate-500 font-semibold font-mono">IN DEVELOPMENT</span>
+          </div>
 
-            <div className="space-y-2">
-              {labCartridges.map((g) => {
-                const Icon = g.icon;
-                return (
-                  <div
-                    key={g.slug}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      soundEngine.playTap();
-                      onSelectGame(g.slug);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        soundEngine.playTap();
-                        onSelectGame(g.slug);
-                      }
-                    }}
-                    className="p-2.5 rounded-xl bg-slate-950 border border-slate-800/90 hover:border-amber-500/60 flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all select-none group"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-amber-400 group-hover:text-amber-300 group-hover:border-amber-500/40 transition-colors">
-                        <Icon className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1.5 font-mono">
-                          <span className="text-xs font-bold text-slate-200 group-hover:text-white transition-colors">
-                            {g.title}
-                          </span>
-                          <span className={`text-[8px] px-1.5 py-0.2 rounded border font-bold ${g.badgeColor}`}>
-                            {g.badge}
-                          </span>
-                        </div>
-                        <div className="text-[10px] text-slate-400 font-sans">{g.tagline}</div>
-                      </div>
+          {comingSoonGames.map((g) => {
+            const Icon = g.icon;
+            return (
+              <div
+                key={g.slug}
+                className="group rounded-2xl p-3 bg-slate-950/80 border border-slate-800/80 hover:border-slate-700/80 shadow-md transition-all relative overflow-hidden select-none"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className={`w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 ${g.iconBg}`}>
+                      <Icon className="w-4.5 h-4.5 stroke-[2.2]" />
                     </div>
-                    <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold group-hover:bg-amber-400 group-hover:text-slate-950 transition-colors">
-                      PLAY ⚡
-                    </span>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 font-mono">
+                        <h3 className="text-sm font-black text-white tracking-tight uppercase truncate">
+                          {g.title}
+                        </h3>
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-sans truncate">{g.tagline}</div>
+                    </div>
                   </div>
-                );
-              })}
-            </div>
-          </section>
-        )}
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-[9px] font-mono px-2 py-0.5 rounded border font-bold flex items-center gap-1.5 uppercase ${g.statusColor}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${g.dotColor} animate-pulse`} />
+                      {g.statusLabel}
+                    </span>
+
+                    {isDev && (
+                      <button
+                        onClick={() => {
+                          soundEngine.playTap();
+                          onSelectGame(g.slug);
+                        }}
+                        className="text-[9px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold hover:bg-amber-400 hover:text-slate-950 transition-colors"
+                        title="Test Prototype (Dev)"
+                      >
+                        TEST ⚡
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-2 pt-1.5 border-t border-slate-900 text-[10px] text-slate-500 font-sans leading-relaxed">
+                  {g.description}
+                </div>
+              </div>
+            );
+          })}
+        </section>
 
         {/* Global Footer Stats & Studio Workbench Link */}
         <footer className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-500">

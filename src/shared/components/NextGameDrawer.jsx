@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, ArrowRight, Gamepad2, Compass, TrainFront, Orbit, Anchor, RotateCcwClock } from 'lucide-react';
+import { Sparkles, ArrowRight, Gamepad2, Compass, TrainFront, Orbit, Anchor, RotateCcwClock, DiagramFlowVertical } from 'lucide-react';
 import { soundEngine } from '../audio/soundEngine';
 import { getAvailableGames } from '../utils/environment';
 import { trackNextGameClick } from '../analytics/analyticsService';
@@ -40,7 +40,7 @@ const ALL_GAMES = [
   {
     slug: 'relic',
     title: 'R.E.L.I.C.',
-    subtitle: 'Temporal Restitution Protocol',
+    subtitle: 'Forensic Archeology Challenge',
     badge: 'Lab',
     icon: RotateCcwClock,
     accent: 'from-cyan-500/20 to-blue-500/20 border-cyan-500/30 text-cyan-400',
@@ -48,7 +48,7 @@ const ALL_GAMES = [
   {
     slug: 'metro',
     title: 'METRO',
-    subtitle: 'Transit Topology Reflex',
+    subtitle: 'Spot cities by their subway maps',
     badge: 'Lab',
     icon: TrainFront,
     accent: 'from-cyan-500/20 to-teal-500/20 border-cyan-500/30 text-cyan-400',
@@ -56,9 +56,9 @@ const ALL_GAMES = [
   {
     slug: 'roots',
     title: 'Roots',
-    subtitle: 'Surname Origins Blitz',
+    subtitle: 'Name where last names come from',
     badge: 'Lab',
-    icon: Compass,
+    icon: DiagramFlowVertical,
     accent: 'from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-400',
   },
 ];
