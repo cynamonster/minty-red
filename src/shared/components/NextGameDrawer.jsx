@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, ArrowRight, Gamepad2, Compass, Layers, Orbit, Anchor, Zap } from 'lucide-react';
+import { Sparkles, ArrowRight, Gamepad2, Compass, TrainFront, Orbit, Anchor, RotateCcwClock } from 'lucide-react';
 import { soundEngine } from '../audio/soundEngine';
 import { getAvailableGames } from '../utils/environment';
 import { trackNextGameClick } from '../analytics/analyticsService';
@@ -24,16 +24,16 @@ const ALL_GAMES = [
   {
     slug: 'flagship',
     title: 'Flagship',
-    subtitle: 'Admiralty Signal Reflex',
+    subtitle: 'Flag Identification',
     badge: 'Naval',
     icon: Anchor,
     accent: 'from-amber-500/20 to-sky-500/20 border-amber-500/30 text-amber-400',
   },
   {
-    slug: 'bearinglock',
-    title: 'Bearing Lock',
+    slug: 'bearings',
+    title: 'Bearings',
     subtitle: 'Tactile Compass Blitz',
-    badge: 'New',
+    badge: 'Precision',
     icon: Compass,
     accent: 'from-sky-500/20 to-teal-500/20 border-sky-500/30 text-sky-400',
   },
@@ -42,7 +42,7 @@ const ALL_GAMES = [
     title: 'R.E.L.I.C.',
     subtitle: 'Temporal Restitution Protocol',
     badge: 'Lab',
-    icon: Zap,
+    icon: RotateCcwClock,
     accent: 'from-cyan-500/20 to-blue-500/20 border-cyan-500/30 text-cyan-400',
   },
   {
@@ -50,7 +50,7 @@ const ALL_GAMES = [
     title: 'METRO',
     subtitle: 'Transit Topology Reflex',
     badge: 'Lab',
-    icon: Layers,
+    icon: TrainFront,
     accent: 'from-cyan-500/20 to-teal-500/20 border-cyan-500/30 text-cyan-400',
   },
   {

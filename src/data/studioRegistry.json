@@ -41,8 +41,8 @@
       ]
     },
     {
-      "slug": "bearinglock",
-      "title": "Bearing Lock",
+      "slug": "bearings",
+      "title": "Bearings",
       "version": "1.0.0",
       "status": "shipped",
       "rating": 5,
@@ -101,11 +101,11 @@
     },
     {
       "slug": "flagship",
-      "title": "Flagship: Admiralty Signal Reflex",
+      "title": "Flagship: Flag Identification",
       "version": "2.0.0",
       "status": "shipped",
       "rating": 5,
-      "tagline": "Admiralty Signal Reflex",
+      "tagline": "Flag Identification",
       "description": "Identify sovereign naval ensigns from abstract optical color signals before boiler steam pressure vents! Features rigged yardarm halyard, Bourdon steam tube timer, and telegraph keys.",
       "category": "Naval / Geography / Reflex",
       "targetSessionSeconds": 30,

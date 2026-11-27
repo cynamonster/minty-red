@@ -5,7 +5,7 @@ import { RootsGame } from './games/roots/RootsGame';
 import { EthnosGame } from './games/ethnos/EthnosGame';
 import { FlagshipGame, FlagHexGame } from './games/flagship/FlagshipGame';
 import { OrbitDropGame } from './games/orbitdrop/OrbitDropGame';
-import { BearingLockGame } from './games/bearinglock/BearingLockGame';
+import { BearingsGame, BearingLockGame } from './games/bearings/BearingsGame';
 import { MetroGame } from './games/metro/MetroGame';
 import { RelicGame } from './games/relic/RelicGame';
 import { ReviewDrawer } from './shared/components/ReviewDrawer';
@@ -174,9 +174,9 @@ export function App() {
     const normalized = normalizeGameSlug(slug);
     if (normalized === 'roots') return 'Roots: Surname Origins';
     if (normalized === 'ethnos') return 'Ethnos: Micro Ethnoguesser';
-    if (normalized === 'flagship') return 'Flagship: Admiralty Signal Reflex';
+    if (normalized === 'flagship') return 'Flagship: Flag Identification';
     if (normalized === 'orbitdrop') return 'OrbitDrop: Micro-Gravity Slingshot';
-    if (normalized === 'bearinglock') return 'Bearing Lock: Compass Blitz';
+    if (normalized === 'bearings' || normalized === 'bearinglock') return 'Bearings: Compass Blitz';
     if (normalized === 'metro') return 'METRO: Transit Topology Reflex';
     if (normalized === 'relic') return 'RELIC: Temporal Restitution Protocol';
     return slug;
@@ -219,9 +219,9 @@ export function App() {
         />
       )}
 
-      {/* 5. Production Game: Bearing Lock */}
-      {(activeGame === 'bearinglock' || activeGame === 'bearing_lock') && (
-        <BearingLockGame
+      {/* 5. Production Game: Bearings */}
+      {(activeGame === 'bearings' || activeGame === 'bearinglock' || activeGame === 'bearing_lock') && (
+        <BearingsGame
           onHome={handleHome}
           onSelectGame={(slug) => handleSelectGame(slug, isReviewMode)}
           challengeCode={challengeCode}
@@ -265,7 +265,7 @@ export function App() {
       )}
 
       {/* Universal In-Game Review Drawer (Active when in review mode or launched from dash) */}
-      {['roots', 'ethnos', 'flagship', 'flaghex', 'orbitdrop', 'bearinglock', 'metro', 'relic'].includes(activeGame) && isReviewMode && (
+      {['roots', 'ethnos', 'flagship', 'flaghex', 'orbitdrop', 'bearings', 'bearinglock', 'metro', 'relic'].includes(activeGame) && isReviewMode && (
         <ReviewDrawer
           gameSlug={activeGame}
           gameTitle={getGameTitle(activeGame)}

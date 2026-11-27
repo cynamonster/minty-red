@@ -26,10 +26,16 @@ const games = [
     image: 'https://minty.red/images/og/ethnos.png',
   },
   {
-    slug: 'bearinglock',
-    title: 'Bearing Lock | Tactile Global Navigation',
+    slug: 'bearings',
+    title: 'Bearings | Tactile Global Navigation',
     description: 'Spin a 360-degree compass dial to lock onto the exact direction of famous world landmarks.',
-    image: 'https://minty.red/images/og/bearinglock.png',
+    image: 'https://minty.red/images/og/bearings.png',
+  },
+  {
+    slug: 'bearinglock',
+    title: 'Bearings | Tactile Global Navigation',
+    description: 'Spin a 360-degree compass dial to lock onto the exact direction of famous world landmarks.',
+    image: 'https://minty.red/images/og/bearings.png',
   },
   {
     slug: 'relic',

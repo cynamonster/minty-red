@@ -54,12 +54,16 @@ import {
 const BLITZ_START_TIME = 45; // 45s blitz timer
 const BLITZ_ACCURACY_BONUS = 8; // +8s bonus time for locks within 15°
 
-export function BearingLockGame({ onHome, onSelectGame, challengeCode }) {
+export function BearingsGame({ onHome, onSelectGame, challengeCode }) {
   const [mode, setMode] = useState('menu'); // 'menu' | 'daily' | 'blitz' | 'challenge'
   const { isPassHolder, openPassModal } = useArcadePass();
   const [showArchive, setShowArchive] = useState(false);
   const [activeDateKey, setActiveDateKey] = useState(null);
-  const [stats, setStats] = useState(() => getGameStats('bearinglock'));
+  const [stats, setStats] = useState(() => {
+    const raw = getGameStats('bearings');
+    const legacy = getGameStats('bearinglock');
+    return (raw && raw.gamesPlayed > 0) ? raw : (legacy || raw);
+  });
   const [challengeData, setChallengeData] = useState(null);
 
   // Active game session state
@@ -88,7 +92,7 @@ export function BearingLockGame({ onHome, onSelectGame, challengeCode }) {
   useEffect(() => {
     if (challengeCode) {
       const decoded = decodeChallenge(challengeCode);
-      if (decoded && decoded.gameSlug === 'bearinglock') {
+      if (decoded && (decoded.gameSlug === 'bearings' || decoded.gameSlug === 'bearinglock')) {
         setChallengeData(decoded);
         startChallenge(decoded);
       }
@@ -137,12 +141,12 @@ export function BearingLockGame({ onHome, onSelectGame, challengeCode }) {
   // Start Blitz Mode
   const startBlitz = () => {
     soundEngine.playTap();
-    const check = canPlayInfiniteMode('bearinglock', isPassHolder);
+    const check = canPlayInfiniteMode('bearings', isPassHolder);
     if (!check.allowed) {
       openPassModal('plans', "You've used today's free Radar Blitz flight. Unlock unlimited flights with the Arcade Pass.");
       return;
     }
-    incrementDailyInfinitePlays('bearinglock');
+    incrementDailyInfinitePlays('bearings');
     setActiveDateKey(null);
 
     const seed = Date.now();
@@ -292,10 +296,10 @@ export function BearingLockGame({ onHome, onSelectGame, challengeCode }) {
 
     const correctCount = history.filter((h) => h.delta <= 15).length;
     if (activeDateKey) {
-      saveArchiveScore('bearinglock', activeDateKey, totalScore);
+      saveArchiveScore('bearings', activeDateKey, totalScore);
     } else {
-      saveGameScore('bearinglock', totalScore, mode === 'daily', correctCount);
-      setStats(getGameStats('bearinglock'));
+      saveGameScore('bearings', totalScore, mode === 'daily', correctCount);
+      setStats(getGameStats('bearings'));
     }
   };
 
@@ -325,11 +329,11 @@ export function BearingLockGame({ onHome, onSelectGame, challengeCode }) {
         ? 'Radar Blitz'
         : '1v1 Challenge';
 
-    const text = `🧭 BEARING LOCK (${modeLabel})
+    const text = `🧭 BEARINGS (${modeLabel})
 Score: ${totalScore.toLocaleString()} pts | Avg Error: ±${avgError}°
 ${emojiGrid}
 Bullseyes: ${bullseyeCount} 🎯
-Play now: ${window.location.origin}/bearinglock`;
+Play now: ${window.location.origin}/bearings`;
 
     copyShareText(text);
     setCopyFeedback('Copied result to clipboard!');
@@ -341,8 +345,8 @@ Play now: ${window.location.origin}/bearinglock`;
     soundEngine.playTap();
     const seed = activeSeedRef.current || Date.now();
     const totalTime = Math.round((Date.now() - gameStartTimeRef.current) / 1000);
-    const code = encodeChallenge('bearinglock', seed, totalScore, totalTime);
-    const url = `${window.location.origin}/bearinglock?c=${code}`;
+    const code = encodeChallenge('bearings', seed, totalScore, totalTime);
+    const url = `${window.location.origin}/bearings?c=${code}`;
     copyShareText(url);
     setCopyFeedback('Copied 1v1 Challenge link!');
     setTimeout(() => setCopyFeedback(null), 2500);
@@ -358,7 +362,7 @@ Play now: ${window.location.origin}/bearinglock`;
 
   return (
     <GameContainer
-      title="BEARING LOCK"
+      title="BEARINGS"
       subtitle="Tactile Compass Blitz"
       streak={combo > 1 ? `${combo}x` : 0}
       onHome={onHome}
@@ -377,7 +381,7 @@ Play now: ${window.location.origin}/bearinglock`;
                 <Compass className="w-9 h-9 text-sky-400 animate-spin-slow" />
               </div>
               <h2 className="text-2xl font-black tracking-tight text-white uppercase">
-                Bearing Lock
+                Bearings
               </h2>
               <p className="text-xs text-sky-400/90 font-medium tracking-wide mt-1">
                 Tactile 360° Compass Navigation Blitz
@@ -485,7 +489,7 @@ Play now: ${window.location.origin}/bearinglock`;
           </div>
 
           <div className="w-full pt-2">
-            <AdBanner game="bearinglock" onSelectGame={onSelectGame} />
+            <AdBanner game="bearings" onSelectGame={onSelectGame} />
           </div>
         </div>
       )}
@@ -648,7 +652,7 @@ Play now: ${window.location.origin}/bearinglock`;
           </div>
 
           <div className="mt-auto pt-2">
-            <AdBanner game="bearinglock" onSelectGame={onSelectGame} />
+            <AdBanner game="bearings" onSelectGame={onSelectGame} />
           </div>
         </div>
       )}
@@ -766,17 +770,17 @@ Play now: ${window.location.origin}/bearinglock`;
           </div>
 
           <div className="w-full pt-2">
-            <AdBanner game="bearinglock" onSelectGame={onSelectGame} />
+            <AdBanner game="bearings" onSelectGame={onSelectGame} />
           </div>
         </div>
       )}
 
       {/* Studio Review Drawer (dash.minty.red / ?review=true) */}
-      <ReviewDrawer gameSlug="bearinglock" />
+      <ReviewDrawer gameSlug="bearings" />
 
       {/* Daily Archive Picker Modal */}
       <GameArchivePicker
-        gameSlug="bearinglock"
+        gameSlug="bearings"
         isOpen={showArchive}
         onClose={() => setShowArchive(false)}
         onSelectDate={(date) => startDaily(date)}
@@ -784,3 +788,6 @@ Play now: ${window.location.origin}/bearinglock`;
     </GameContainer>
   );
 }
+
+// Backward compatibility alias
+export const BearingLockGame = BearingsGame;

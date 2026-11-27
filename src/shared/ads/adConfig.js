@@ -41,8 +41,11 @@ export const AD_SLOTS = {
   logicgate:
     (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ADSENSE_SLOT_LOGICGATE) ||
     '1000000009',
+  bearings:
+    (typeof import.meta !== 'undefined' && (import.meta.env?.VITE_ADSENSE_SLOT_BEARINGS || import.meta.env?.VITE_ADSENSE_SLOT_BEARINGLOCK)) ||
+    '1000000010',
   bearinglock:
-    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ADSENSE_SLOT_BEARINGLOCK) ||
+    (typeof import.meta !== 'undefined' && (import.meta.env?.VITE_ADSENSE_SLOT_BEARINGS || import.meta.env?.VITE_ADSENSE_SLOT_BEARINGLOCK)) ||
     '1000000010',
   default:
     (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ADSENSE_SLOT_DEFAULT) ||
@@ -89,9 +92,9 @@ export const HOUSE_ADS = [
     borderColor: 'border-indigo-500/30',
   },
   {
-    id: 'bearinglock-blitz',
-    gameSlug: 'bearinglock',
-    title: 'Bearing Lock: Compass Blitz',
+    id: 'bearings-blitz',
+    gameSlug: 'bearings',
+    title: 'Bearings: Compass Blitz',
     tagline: 'Geography challenge with a 360º compass dial',
     cta: 'Play Now',
     icon: 'Compass',

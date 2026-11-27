@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Compass,
   Sparkles,
-  Layers,
+  TrainFront,
   Flame,
   Volume2,
   VolumeX,
@@ -10,7 +10,7 @@ import {
   Trophy,
   ExternalLink,
   Orbit,
-  Zap,
+  RotateCcwClock,
   Anchor,
   PersonStanding,
   GamepadDirectional,
@@ -29,7 +29,9 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
   // Production Games Stats
   const orbitdropStats = getGameStats('orbitdrop');
   const ethnosStats = getGameStats('ethnos');
-  const bearinglockStats = getGameStats('bearinglock');
+  const bearingsRaw = getGameStats('bearings');
+  const legacyBearinglock = getGameStats('bearinglock') || getGameStats('bearing_lock');
+  const bearingsStats = (bearingsRaw && bearingsRaw.gamesPlayed > 0) ? bearingsRaw : legacyBearinglock;
   const flagshipRaw = getGameStats('flagship');
   const legacyFlaghex = getGameStats('flaghex');
   const flagshipStats = (flagshipRaw && flagshipRaw.gamesPlayed > 0) ? flagshipRaw : legacyFlaghex;
@@ -51,7 +53,7 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       slug: 'flagship',
       title: 'FLAGSHIP',
       displayTitle: 'Flagship',
-      tagline: 'Admiralty Signal Reflex',
+      tagline: 'Flag Identification',
       description: 'Identify sovereign naval ensigns from abstract optical color signals before boiler steam pressure vents!',
       stats: flagshipStats,
       badge: 'NAVAL',
@@ -59,12 +61,12 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       icon: Anchor,
     },
     {
-      slug: 'bearinglock',
-      title: 'BEARING_LOCK',
-      displayTitle: 'Bearing Lock',
+      slug: 'bearings',
+      title: 'BEARINGS',
+      displayTitle: 'Bearings',
       tagline: 'Tactile 360° Compass Blitz',
       description: 'Test your global sense of direction by navigating across global landmarks, cities, and corridors on an interactive 360° tactile compass dial.',
-      stats: bearinglockStats,
+      stats: bearingsStats,
       badge: 'PRECISION',
       badgeColor: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
       icon: Compass,
@@ -93,7 +95,7 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       stats: relicStats,
       badge: 'NEW',
       badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-      icon: Zap,
+      icon: RotateCcwClock,
     },
     {
       slug: 'metro',
@@ -104,7 +106,7 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       stats: metroStats,
       badge: 'PROTOTYPE',
       badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-      icon: Layers,
+      icon: TrainFront,
     },
     {
       slug: 'roots',
@@ -127,10 +129,10 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       (flagshipStats?.currentStreak || 0) +
       (orbitdropStats?.currentStreak || 0) +
       (ethnosStats?.currentStreak || 0) +
-      (bearinglockStats?.currentStreak || 0)
+      (bearingsStats?.currentStreak || 0)
     : (orbitdropStats?.currentStreak || 0) +
       (ethnosStats?.currentStreak || 0) +
-      (bearinglockStats?.currentStreak || 0) +
+      (bearingsStats?.currentStreak || 0) +
       (flagshipStats?.currentStreak || 0);
 
   const totalPlayed = isDev
@@ -140,10 +142,10 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       (flagshipStats?.gamesPlayed || 0) +
       (orbitdropStats?.gamesPlayed || 0) +
       (ethnosStats?.gamesPlayed || 0) +
-      (bearinglockStats?.gamesPlayed || 0)
+      (bearingsStats?.gamesPlayed || 0)
     : (orbitdropStats?.gamesPlayed || 0) +
       (ethnosStats?.gamesPlayed || 0) +
-      (bearinglockStats?.gamesPlayed || 0) +
+      (bearingsStats?.gamesPlayed || 0) +
       (flagshipStats?.gamesPlayed || 0);
 
   return (
@@ -328,7 +330,7 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
           </div>
         </section>
 
-        {/* LIVE PRODUCTION CABINETS: Flagship, Bearing Lock & Ethnos */}
+        {/* LIVE PRODUCTION CABINETS: Flagship, Bearings & Ethnos */}
         <section className="mb-4 space-y-2">
           <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1.5 px-0.5">
             <span className="text-cyan-400 font-bold tracking-wider">// NOW AVAILABLE</span>

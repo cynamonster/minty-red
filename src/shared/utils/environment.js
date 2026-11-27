@@ -6,7 +6,7 @@
 export const PUBLIC_GAMES = [
   'orbitdrop',
   'ethnos',
-  'bearinglock',
+  'bearings',
   'flagship',
 ];
 
@@ -29,6 +29,8 @@ export const ALL_GAMES = [
   'metro',
   'roots',
   'flaghex', // legacy alias for flagship
+  'bearinglock', // legacy alias for bearings
+  'bearing_lock',
 ];
 
 /**
@@ -115,12 +117,12 @@ export function shouldHideAds() {
 }
 
 /**
- * Normalizes game slug aliases (e.g. bearing_lock -> bearinglock, flaghex -> flagship).
+ * Normalizes game slug aliases (e.g. bearing_lock / bearinglock -> bearings, flaghex -> flagship).
  */
 export function normalizeGameSlug(slug) {
   if (!slug) return '';
   const clean = slug.toLowerCase().trim();
-  if (clean === 'bearing_lock') return 'bearinglock';
+  if (clean === 'bearing_lock' || clean === 'bearinglock') return 'bearings';
   if (clean === 'flaghex') return 'flagship';
   if (clean === 'cyber-shinobi') return 'shinobi';
   return clean;
@@ -128,7 +130,7 @@ export function normalizeGameSlug(slug) {
 
 /**
  * Returns the list of games available in the current environment.
- * On production minty.red: 'orbitdrop', 'ethnos', 'bearinglock', 'flagship'
+ * On production minty.red: 'orbitdrop', 'ethnos', 'bearings', 'flagship'
  * On dev site: production games + dev lab cartridges
  */
 export function getAvailableGames() {

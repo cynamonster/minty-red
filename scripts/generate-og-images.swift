@@ -36,12 +36,12 @@ let cards: [OGCard] = [
         description: "Look at real composite portraits of people from across the globe and pinpoint their home regions on the world map."
     ),
     OGCard(
-        slug: "bearinglock",
-        url: "MINTY.RED/BEARINGLOCK",
+        slug: "bearings",
+        url: "MINTY.RED/BEARINGS",
         topRightGrey: "5 CORRIDORS",
         topRightAccent: "DAILY COMPASS",
         category: "// TACTILE GLOBAL NAVIGATION",
-        headline: "BEARING LOCK",
+        headline: "BEARINGS",
         colorR: 245/255.0, colorG: 158/255.0, colorB: 11/255.0, // #f59e0b
         description: "Spin a 360-degree compass dial to lock onto the exact direction of famous world landmarks."
     ),

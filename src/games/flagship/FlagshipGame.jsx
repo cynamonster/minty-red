@@ -988,7 +988,7 @@ export function FlagshipGame({ onHome, onSelectGame, challengeCode }) {
   return (
     <GameContainer
       title="FLAGSHIP"
-      subtitle="Admiralty Signal Reflex"
+      subtitle="Flag Identification"
       streak={stats.currentStreak}
       onHome={onHome}
       showConfetti={showConfetti}
