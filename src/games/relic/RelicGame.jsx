@@ -361,7 +361,7 @@ export function RelicGame({ onHome, onSelectGame, challengeCode }) {
             R.E.L.I.C.
           </h2>
           <p className="text-xs font-mono font-bold text-cyan-400 tracking-widest mb-4">
-            Recovery & Extrication of<br/>
+            Reverse-Extraction of<br/>
             Looted Intertemporal Contraband
           </p>
 

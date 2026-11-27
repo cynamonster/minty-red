@@ -1,4 +1,4 @@
-// R.E.L.I.C. — Recovery & Extrication of Lost Intertemporal Contraband
+// R.E.L.I.C. — Reverse-Extraction of Looted Intertemporal Contraband
 // Curated Master Collection: Baked High-Resolution Treasures from The Met Open Access (CC0) and Wikimedia Archives.
 // Zero in-game latency, 100% offline & edge-cached resilient.
 
