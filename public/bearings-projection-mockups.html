@@ -1,0 +1,1751 @@
+function runGlobe1(elementId) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+
+      const r = ROUTES[activeRouteKey];
+      const lon1 = r.origin.lon, lat1 = r.origin.lat;
+      let lon2 = r.dest.lon, lat2 = r.dest.lat;
+
+      let dLon = lon2 - lon1;
+      if (dLon > 180) lon2 -= 360;
+      if (dLon < -180) lon2 += 360;
+
+      const midLon = (lon1 + lon2) / 2;
+      const midLat = (lat1 + lat2) / 2;
+      const pitch = Math.max(-40, Math.min(40, -midLat * 0.75));
+
+      const distKm = calculateGreatCircleDistance(lat1, lon1, r.dest.lat, r.dest.lon);
+      const minD = 300, maxD = 6000;
+      const clampedD = Math.max(minD, Math.min(maxD, distKm));
+      const tDist = (clampedD - minD) / (maxD - minD);
+      const zoomRatio = 1 + 1.15 * Math.pow(1 - tDist, 1.4);
+
+      const width = 100, height = 100;
+      const cx = width / 2, cy = height / 2;
+      const radius = 46 * zoomRatio;
+
+      const gcCoords = interpolateGreatCircle(lat1, lon1, lat2, lon2, 80);
+      const rhumbCoords = interpolateRhumbLine(lat1, lon1, lat2, lon2, 80);
+      const graticuleGeo = d3.geoGraticule().step([30, 30])();
+      const equatorGeo = { type: 'LineString', coordinates: [[-180, 0], [180, 0]] };
+
+      const svg = d3.select(el);
+      svg.selectAll('*').remove();
+
+      const defs = svg.append('defs');
+      
+      // Viewport clip path so zoomed regional routes fit cleanly in porthole
+      defs.append('clipPath').attr('id', 'porthole-clip')
+        .append('circle').attr('cx', cx).attr('cy', cy).attr('r', 46);
+
+      const oceanGrad = defs.append('radialGradient').attr('id', 'ocean-grad-thumb').attr('cx', '45%').attr('cy', '45%').attr('r', '60%');
+      oceanGrad.append('stop').attr('offset', '60%').attr('stop-color', '#0e121a');
+      oceanGrad.append('stop').attr('offset', '100%').attr('stop-color', '#06080c');
+
+      const glowGrad = defs.append('radialGradient').attr('id', 'rim-glow-thumb').attr('cx', '50%').attr('cy', '50%').attr('r', '50%');
+      glowGrad.append('stop').attr('offset', '85%').attr('stop-color', '#ff5722').attr('stop-opacity', 0);
+      glowGrad.append('stop').attr('offset', '100%').attr('stop-color', '#ff5722').attr('stop-opacity', 0.3);
+
+      // Porthole clipped group
+      const porthole = svg.append('g').attr('clip-path', 'url(#porthole-clip)');
+
+      const oceanCircle = porthole.append('circle').attr('cx', cx).attr('cy', cy).attr('r', radius).attr('fill', 'url(#ocean-grad-thumb)').attr('stroke', '#262833').attr('stroke-width', 1.2);
+      const graticulePath = porthole.append('path').attr('fill', 'none').attr('stroke', '#1e2430').attr('stroke-width', 0.6);
+      const equatorPath = porthole.append('path').attr('fill', 'none').attr('stroke', '#334155').attr('stroke-width', 0.8);
+      const landPath = porthole.append('path').attr('fill', '#171b26').attr('stroke', '#2b3245').attr('stroke-width', 0.5);
+      const rhumbPath = porthole.append('path').attr('fill', 'none').attr('stroke', '#38bdf8').attr('stroke-width', 1.4).attr('stroke-dasharray', '2.5,2.5').attr('stroke-opacity', 0.85);
+      const gcPath = porthole.append('path').attr('fill', 'none').attr('stroke', '#ff5722').attr('stroke-width', zoomRatio > 1.3 ? 2.8 : 2.4).attr('stroke-linecap', 'round').attr('class', 'arc-glow');
+
+      const origPin = porthole.append('g').style('display', 'none');
+      origPin.append('circle').attr('r', 4).attr('fill', '#ff5722').attr('opacity', 0.35).attr('class', 'animate-ping');
+      origPin.append('circle').attr('r', 2.8).attr('fill', '#ff5722').attr('stroke', '#ffffff').attr('stroke-width', 1);
+      origPin.append('text').attr('y', -5).attr('text-anchor', 'middle').attr('class', 'fill-white font-mono text-[7px] font-bold').text(r.origin.code);
+
+      const destPin = porthole.append('g').style('display', 'none');
+      destPin.append('circle').attr('r', 4).attr('fill', '#38bdf8').attr('opacity', 0.35).attr('class', 'animate-ping');
+      destPin.append('circle').attr('r', 2.8).attr('fill', '#38bdf8').attr('stroke', '#ffffff').attr('stroke-width', 1);
+      destPin.append('text').attr('y', 9).attr('text-anchor', 'middle').attr('class', 'fill-white font-mono text-[7px] font-bold').text(r.dest.code);
+
+      const rimCircle = porthole.append('circle').attr('cx', cx).attr('cy', cy).attr('r', radius).attr('fill', 'url(#rim-glow-thumb)').attr('pointer-events', 'none');
+
+      // Outer border ring
+      svg.append('circle').attr('cx', cx).attr('cy', cy).attr('r', 46).attr('fill', 'none').attr('stroke', '#ff5722').attr('stroke-width', 1.2).attr('stroke-opacity', zoomRatio > 1.25 ? 0.65 : 0.35).attr('pointer-events', 'none');
+
+      let yaw = -midLon - 10;
+      const baseSpeed = 0.55 / Math.sqrt(zoomRatio);
+
+      function tick() {
+        const viewLon = ((-yaw % 360) + 360) % 360;
+        const targetLon = ((midLon % 360) + 360) % 360;
+        let diff = Math.abs(viewLon - targetLon);
+        if (diff > 180) diff = 360 - diff;
+
+        // Dynamic rotation speed: slow inspection over the arc (0.12°), fast transit when off-screen (up to 2.2°)
+        let speed;
+        if (diff < 70) {
+          const t = diff / 70;
+          speed = 0.12 + 0.53 * (1 - Math.cos((t * Math.PI) / 2));
+        } else {
+          const t = (diff - 70) / 110;
+          speed = 0.65 + 1.55 * Math.sin((t * Math.PI) / 2);
+        }
+        yaw += speed;
+
+        const projection = d3.geoOrthographic()
+          .scale(radius)
+          .translate([cx, cy])
+          .rotate([yaw, pitch])
+          .clipAngle(90);
+
+        const pathGen = d3.geoPath().projection(projection);
+
+        if (worldLandData) landPath.attr('d', pathGen(worldLandData) || '');
+        graticulePath.attr('d', pathGen(graticuleGeo) || '');
+        equatorPath.attr('d', pathGen(equatorGeo) || '');
+        rhumbPath.attr('d', pathGen({ type: 'LineString', coordinates: rhumbCoords }) || '');
+        gcPath.attr('d', pathGen({ type: 'LineString', coordinates: gcCoords }) || '');
+
+        const origVis = d3.geoDistance([lon1, lat1], [-yaw, -pitch]) < Math.PI / 2;
+        const destVis = d3.geoDistance([r.dest.lon, r.dest.lat], [-yaw, -pitch]) < Math.PI / 2;
+        const p1 = projection([lon1, lat1]);
+        const p2 = projection([r.dest.lon, r.dest.lat]);
+
+        if (origVis && p1) {
+          origPin.attr('transform', 'translate(' + p1[0] + ', ' + p1[1] + ')').style('display', 'block');
+        } else {
+          origPin.style('display', 'none');
+        }
+
+        if (destVis && p2) {
+          destPin.attr('transform', 'translate(' + p2[0] + ', ' + p2[1] + ')').style('display', 'block');
+        } else {
+          destPin.style('display', 'none');
+        }
+
+        bouncingAnimFrameId = requestAnimationFrame(tick);
+      }
+
+      bouncingAnimFrameId = requestAnimationFrame(tick);
+    }="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEARINGS° — Projection & Mercator Trap Mockups</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <!-- D3.js for high precision SVG/Canvas Orthographic & Mercator Projections -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+  <!-- Three.js for 3D WebGL comparison -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .font-inter { font-family: 'Inter', sans-serif; }
+    
+    /* Flip Card Animation for Treatment A */
+    .perspective-1000 { perspective: 1000px; }
+    .transform-style-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b0c0e; }
+    ::-webkit-scrollbar-thumb { background: #262830; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #ff5722; }
+
+    /* Pulse animation */
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 4px #ff5722); }
+      50% { opacity: 1; filter: drop-shadow(0 0 10px #ff5722); }
+    }
+    .arc-glow { animation: pulse-glow 2.5s infinite ease-in-out; }
+  </style>
+</head>
+<body class="bg-[#08090b] text-slate-100 antialiased font-inter select-none min-h-screen p-3 sm:p-6">
+
+  <div class="max-w-6xl mx-auto space-y-6">
+
+    <!-- Header & Navigation -->
+    <header class="border-b border-slate-800 pb-5">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold uppercase bg-orange-500/15 text-orange-400 border border-orange-500/30">
+            <span>Projection UX Design Suite</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse"></span>
+            <span>Interactive Lab</span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1">
+            BEARINGS<span class="text-[#ff5722] font-mono">°</span> <span class="text-slate-400 text-lg font-normal">— Spherical Geodesic vs Flat Mercator</span>
+          </h1>
+          <p class="text-xs text-slate-400 mt-1 max-w-2xl leading-relaxed">
+            Eliminating the "Mercator confusion" without diluting spherical math: explore interactive Orthographic Arc reveals, Mercator Trap indicators, Flat Map comparison toggles, and pure SVG vs WebGL rendering.
+          </p>
+        </div>
+
+        <!-- Master Route Selector -->
+        <div class="flex flex-col items-end">
+          <span class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-1">Select Active Test Waypoint:</span>
+          <select id="route-select" onchange="switchRoute(this.value)" class="bg-[#121316] border border-orange-500/40 text-orange-300 font-mono text-xs rounded-xl px-3 py-2 outline-none cursor-pointer hover:border-orange-400 focus:ring-1 focus:ring-orange-500">
+            <option value="syd-scl">Sydney (SYD) → Santiago (SCL) [Trap Δ48°]</option>
+            <option value="ber-tok">Berlin (BER) → Tokyo (HND) [Trap Δ55°]</option>
+            <option value="sfo-tok">San Francisco (SFO) → Tokyo (NRT) [Trap Δ31°]</option>
+            <option value="nyc-lon">New York (JFK) → London (LHR) [Trap Δ34°]</option>
+            <option value="par-rom">Paris (CDG) → Rome (FCO) [Regional 1.9x Zoom]</option>
+            <option value="lon-par">London (LHR) → Paris (CDG) [Regional 2.1x Zoom]</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Current Route Telemetry Pill -->
+      <div id="route-telemetry" class="mt-4 p-3 rounded-xl bg-[#121316] border border-slate-800 flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
+        <!-- Injected dynamically -->
+      </div>
+    </header>
+
+    <!-- SECTION NAV TABS -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl">
+      <button id="nav-btn-1" onclick="selectSection(1)" class="p-2.5 rounded-xl text-left transition-all bg-[#ff5722] text-white shadow-md">
+        <div class="text-[9px] font-mono uppercase font-bold opacity-80">Section 1</div>
+        <div class="text-xs sm:text-sm font-black truncate">1. Reveal Placement (3 Layouts)</div>
+      </button>
+
+      <button id="nav-btn-2" onclick="selectSection(2)" class="p-2.5 rounded-xl text-left transition-all text-slate-400 hover:text-white hover:bg-slate-800/60">
+        <div class="text-[9px] font-mono uppercase font-bold opacity-80">Section 2</div>
+        <div class="text-xs sm:text-sm font-black truncate">2. Globe vs Flat Map Toggle</div>
+      </button>
+
+      <button id="nav-btn-3" onclick="selectSection(3)" class="p-2.5 rounded-xl text-left transition-all text-slate-400 hover:text-white hover:bg-slate-800/60">
+        <div class="text-[9px] font-mono uppercase font-bold opacity-80">Section 3</div>
+        <div class="text-xs sm:text-sm font-black truncate">3. Mercator Trap Indicators</div>
+      </button>
+
+      <button id="nav-btn-4" onclick="selectSection(4)" class="p-2.5 rounded-xl text-left transition-all text-slate-400 hover:text-white hover:bg-slate-800/60">
+        <div class="text-[9px] font-mono uppercase font-bold opacity-80">Section 4</div>
+        <div class="text-xs sm:text-sm font-black truncate">4. Pure SVG vs WebGL (3D)</div>
+      </button>
+    </div>
+
+    <!-- ===================================================================================
+         SECTION 1: REVEAL PLACEMENT ARCHITECTURES (3 TREATMENTS)
+    ==================================================================================== -->
+    <div id="section-1" class="space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-black text-white flex items-center gap-2">
+            <span>In-Game Reveal Placement Architecture</span>
+            <span class="text-xs font-mono font-normal text-orange-400">Where does the arc reveal live in the mobile game?</span>
+          </h2>
+          <p class="text-xs text-slate-400">Choose between Treatment B (Overlaying HUD & Snap controls), Treatment A (Compass Flip), or Treatment C (Modal Sheet).</p>
+        </div>
+        <div class="flex gap-1.5 p-1 bg-[#121316] rounded-xl border border-slate-800 text-[11px] font-mono">
+          <button onclick="setPlacementTreatment('B')" id="btn-treat-b" class="px-3 py-1 rounded-lg bg-orange-500 text-white font-bold transition-all">Treatment B: Inline Overlay Card (Specified)</button>
+          <button onclick="setPlacementTreatment('A')" id="btn-treat-a" class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition-all">Treatment A: Compass Flip</button>
+          <button onclick="setPlacementTreatment('C')" id="btn-treat-c" class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition-all">Treatment C: Modal Sheet</button>
+        </div>
+      </div>
+
+      <!-- Live Mobile Phone Stage for Placement Testing -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left: Realistic Mobile Phone Screen Mockup -->
+        <div class="lg:col-span-6 flex justify-center">
+          <div class="w-full max-w-[375px] rounded-[40px] bg-[#0b0c0e] border-[3px] border-slate-800 shadow-2xl p-4 relative overflow-hidden flex flex-col justify-between min-h-[660px]">
+            
+            <!-- Mobile Top Bar -->
+            <div>
+              <div class="flex items-center justify-between text-[11px] font-mono text-slate-400 mb-2">
+                <span class="text-orange-400 font-bold">ARC 1 / 5</span>
+                <span class="text-white font-black">2,850 PTS</span>
+              </div>
+
+              <!-- Waypoint Card -->
+              <div id="phone-wp-card" class="p-3 rounded-2xl bg-[#121316] border border-slate-800 text-xs">
+                <!-- Injected dynamically -->
+              </div>
+            </div>
+
+            <!-- Dynamic Middle Content Area (Swaps based on Treatment A, B, C) -->
+            <div id="phone-middle-area" class="my-auto py-1 flex flex-col items-center justify-center w-full">
+              <!-- Content rendered by setPlacementTreatment() -->
+            </div>
+
+            <!-- Mobile Action Bottom -->
+            <div id="phone-bottom-area" class="w-full space-y-2 mt-auto">
+              <!-- Injected dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Treatment Explanation & Evaluation Checklist -->
+        <div class="lg:col-span-6 space-y-4">
+          <!-- Simulation Interactive Toggles -->
+          <div class="p-4 rounded-2xl bg-[#121316] border border-orange-500/40 flex items-center justify-between gap-3 text-xs">
+            <div>
+              <div class="font-bold text-white flex items-center gap-2">
+                <span>Interactive Reveal Simulation</span>
+                <span id="sim-lock-badge" class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-300 font-bold">
+                  LOCKED (CARD ACTIVE)
+                </span>
+              </div>
+              <p class="text-slate-400 text-[11px] mt-0.5">
+                Toggle lock state to inspect how the Inline Card overlays the HUD & Snap Controls without layout shift.
+              </p>
+            </div>
+            <button onclick="toggleSimulatedLock()" id="sim-lock-btn" class="px-3.5 py-2 rounded-xl bg-[#ff5722] hover:bg-orange-600 text-white font-mono font-bold text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 shrink-0">
+              Unlock Heading
+            </button>
+          </div>
+
+          <div id="placement-explainer" class="p-5 rounded-2xl bg-[#121316] border border-slate-800 space-y-3">
+            <!-- Dynamic explanation injected -->
+          </div>
+
+          <div class="p-4 rounded-2xl bg-[#0f1013] border border-slate-800 space-y-3">
+            <h4 class="text-xs font-mono font-bold text-orange-400 uppercase tracking-wider">Ergonomic & UX Evaluation:</h4>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+              <div class="p-3 rounded-xl bg-[#14151a] border border-slate-800/80">
+                <span class="text-[10px] text-slate-400 font-mono uppercase block">Thumb Anchor</span>
+                <span id="eval-thumb" class="font-bold text-emerald-400">Perfect (Zero dial displacement)</span>
+              </div>
+              <div class="p-3 rounded-xl bg-[#14151a] border border-slate-800/80">
+                <span class="text-[10px] text-slate-400 font-mono uppercase block">Screen Real Estate</span>
+                <span id="eval-density" class="font-bold text-emerald-400">Reuses disabled control space</span>
+              </div>
+              <div class="p-3 rounded-xl bg-[#14151a] border border-slate-800/80">
+                <span class="text-[10px] text-slate-400 font-mono uppercase block">Epiphany Impact</span>
+                <span id="eval-epiphany" class="font-bold text-orange-400">High (Animated 2D bouncing globe)</span>
+              </div>
+              <div class="p-3 rounded-xl bg-[#14151a] border border-slate-800/80">
+                <span class="text-[10px] text-slate-400 font-mono uppercase block">Curiosity & Education</span>
+                <span id="eval-flow" class="font-bold text-white">Simple English "WHY" Callout</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===================================================================================
+         SECTION 2: GLOBE VS FLAT MAP COMPARISON TOGGLE
+    ==================================================================================== -->
+    <div id="section-2" class="space-y-4 hidden">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-black text-white flex items-center gap-2">
+            <span>Projection Visualizer: Orthographic 3D Globe vs Flat Mercator</span>
+          </h2>
+          <p class="text-xs text-slate-400">Directly inspect how the identical flight path curves dramatically toward the pole on the flat map vs cuts a straight great circle on the globe.</p>
+        </div>
+
+        <!-- Toggle Pill -->
+        <div class="flex items-center gap-2 bg-[#121316] p-1 rounded-xl border border-slate-800 text-xs font-mono">
+          <button id="proj-btn-globe" onclick="setProjectionMode('globe')" class="px-3 py-1.5 rounded-lg bg-orange-500 text-white font-bold transition-all flex items-center gap-1.5 shadow">
+            <span>🌐 Orthographic Globe</span>
+          </button>
+          <button id="proj-btn-flat" onclick="setProjectionMode('flat')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-1.5">
+            <span>🗺️ Flat Mercator</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Dual Stage / Interactive Canvas View -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Interactive Stage -->
+        <div class="lg:col-span-8 p-6 rounded-2xl bg-[#0e0f12] border border-slate-800 flex flex-col items-center justify-center relative min-h-[460px] shadow-2xl overflow-hidden">
+          
+          <!-- Layer Toggles -->
+          <div class="absolute top-4 left-4 z-10 flex flex-wrap gap-2 text-[11px] font-mono">
+            <label class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#14151a]/90 border border-slate-700/80 cursor-pointer">
+              <input type="checkbox" id="layer-gc" checked onchange="redrawActiveVisualizer()" class="accent-[#ff5722]">
+              <span class="text-orange-400 font-bold">Great Circle Arc (Geodesic)</span>
+            </label>
+            <label class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#14151a]/90 border border-slate-700/80 cursor-pointer">
+              <input type="checkbox" id="layer-rhumb" checked onchange="redrawActiveVisualizer()" class="accent-[#38bdf8]">
+              <span class="text-sky-400 font-bold">Rhumb Line (Flat Map Constant Heading)</span>
+            </label>
+            <label class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#14151a]/90 border border-slate-700/80 cursor-pointer">
+              <input type="checkbox" id="layer-vector" checked onchange="redrawActiveVisualizer()" class="accent-[#34d399]">
+              <span class="text-emerald-400 font-bold">Initial Departure Vector</span>
+            </label>
+          </div>
+
+          <!-- The Render Container -->
+          <div id="projection-canvas-container" class="w-full flex items-center justify-center">
+            <!-- Dynamic SVG inserted here -->
+          </div>
+
+          <!-- Bottom Visual Legend & Math Summary -->
+          <div class="w-full mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-xs font-mono">
+            <div class="flex items-center gap-4">
+              <div class="flex items-center gap-1.5">
+                <span class="w-3 h-1 bg-[#ff5722] rounded-full"></span>
+                <span class="text-slate-300">Geodesic: <strong id="gc-distance-label" class="text-white"></strong></span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="w-3 h-1 bg-[#38bdf8] rounded-full border-dashed"></span>
+                <span class="text-slate-300">Rhumb Line: <strong id="rhumb-distance-label" class="text-white"></strong></span>
+              </div>
+            </div>
+            <div id="bearing-contrast-pill" class="text-orange-400 font-bold">
+              <!-- Injected -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Explainer & Contrast Analysis -->
+        <div class="lg:col-span-4 space-y-4">
+          <div class="p-5 rounded-2xl bg-[#121316] border border-slate-800 space-y-3">
+            <h3 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+              <span>Why This Visual Cures Confusion</span>
+            </h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              When players look at a flat schoolroom Mercator map, straight lines are <strong>rhumb lines</strong> (constant compass bearings). But on a sphere, lines of latitude are small circles, not straight shortest paths.
+            </p>
+            <div class="p-3 rounded-xl bg-orange-500/10 border border-orange-500/30 text-xs text-orange-300 leading-relaxed font-mono">
+              <strong>The Epiphany:</strong> The shortest path between any two points on a globe is always a great-circle slice through Earth's center. Notice how on the globe, the orange arc is the direct path, while the blue line spirals longer!
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-[#121316] border border-slate-800 space-y-2 text-xs font-mono">
+            <span class="text-[10px] text-slate-400 uppercase font-bold">Mathematical Delta:</span>
+            <div class="flex items-center justify-between p-2 rounded-lg bg-[#14151a]">
+              <span class="text-slate-400">Initial Geodesic Bearing:</span>
+              <span id="math-gc-bearing" class="font-bold text-orange-400">138° (SE)</span>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded-lg bg-[#14151a]">
+              <span class="text-slate-400">Flat Rhumb Line Bearing:</span>
+              <span id="math-rhumb-bearing" class="font-bold text-sky-400">090° (Due East)</span>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded-lg bg-orange-500/20 text-orange-300 font-bold">
+              <span>Mercator Distortion:</span>
+              <span id="math-distortion">Δ 48° Deviation</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===================================================================================
+         SECTION 3: MERCATOR TRAP INDICATORS (VARIANTS)
+    ==================================================================================== -->
+    <div id="section-3" class="space-y-4 hidden">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-black text-white flex items-center gap-2">
+            <span>"Mercator Trap" Indicator & Trivia Treatments</span>
+          </h2>
+          <p class="text-xs text-slate-400">Comparing high-prominence hazard alerts vs subtle Bauhaus typography badges.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        
+        <!-- Treatment 1: High Prominence Hazard Alert -->
+        <div class="p-5 rounded-2xl bg-[#121316] border border-orange-500/40 space-y-4 relative overflow-hidden flex flex-col justify-between">
+          <div class="absolute top-0 right-0 px-3 py-1 bg-orange-500/20 text-orange-400 border-b border-l border-orange-500/30 text-[9px] font-mono font-bold uppercase rounded-bl-xl">
+            Variant 01: High Prominence
+          </div>
+
+          <div class="space-y-3 pt-2">
+            <div class="text-xs font-mono font-bold text-slate-400 uppercase">Appearance on Reveal Screen:</div>
+            
+            <!-- The Mockup Component -->
+            <div class="p-3.5 rounded-xl bg-orange-500/15 border border-orange-500/50 space-y-2">
+              <div class="flex items-center gap-2 text-xs font-black text-orange-400 font-mono tracking-wide uppercase">
+                <span class="text-base">⚠️</span>
+                <span>MERCATOR TRAP DETECTED</span>
+              </div>
+              <p class="text-[11px] text-orange-200 leading-snug">
+                Flat maps make destination look <strong>Due East (090°)</strong>, but the true spherical geodesic dips <strong>SE (138°)</strong> toward Antarctica!
+              </p>
+              <div class="flex items-center gap-2 pt-1 font-mono text-[10px] text-orange-400 font-bold">
+                <span class="px-1.5 py-0.5 rounded bg-black/30">Polar Divergence: Δ 48°</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-800 text-xs text-slate-400 space-y-1">
+            <strong class="text-white block font-mono text-[11px]">Best for:</strong>
+            <p>Casual players who get confused why their "obviously correct" East guess was marked Out-of-Bounds.</p>
+          </div>
+        </div>
+
+        <!-- Treatment 2: Sleek Swiss Curvature Pill -->
+        <div class="p-5 rounded-2xl bg-[#121316] border border-slate-800 space-y-4 flex flex-col justify-between">
+          <div class="text-[9px] font-mono font-bold text-slate-500 uppercase">
+            Variant 02: Subtle Swiss Pill (Recommended)
+          </div>
+
+          <div class="space-y-3">
+            <div class="text-xs font-mono font-bold text-slate-400 uppercase">Appearance on Reveal Screen:</div>
+            
+            <!-- The Mockup Component -->
+            <div class="p-3 rounded-xl bg-[#16171c] border border-slate-700/80 space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
+                  <span class="text-xs font-bold text-white font-mono">Curvature Offset</span>
+                </div>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 font-bold border border-orange-500/30">
+                  Δ 48° Poleward
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-snug">
+                Rhumb line: 090° (E) • True Geodesic: 138° (SE)
+              </p>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-800 text-xs text-slate-400 space-y-1">
+            <strong class="text-white block font-mono text-[11px]">Best for:</strong>
+            <p>Maintaining the premium Swiss navigation aesthetic while still giving instant mathematical confirmation.</p>
+          </div>
+        </div>
+
+        <!-- Treatment 3: Interactive Epiphany Tooltip / Drawer -->
+        <div class="p-5 rounded-2xl bg-[#121316] border border-slate-800 space-y-4 flex flex-col justify-between">
+          <div class="text-[9px] font-mono font-bold text-slate-500 uppercase">
+            Variant 03: Interactive "Why?" Pill
+          </div>
+
+          <div class="space-y-3">
+            <div class="text-xs font-mono font-bold text-slate-400 uppercase">Appearance on Reveal Screen:</div>
+            
+            <!-- The Mockup Component -->
+            <div class="space-y-2">
+              <button onclick="toggleWhyDrawer()" class="w-full p-2.5 rounded-xl bg-[#1a1b22] border border-orange-500/30 hover:border-orange-400 flex items-center justify-between text-left transition-all">
+                <div class="flex items-center gap-2">
+                  <span class="text-orange-400 text-sm">💡</span>
+                  <span class="text-xs font-bold text-white">Why isn't this Due East?</span>
+                </div>
+                <span class="text-xs text-orange-400 font-mono font-bold">[Explain]</span>
+              </button>
+
+              <div id="why-drawer-content" class="p-3 rounded-xl bg-black/40 border border-slate-800 text-[11px] text-slate-300 space-y-1.5 transition-all">
+                <p>Because Earth is spherical, longitude lines converge at the poles. Flying along a parallel (constant latitude) requires continuous steering away from the pole, making it 1,200 km longer!</p>
+                <div class="text-[10px] font-mono text-orange-400 font-semibold">
+                  Initial Launch Heading: 138° (SE)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-800 text-xs text-slate-400 space-y-1">
+            <strong class="text-white block font-mono text-[11px]">Best for:</strong>
+            <p>Opt-in learning that rewards curious players without cluttering the screen for fast-paced players.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===================================================================================
+         SECTION 4: PURE SVG/CANVAS VS WEBGL (THREE.JS) RENDERING COMPARISON
+    ==================================================================================== -->
+    <div id="section-4" class="space-y-4 hidden">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-black text-white flex items-center gap-2">
+            <span>Rendering Engine Comparison: Pure SVG vs WebGL (Three.js)</span>
+          </h2>
+          <p class="text-xs text-slate-400">Directly inspect visual aesthetics, shading, performance, and bundle weight.</p>
+        </div>
+
+        <div class="flex items-center gap-2 bg-[#121316] p-1 rounded-xl border border-slate-800 text-xs font-mono">
+          <button id="render-btn-svg" onclick="setRenderEngine('svg')" class="px-3 py-1.5 rounded-lg bg-orange-500 text-white font-bold transition-all">
+            Pure SVG/Canvas (0 KB)
+          </button>
+          <button id="render-btn-webgl" onclick="setRenderEngine('webgl')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all">
+            WebGL Three.js (140 KB)
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Side-by-Side Comparison Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Left: Pure SVG / Canvas Vector Globe -->
+        <div class="p-5 rounded-2xl bg-[#0e0f12] border border-slate-800 flex flex-col items-center justify-between space-y-4 relative shadow-xl">
+          <div class="w-full flex items-center justify-between text-xs font-mono">
+            <span class="font-bold text-white flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              Pure SVG / Vector Canvas
+            </span>
+            <span class="px-2 py-0.5 rounded bg-emerald-400/20 text-emerald-300 font-bold border border-emerald-400/30">
+              0 KB ENGINE • FAST
+            </span>
+          </div>
+
+          <!-- SVG Globe Canvas -->
+          <div id="compare-svg-container" class="w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center my-2">
+            <!-- Dynamic SVG injected -->
+          </div>
+
+          <!-- Metrics table -->
+          <div class="w-full grid grid-cols-3 gap-2 text-center text-[10px] font-mono border-t border-slate-800/80 pt-3">
+            <div>
+              <div class="text-slate-500 uppercase">Bundle Cost</div>
+              <div class="text-emerald-400 font-bold text-xs mt-0.5">0 KB (Native)</div>
+            </div>
+            <div>
+              <div class="text-slate-500 uppercase">Init Time</div>
+              <div class="text-emerald-400 font-bold text-xs mt-0.5">&lt; 1 ms</div>
+            </div>
+            <div>
+              <div class="text-slate-500 uppercase">Crispness</div>
+              <div class="text-white font-bold text-xs mt-0.5">Infinite Vector</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: 3D WebGL / Three.js Globe -->
+        <div class="p-5 rounded-2xl bg-[#0e0f12] border border-slate-800 flex flex-col items-center justify-between space-y-4 relative shadow-xl">
+          <div class="w-full flex items-center justify-between text-xs font-mono">
+            <span class="font-bold text-white flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+              WebGL / Three.js 3D Sphere
+            </span>
+            <span class="px-2 py-0.5 rounded bg-sky-400/20 text-sky-300 font-bold border border-sky-400/30">
+              +140 KB GZIP • 3D GLOW
+            </span>
+          </div>
+
+          <!-- WebGL Canvas Container -->
+          <div id="compare-webgl-container" class="w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center my-2 relative">
+            <canvas id="webgl-canvas" class="w-full h-full rounded-full cursor-grab active:cursor-grabbing"></canvas>
+            <div class="absolute bottom-1 right-2 text-[9px] font-mono text-slate-500">Drag to rotate 3D</div>
+          </div>
+
+          <!-- Metrics table -->
+          <div class="w-full grid grid-cols-3 gap-2 text-center text-[10px] font-mono border-t border-slate-800/80 pt-3">
+            <div>
+              <div class="text-slate-500 uppercase">Bundle Cost</div>
+              <div class="text-amber-400 font-bold text-xs mt-0.5">~140 KB Gzip</div>
+            </div>
+            <div>
+              <div class="text-slate-500 uppercase">GPU Shaders</div>
+              <div class="text-sky-400 font-bold text-xs mt-0.5">Specular Glow</div>
+            </div>
+            <div>
+              <div class="text-slate-500 uppercase">Interaction</div>
+              <div class="text-white font-bold text-xs mt-0.5">Free 3D Orbit</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Verdict Analysis Box -->
+      <div class="p-5 rounded-2xl bg-[#121316] border border-orange-500/30 space-y-2 text-xs">
+        <h4 class="font-bold text-white text-sm font-mono flex items-center gap-2">
+          <span class="text-orange-400">⚡</span>
+          <span>Architectural Recommendation:</span>
+        </h4>
+        <p class="text-slate-300 leading-relaxed">
+          The <strong>Pure SVG / Vector Canvas</strong> version delivers 95% of the epiphany impact at <strong>0 kb added bundle weight</strong>, pixel-perfect crispness on mobile OLED screens, and instantaneous load times. 
+          The <strong>Three.js</strong> version looks gorgeous with atmospheric specular glow and free 3D rotation, but introduces WebGL context overhead. For the core mobile game, Pure SVG is the ideal default, with Three.js as an optional enhancement.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SCRIPT FOR DYNAMIC MOCKUP INTERACTION & SPHERICAL GEOMETRY MATH -->
+  <script>
+    // Master Waypoint Dataset with Great Circle & Rhumb Line Math
+    const ROUTES = {
+      'par-rom': {
+        id: 'par-rom',
+        name: 'Paris → Rome',
+        origin: { name: 'Paris', code: 'CDG', country: 'France', flag: '🇫🇷', lat: 48.8566, lon: 2.3522 },
+        dest: { name: 'Rome', code: 'FCO', country: 'Italy', flag: '🇮🇹', lat: 41.9028, lon: 12.4964 },
+        trivia: 'Cutting over the snow-capped French Alps along a southeast trajectory.',
+        whyTitle: 'REGIONAL CONTINENTAL CORRIDOR',
+        whyText: 'Over 1,100 km, the great circle arches southeast across the French and Swiss Alps down the Italian peninsula.'
+      },
+      'syd-scl': {
+        id: 'syd-scl',
+        name: 'Sydney → Santiago',
+        origin: { name: 'Sydney', code: 'SYD', country: 'Australia', flag: '🇦🇺', lat: -33.8688, lon: 151.2093 },
+        dest: { name: 'Santiago', code: 'SCL', country: 'Chile', flag: '🇨🇱', lat: -33.4489, lon: -70.6693 },
+        trivia: 'Flies southeast down towards Antarctica before turning back up northeast to Chile.',
+        whyTitle: "WHY THIS ISN'T EAST (090°)",
+        whyText: "Flat maps make Santiago look due east. But Earth is spherical! The shortest path arcs southeast toward Antarctica before curving back north to Chile."
+      },
+      'ber-tok': {
+        id: 'ber-tok',
+        name: 'Berlin → Tokyo',
+        origin: { name: 'Berlin', code: 'BER', country: 'Germany', flag: '🇩🇪', lat: 52.5200, lon: 13.4050 },
+        dest: { name: 'Tokyo', code: 'HND', country: 'Japan', flag: '🇯🇵', lat: 35.6762, lon: 139.6503 },
+        trivia: 'The great circle route launches northeast over Scandinavia and Siberia, not east!',
+        whyTitle: "WHY THIS HEADS NORTHEAST (035°)",
+        whyText: "Flat maps show Tokyo east across Asia. But near polar latitudes, longitude lines converge! The shortest path heads northeast across Scandinavia and Siberia."
+      },
+      'sfo-tok': {
+        id: 'sfo-tok',
+        name: 'San Francisco → Tokyo',
+        origin: { name: 'San Francisco', code: 'SFO', country: 'United States', flag: '🇺🇸', lat: 37.7749, lon: -122.4194 },
+        dest: { name: 'Tokyo', code: 'NRT', country: 'Japan', flag: '🇯🇵', lat: 35.6762, lon: 139.6503 },
+        trivia: 'Due to spherical curvature, planes launch northwest over Alaska and the Aleutians, not west!',
+        whyTitle: "WHY THIS HEADS NORTHWEST (301°)",
+        whyText: "On a flat map Tokyo looks due west. But the spherical great-circle arc climbs northwest over the Aleutian Islands and Alaska, saving 1,800 km!"
+      },
+      'nyc-lon': {
+        id: 'nyc-lon',
+        name: 'New York City → London',
+        origin: { name: 'New York City', code: 'JFK', country: 'United States', flag: '🇺🇸', lat: 40.7128, lon: -74.0060 },
+        dest: { name: 'London', code: 'LHR', country: 'United Kingdom', flag: '🇬🇧', lat: 51.5074, lon: -0.1278 },
+        trivia: 'Great circle routes steer northeast over Newfoundland and Ireland rather than flying directly east.',
+        whyTitle: "WHY THIS HEADS NORTHEAST (051°)",
+        whyText: "Flat maps suggest heading east (085°). But transatlantic flights arc sharply northeast up over Nova Scotia and Newfoundland before crossing to Ireland."
+      },
+      'lon-par': {
+        id: 'lon-par',
+        name: 'London → Paris',
+        origin: { name: 'London', code: 'LHR', country: 'United Kingdom', flag: '🇬🇧', lat: 51.5074, lon: -0.1278 },
+        dest: { name: 'Paris', code: 'CDG', country: 'France', flag: '🇫🇷', lat: 48.8566, lon: 2.3522 },
+        trivia: 'The historic air route crosses the English Channel on a smooth south-southeast heading.',
+        whyTitle: "MINIMAL CURVATURE DISTORTION",
+        whyText: "For short cross-channel legs, great-circle and flat-map paths are virtually identical (Δ2°). Minimal curvature trap here!"
+      }
+    };
+
+    // Simplified Continent Polygon Outlines for Instant Offline Canvas Rendering
+    const CONTINENTS_GEOJSON = {
+      type: "FeatureCollection",
+      features: [
+        // North America
+        { type: "Feature", geometry: { type: "Polygon", coordinates: [[
+          [-168, 65], [-160, 71], [-130, 70], [-100, 70], [-80, 62], [-60, 60],
+          [-65, 45], [-75, 35], [-80, 25], [-85, 20], [-97, 18], [-105, 20],
+          [-115, 30], [-124, 40], [-125, 50], [-135, 58], [-150, 60], [-168, 65]
+        ]]}},
+        // South America
+        { type: "Feature", geometry: { type: "Polygon", coordinates: [[
+          [-80, 8], [-75, 11], [-60, 8], [-50, 0], [-35, -5], [-35, -12],
+          [-40, -22], [-48, -28], [-58, -38], [-65, -54], [-75, -50], [-74, -40],
+          [-70, -20], [-78, -3], [-80, 8]
+        ]]}},
+        // Eurasia
+        { type: "Feature", geometry: { type: "Polygon", coordinates: [[
+          [-9, 36], [0, 42], [15, 40], [25, 35], [35, 30], [52, 25], [60, 25],
+          [72, 20], [77, 8], [80, 15], [90, 22], [100, 10], [105, 2], [115, 22],
+          [122, 32], [125, 40], [132, 45], [140, 52], [160, 60], [175, 65],
+          [180, 68], [160, 72], [120, 75], [80, 73], [50, 70], [30, 70],
+          [15, 60], [5, 54], [-5, 48], [-9, 43], [-9, 36]
+        ]]}},
+        // Africa
+        { type: "Feature", geometry: { type: "Polygon", coordinates: [[
+          [-17, 15], [-15, 8], [0, 5], [10, 4], [10, -5], [15, -15], [20, -34],
+          [28, -33], [35, -25], [40, -10], [51, 11], [43, 14], [35, 30],
+          [10, 37], [-5, 35], [-17, 15]
+        ]]}},
+        // Australia
+        { type: "Feature", geometry: { type: "Polygon", coordinates: [[
+          [114, -22], [122, -15], [132, -12], [142, -11], [150, -22], [153, -28],
+          [150, -37], [138, -35], [135, -34], [115, -34], [113, -25], [114, -22]
+        ]]}},
+        // Antarctica
+        { type: "Feature", geometry: { type: "Polygon", coordinates: [[
+          [-180, -65], [-120, -68], [-60, -62], [0, -68], [60, -65], [120, -66], [180, -65],
+          [180, -90], [-180, -90], [-180, -65]
+        ]]}}
+      ]
+    };
+
+    // Global Active State
+    let activeRouteKey = 'syd-scl';
+    let activePlacement = 'B'; // Default to Treatment B as specified!
+    let activeProjection = 'globe'; // 'globe' | 'flat'
+    let isFlipped = false; // For treatment A flip state
+    let isSimulatedLocked = true; // True for locked reveal state, false for dialing state
+    let whyDrawerOpen = false;
+    let bouncingAnimFrameId = null;
+
+    // Mathematical Navigation Functions
+    function toRad(d) { return (d * Math.PI) / 180; }
+    function toDeg(r) { return (r * 180) / Math.PI; }
+
+    function calculateInitialBearing(lat1, lon1, lat2, lon2) {
+      const φ1 = toRad(lat1), φ2 = toRad(lat2);
+      const Δλ = toRad(lon2 - lon1);
+      const y = Math.sin(Δλ) * Math.cos(φ2);
+      const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+      return Math.round((toDeg(Math.atan2(y, x)) + 360) % 360);
+    }
+
+    function calculateGreatCircleDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const φ1 = toRad(lat1), φ2 = toRad(lat2);
+      const Δφ = toRad(lat2 - lat1), Δλ = toRad(lon2 - lon1);
+      const a = Math.sin(Δφ / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
+      return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+    }
+
+    // Rhumb Line (Constant Heading / Straight line on Mercator)
+    function calculateRhumbBearing(lat1, lon1, lat2, lon2) {
+      const φ1 = toRad(lat1), φ2 = toRad(lat2);
+      let Δλ = toRad(lon2 - lon1);
+      const Δψ = Math.log(Math.tan(Math.PI / 4 + φ2 / 2) / Math.tan(Math.PI / 4 + φ1 / 2));
+      if (Math.abs(Δλ) > Math.PI) {
+        Δλ = Δλ > 0 ? -(2 * Math.PI - Δλ) : (2 * Math.PI + Δλ);
+      }
+      return Math.round((toDeg(Math.atan2(Δλ, Δψ)) + 360) % 360);
+    }
+
+    function calculateRhumbDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const φ1 = toRad(lat1), φ2 = toRad(lat2);
+      const Δφ = toRad(lat2 - lat1);
+      let Δλ = toRad(lon2 - lon1);
+      if (Math.abs(Δλ) > Math.PI) Δλ = Δλ > 0 ? -(2 * Math.PI - Δλ) : (2 * Math.PI + Δλ);
+      const Δψ = Math.log(Math.tan(Math.PI / 4 + φ2 / 2) / Math.tan(Math.PI / 4 + φ1 / 2));
+      const q = Math.abs(Δψ) > 1e-10 ? Δφ / Δψ : Math.cos(φ1);
+      return Math.round(R * Math.sqrt(Δφ * Δφ + q * q * Δλ * Δλ));
+    }
+
+    function getCompassHeading(deg) {
+      const normalized = (deg % 360 + 360) % 360;
+      const points = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+      return points[Math.round(normalized / 22.5) % 16];
+    }
+
+    function formatDeg(d) {
+      return `${String(Math.round(d)).padStart(3, '0')}°`;
+    }
+
+    // SLERP interpolation for Great Circle points
+    function interpolateGreatCircle(lat1, lon1, lat2, lon2, n = 60) {
+      const p1 = latLonToVector(lat1, lon1);
+      const p2 = latLonToVector(lat2, lon2);
+      let dot = p1[0]*p2[0] + p1[1]*p2[1] + p1[2]*p2[2];
+      dot = Math.max(-1, Math.min(1, dot));
+      const omega = Math.acos(dot);
+      const points = [];
+
+      for (let i = 0; i <= n; i++) {
+        const t = i / n;
+        if (omega === 0) {
+          points.push([lon1, lat1]);
+          continue;
+        }
+        const s1 = Math.sin((1 - t) * omega) / Math.sin(omega);
+        const s2 = Math.sin(t * omega) / Math.sin(omega);
+        const vx = s1 * p1[0] + s2 * p2[0];
+        const vy = s1 * p1[1] + s2 * p2[1];
+        const vz = s1 * p1[2] + s2 * p2[2];
+        const pt = vectorToLatLon([vx, vy, vz]);
+        points.push([pt.lon, pt.lat]);
+      }
+      return points;
+    }
+
+    function interpolateRhumbLine(lat1, lon1, lat2, lon2, n = 60) {
+      const points = [];
+      let dLon = lon2 - lon1;
+      if (Math.abs(dLon) > 180) {
+        dLon = dLon > 0 ? dLon - 360 : dLon + 360;
+      }
+      for (let i = 0; i <= n; i++) {
+        const t = i / n;
+        const lat = lat1 + t * (lat2 - lat1);
+        const lon = lon1 + t * dLon;
+        points.push([lon, lat]);
+      }
+      return points;
+    }
+
+    function latLonToVector(lat, lon) {
+      const φ = toRad(lat), λ = toRad(lon);
+      return [Math.cos(φ) * Math.cos(λ), Math.cos(φ) * Math.sin(λ), Math.sin(φ)];
+    }
+
+    function vectorToLatLon(v) {
+      const lat = toDeg(Math.asin(v[2]));
+      const lon = toDeg(Math.atan2(v[1], v[0]));
+      return { lat, lon };
+    }
+
+    // Switch Route Handler
+    function switchRoute(routeId) {
+      activeRouteKey = routeId;
+      updateHeaderTelemetry();
+      renderPlacementTreatment();
+      redrawActiveVisualizer();
+      renderSVGComparison();
+      if (typeof updateWebGLRoute === 'function') updateWebGLRoute();
+    }
+
+    function updateHeaderTelemetry() {
+      const r = ROUTES[activeRouteKey];
+      const gcBearing = calculateInitialBearing(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon);
+      const rhumbBearing = calculateRhumbBearing(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon);
+      const gcDist = calculateGreatCircleDistance(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon);
+      const rhumbDist = calculateRhumbDistance(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon);
+      
+      let delta = Math.abs(gcBearing - rhumbBearing);
+      if (delta > 180) delta = 360 - delta;
+
+      const isTrap = delta >= 15;
+
+      const container = document.getElementById('route-telemetry');
+      container.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="text-white font-bold flex items-center gap-1.5 text-sm">
+            <span>${r.origin.flag} ${r.origin.code}</span>
+            <span class="text-orange-400">→</span>
+            <span>${r.dest.flag} ${r.dest.code}</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isTrap ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-slate-800 text-slate-400'}">
+            ${isTrap ? `⚠️ MERCATOR TRAP: Δ ${delta}°` : 'NORMAL BEARING'}
+          </span>
+        </div>
+
+        <div class="flex items-center gap-5">
+          <div>
+            <span class="text-slate-400 text-[10px] uppercase">Spherical Geodesic:</span>
+            <div class="text-orange-400 font-bold">${formatDeg(gcBearing)} (${getCompassHeading(gcBearing)}) • ${gcDist.toLocaleString()} km</div>
+          </div>
+          <div>
+            <span class="text-slate-400 text-[10px] uppercase">Flat Rhumb Line:</span>
+            <div class="text-sky-400 font-bold">${formatDeg(rhumbBearing)} (${getCompassHeading(rhumbBearing)}) • ${rhumbDist.toLocaleString()} km</div>
+          </div>
+        </div>
+      `;
+
+      // Update Section 2 math pills
+      document.getElementById('gc-distance-label').innerText = `${gcDist.toLocaleString()} km`;
+      document.getElementById('rhumb-distance-label').innerText = `${rhumbDist.toLocaleString()} km`;
+      document.getElementById('math-gc-bearing').innerText = `${formatDeg(gcBearing)} (${getCompassHeading(gcBearing)})`;
+      document.getElementById('math-rhumb-bearing').innerText = `${formatDeg(rhumbBearing)} (${getCompassHeading(rhumbBearing)})`;
+      document.getElementById('math-distortion').innerText = `Δ ${delta}° Divergence`;
+
+      const contrastEl = document.getElementById('bearing-contrast-pill');
+      if (isTrap) {
+        contrastEl.className = 'text-orange-400 font-bold animate-pulse';
+        contrastEl.innerText = `⚠️ Mercator Trap: Flat maps skew heading by ${delta}°!`;
+      } else {
+        contrastEl.className = 'text-slate-400';
+        contrastEl.innerText = `Geodesic & Rhumb line closely aligned (Δ ${delta}°)`;
+      }
+    }
+
+    // SECTION SWITCHER
+    function selectSection(idx) {
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`section-${i}`).classList.add('hidden');
+        const btn = document.getElementById(`nav-btn-${i}`);
+        btn.className = "p-2.5 rounded-xl text-left transition-all text-slate-400 hover:text-white hover:bg-slate-800/60";
+      }
+      document.getElementById(`section-${idx}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`nav-btn-${idx}`);
+      activeBtn.className = "p-2.5 rounded-xl text-left transition-all bg-[#ff5722] text-white shadow-md";
+
+      if (idx === 1) {
+        setTimeout(renderPlacementTreatment, 50);
+      } else if (idx === 2) {
+        setTimeout(redrawActiveVisualizer, 50);
+      } else if (idx === 4) {
+        setTimeout(() => {
+          renderSVGComparison();
+          initWebGL();
+        }, 50);
+      }
+    }
+
+    // ===================================================================================
+    // SECTION 1: IN-GAME PLACEMENT TREATMENTS (A, B, C)
+    // ===================================================================================
+    function setPlacementTreatment(t) {
+      activePlacement = t;
+      ['a', 'b', 'c'].forEach(k => {
+        const btn = document.getElementById(`btn-treat-${k}`);
+        if (k === t.toLowerCase()) {
+          btn.className = "px-3 py-1 rounded-lg bg-orange-500 text-white font-bold transition-all shadow";
+        } else {
+          btn.className = "px-3 py-1 rounded-lg text-slate-400 hover:text-white transition-all";
+        }
+      });
+      renderPlacementTreatment();
+    }
+
+    function toggleSimulatedLock() {
+      isSimulatedLocked = !isSimulatedLocked;
+      const badge = document.getElementById('sim-lock-badge');
+      const btn = document.getElementById('sim-lock-btn');
+      if (isSimulatedLocked) {
+        badge.className = "px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-300 font-bold";
+        badge.innerText = "LOCKED (CARD ACTIVE)";
+        btn.innerText = "Unlock Heading";
+      } else {
+        badge.className = "px-2 py-0.5 rounded text-[10px] font-mono bg-orange-500/20 text-orange-400 font-bold";
+        badge.innerText = "DIALING (HUD & SNAPS VISIBLE)";
+        btn.innerText = "Simulate Lock Bearing";
+      }
+      renderPlacementTreatment();
+    }
+
+    function renderPlacementTreatment() {
+      if (bouncingAnimFrameId) {
+        cancelAnimationFrame(bouncingAnimFrameId);
+        bouncingAnimFrameId = null;
+      }
+
+      const r = ROUTES[activeRouteKey];
+      const gcBearing = calculateInitialBearing(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon);
+      const rhumbBearing = calculateRhumbBearing(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon);
+      const gcDist = calculateGreatCircleDistance(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon);
+      const rhumbDist = calculateRhumbDistance(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon);
+      let delta = Math.abs(gcBearing - rhumbBearing);
+      if (delta > 180) delta = 360 - delta;
+      const isTrap = delta >= 15;
+
+      // Update mobile phone waypoint card
+      document.getElementById('phone-wp-card').innerHTML = `
+        <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono uppercase mb-1">
+          <span class="text-orange-400">WAYPOINT CALIBRATION</span>
+          <span>${gcDist.toLocaleString()} KM</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <div class="font-bold text-white">${r.origin.flag} ${r.origin.name}</div>
+          <span class="text-orange-400 font-mono text-[10px]">→</span>
+          <div class="font-bold text-white">${r.dest.name} ${r.dest.flag}</div>
+        </div>
+      `;
+
+      const middleArea = document.getElementById('phone-middle-area');
+      const bottomArea = document.getElementById('phone-bottom-area');
+      const explainer = document.getElementById('placement-explainer');
+
+      // Shared Compass SVG helper
+      const renderCompassSVG = (size = 200) => `
+        <svg viewBox="0 0 300 300" class="w-full h-full drop-shadow-2xl overflow-visible select-none">
+          <circle cx="150" cy="150" r="146" fill="#0d0e11" stroke="#262830" stroke-width="3" />
+          <circle cx="150" cy="150" r="138" fill="#14151a" stroke="#1e2026" stroke-width="1.5" />
+          <circle cx="150" cy="150" r="85" fill="none" stroke="#262830" stroke-dasharray="3,3" stroke-width="1" />
+          <circle cx="150" cy="150" r="50" fill="none" stroke="#1e2026" stroke-width="1" />
+          <line x1="150" y1="65" x2="150" y2="235" stroke="#262830" stroke-width="1" />
+          <line x1="65" y1="150" x2="235" y2="150" stroke="#262830" stroke-width="1" />
+          
+          <!-- Cardinal Ticks -->
+          <text x="150" y="38" text-anchor="middle" dominant-baseline="central" class="fill-[#ff5722] font-black text-[13px] font-mono">N</text>
+          <text x="262" y="150" text-anchor="middle" dominant-baseline="central" class="fill-[#f8fafc] font-bold text-[12px] font-mono">E</text>
+          <text x="150" y="262" text-anchor="middle" dominant-baseline="central" class="fill-[#f8fafc] font-bold text-[12px] font-mono">S</text>
+          <text x="38" y="150" text-anchor="middle" dominant-baseline="central" class="fill-[#f8fafc] font-bold text-[12px] font-mono">W</text>
+          
+          <!-- Target Beam (Locked) -->
+          ${isSimulatedLocked ? `
+            <line x1="150" y1="150" x2="${150 + 130 * Math.sin(toRad(gcBearing))}" y2="${150 - 130 * Math.cos(toRad(gcBearing))}" stroke="#f8fafc" stroke-width="3" stroke-linecap="round" class="animate-pulse" />
+            <circle cx="${150 + 132 * Math.sin(toRad(gcBearing))}" cy="${150 - 132 * Math.cos(toRad(gcBearing))}" r="6" fill="#ff5722" stroke="#0d0e11" stroke-width="2" />
+          ` : ''}
+
+          <!-- Player Needle -->
+          <line x1="150" y1="150" x2="${150 - 35 * Math.sin(toRad(gcBearing))}" y2="${150 + 35 * Math.cos(toRad(gcBearing))}" stroke="#64748b" stroke-width="3" stroke-linecap="round" />
+          <line x1="150" y1="150" x2="${150 + 115 * Math.sin(toRad(gcBearing))}" y2="${150 - 115 * Math.cos(toRad(gcBearing))}" stroke="#ff5722" stroke-width="3.5" stroke-linecap="round" />
+          <circle cx="150" cy="150" r="14" fill="#181a1f" stroke="#ff5722" stroke-width="2" />
+          <circle cx="150" cy="150" r="5" fill="#ff5722" />
+          <circle cx="150" cy="150" r="2.5" fill="#ffffff" />
+        </svg>
+      `;
+
+      if (activePlacement === 'B') {
+        // =========================================================================
+        // TREATMENT B: SPECIFIED INLINE OVERLAY CARD
+        // 1. Digital HUD moved BELOW compass dial and ABOVE snap controls
+        // 2. Inline Card ABSOLUTELY POSITIONED covering Digital HUD and Snap Controls
+        // 3. Inside: Left = rotating 2D Canvas globe with bounced rotation,
+        //            Center/Right = simple English WHY explanation
+        // =========================================================================
+
+        middleArea.innerHTML = `
+          <!-- 1. The Main Interactive Compass Dial -->
+          <div class="relative w-48 h-48 sm:w-52 sm:h-52 rounded-full cursor-grab select-none mx-auto mb-1">
+            ${renderCompassSVG()}
+          </div>
+
+          <!-- Relative Lower Container Housing HUD, Snaps, and Absolutely Positioned Overlay Card -->
+          <div class="relative w-full mt-1" style="min-height: 140px;">
+            
+            <!-- Default Layer: Dynamic Digital HUD (above snaps) + High-Precision Nudge & Snap Controls -->
+            <div id="hud-and-controls-layer" class="w-full flex flex-col items-center gap-2 select-none ${isSimulatedLocked ? 'opacity-20 pointer-events-none' : ''}">
+              
+              <!-- Dynamic Digital HUD Heading Readout (Moved below compass, above snaps!) -->
+              <div class="flex items-center justify-center gap-2">
+                <div class="px-4 py-1.5 rounded-xl bg-[#121316] border border-slate-800 shadow-inner flex items-center gap-2">
+                  <span class="w-3 h-3 text-orange-400">🧭</span>
+                  <span class="text-xl font-black font-mono tracking-wider text-white">
+                    ${formatDeg(gcBearing)}
+                  </span>
+                  <span class="text-xs font-bold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 font-mono">
+                    ${getCompassHeading(gcBearing)}
+                  </span>
+                </div>
+              </div>
+
+              <!-- High-Precision Nudge Controls -->
+              <div class="w-full grid grid-cols-4 gap-1.5">
+                <button class="py-1 rounded-lg bg-slate-900 border border-slate-800 text-[11px] font-mono font-bold text-slate-300">-10°</button>
+                <button class="py-1 rounded-lg bg-slate-900 border border-slate-800 text-[11px] font-mono font-bold text-orange-400">-1°</button>
+                <button class="py-1 rounded-lg bg-slate-900 border border-slate-800 text-[11px] font-mono font-bold text-orange-400">+1°</button>
+                <button class="py-1 rounded-lg bg-slate-900 border border-slate-800 text-[11px] font-mono font-bold text-slate-300">+10°</button>
+              </div>
+
+              <!-- Cardinal Snaps -->
+              <div class="w-full grid grid-cols-4 gap-1.5">
+                <button class="py-1 rounded-md bg-slate-950 border border-orange-500/40 text-[10px] font-bold text-orange-400">0° N</button>
+                <button class="py-1 rounded-md bg-slate-950 border border-slate-800 text-[10px] font-bold text-slate-300">90° E</button>
+                <button class="py-1 rounded-md bg-slate-950 border border-slate-800 text-[10px] font-bold text-slate-300">180° S</button>
+                <button class="py-1 rounded-md bg-slate-950 border border-slate-800 text-[10px] font-bold text-slate-300">270° W</button>
+              </div>
+            </div>
+
+            <!-- The Treatment B Inline Card (ABSOLUTELY POSITIONED COVERING HUD & CONTROLS) -->
+            ${isSimulatedLocked ? `
+              <div id="inline-epiphany-card" class="absolute inset-0 z-20 rounded-2xl bg-[#0f1117]/95 backdrop-blur-md border border-orange-500/50 shadow-2xl p-2.5 flex items-center gap-3 overflow-hidden animate-fadeIn select-none">
+                
+                <!-- Left: 2D Rotating Canvas Globe with Eased Bounce Back & Forth -->
+                <div class="relative w-[100px] h-[100px] shrink-0 rounded-full overflow-hidden border border-orange-500/40 shadow-inner bg-[#07090e]">
+                  <svg id="bouncing-globe-svg" viewBox="0 0 100 100" class="w-full h-full overflow-visible"></svg>
+                  <div class="absolute bottom-1 inset-x-0 text-center text-[7px] font-mono text-orange-400 font-bold tracking-tight bg-black/60 py-0.5">
+                    GEODESIC ARC
+                  </div>
+                </div>
+
+                <!-- Center & Right: Simple English WHY Explanation -->
+                <div class="flex-1 min-w-0 flex flex-col justify-between h-full py-0.5 text-left">
+                  <div>
+                    <div class="flex items-center justify-between gap-1 mb-0.5">
+                      <span class="text-[10px] font-black font-mono uppercase text-orange-400 truncate">
+                        ${r.whyTitle}
+                      </span>
+                      ${isTrap ? `
+                        <span class="text-[8px] font-mono px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-300 font-bold border border-orange-500/30 shrink-0">
+                          Δ ${delta}° TRAP
+                        </span>
+                      ` : ''}
+                    </div>
+                    <p class="text-[10px] text-slate-300 leading-snug font-sans">
+                      ${r.whyText}
+                    </p>
+                  </div>
+
+                  <!-- Quick Telemetry Comparison -->
+                  <div class="grid grid-cols-2 gap-1 pt-1 border-t border-slate-800/80 text-[9px] font-mono">
+                    <div class="flex items-center gap-1">
+                      <span class="w-2 h-1 bg-[#ff5722] rounded-full shrink-0"></span>
+                      <span class="text-slate-400 truncate">Arc: <strong class="text-white">${formatDeg(gcBearing)} ${getCompassHeading(gcBearing)}</strong></span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                      <span class="w-2 h-1 bg-[#38bdf8] rounded-full border-dashed shrink-0"></span>
+                      <span class="text-slate-400 truncate">Flat: <strong class="text-sky-300">${formatDeg(rhumbBearing)} ${getCompassHeading(rhumbBearing)}</strong></span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            ` : ''}
+
+          </div>
+        `;
+
+        bottomArea.innerHTML = `
+          ${isSimulatedLocked ? `
+            <div class="p-2.5 rounded-xl bg-[#121316] border border-slate-800 text-xs flex items-center justify-between">
+              <div>
+                <div class="font-black text-emerald-400 font-mono text-[11px]">TRUE MERIDIAN LOCK</div>
+                <div class="text-[9px] text-slate-400 font-mono">Target: ${formatDeg(gcBearing)} (${getCompassHeading(gcBearing)}) • Delta ±0.0°</div>
+              </div>
+              <div class="text-right">
+                <div class="text-sm font-black font-mono text-white">+1,000</div>
+                <div class="text-[8px] text-orange-400 font-mono font-bold">1.5x COMBO</div>
+              </div>
+            </div>
+          ` : ''}
+          <button onclick="toggleSimulatedLock()" class="w-full py-3 rounded-2xl bg-[#ff5722] text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-950/40 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+            <span>${isSimulatedLocked ? 'Next Waypoint →' : 'Lock Bearing (Simulate Reveal)'}</span>
+          </button>
+        `;
+
+        explainer.innerHTML = `
+          <div class="flex items-center gap-2 text-orange-400 font-bold font-mono text-xs uppercase">
+            <span>Treatment B (Specified Layout Architecture)</span>
+          </div>
+          <h3 class="text-base font-black text-white">Absolute Overlay Over HUD & Snap Controls</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            During dialing, the Dynamic Digital HUD lives conveniently below the compass dial, directly above the tactile nudge/snap buttons. Upon locking, the <strong>Treatment B Inline Card animates in absolutely</strong>, covering those controls with the educational epiphany suite.
+          </p>
+          <ul class="text-xs text-slate-400 space-y-1.5 list-disc pl-4">
+            <li><strong>Left Globe 1 (SVG):</strong> Pure Scalable Vector (SVG) from interactive-rotating-globe-mockup.html with actual Natural Earth continents, graticules, bold orange geodesic arc, and dashed blue rhumb line.</li>
+            <li><strong>Natural Planetary Rotation:</strong> Spins continuously like Earth rotates (West-to-East), smoothly decelerating as the flight corridor crosses center screen.</li>
+            <li><strong>Center/Right Simple English "WHY":</strong> Gives players immediate clarity on why flat Mercator maps distort the route.</li>
+            <li><strong>Zero Layout Shifts:</strong> The Compass Dial never moves or shrinks; the bottom button stays fixed in place.</li>
+          </ul>
+        `;
+
+        document.getElementById('eval-thumb').innerText = 'Zero layout displacement';
+        document.getElementById('eval-density').innerText = 'Reuses disabled control space';
+        document.getElementById('eval-epiphany').innerText = 'Instant (2D Bouncing Globe)';
+        document.getElementById('eval-flow').innerText = 'Simple English WHY Callout';
+
+        if (isSimulatedLocked) {
+          startBouncingGlobeAnimation('bouncing-globe-canvas');
+        }
+
+      } else if (activePlacement === 'A') {
+        // TREATMENT A: COMPASS FLIP
+        middleArea.innerHTML = `
+          <div class="relative w-56 h-56 perspective-1000 select-none my-2">
+            <div id="flip-card-inner" class="relative w-full h-full transform-style-3d transition-transform duration-500 ${isFlipped ? 'rotate-y-180' : ''}">
+              
+              <!-- Front: Compass Dial -->
+              <div class="absolute inset-0 backface-hidden rounded-full bg-[#121316] border border-slate-800 flex flex-col items-center justify-center shadow-xl p-2">
+                <div class="text-[9px] font-mono text-slate-400 uppercase">Input Bearing</div>
+                <div class="text-2xl font-black font-mono text-white mt-1">${formatDeg(gcBearing)}</div>
+                <div class="text-xs font-mono text-orange-400 font-bold">${getCompassHeading(gcBearing)}</div>
+                <div class="mt-3 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-[9px] font-mono text-orange-400">
+                  Tap to flip
+                </div>
+              </div>
+
+              <!-- Back: 3D Orthographic Globe Reveal -->
+              <div class="absolute inset-0 backface-hidden rotate-y-180 rounded-full bg-[#0d0e11] border-2 border-orange-500/40 flex flex-col items-center justify-center shadow-2xl overflow-hidden p-1">
+                <canvas id="flip-globe-canvas" width="220" height="220" class="w-full h-full"></canvas>
+              </div>
+
+            </div>
+          </div>
+
+          <button onclick="toggleFlipState()" class="px-3 py-1.5 rounded-xl bg-[#14151a] border border-orange-500/40 text-orange-400 text-xs font-mono font-bold flex items-center gap-1.5 mt-2">
+            <span>🔄</span>
+            <span>${isFlipped ? 'Show Compass Dial' : 'Reveal Geodesic Arc'}</span>
+          </button>
+        `;
+
+        bottomArea.innerHTML = `
+          <button class="w-full py-3 rounded-2xl bg-[#ff5722] text-white font-black text-xs uppercase tracking-wider">
+            Next Waypoint →
+          </button>
+        `;
+
+        explainer.innerHTML = `
+          <div class="flex items-center gap-2 text-slate-400 font-bold font-mono text-xs uppercase">
+            <span>Treatment A: Direct Compass Morph / Flip</span>
+          </div>
+          <h3 class="text-base font-black text-white">3D Card Flip of the Dial</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Upon locking, the compass flips in 3D to reveal the globe.
+          </p>
+        `;
+
+        if (isFlipped) startBouncingGlobeAnimation('flip-globe-canvas');
+
+      } else if (activePlacement === 'C') {
+        // TREATMENT C: MODAL SHEET
+        middleArea.innerHTML = `
+          <div class="w-48 h-48 rounded-full cursor-grab select-none mx-auto my-2">
+            ${renderCompassSVG()}
+          </div>
+        `;
+
+        bottomArea.innerHTML = `
+          <div class="p-3 rounded-xl bg-[#121316] border border-slate-800 text-xs flex items-center justify-between">
+            <div>
+              <div class="font-black text-emerald-400 font-mono">TRUE MERIDIAN</div>
+              <div class="text-[10px] text-slate-400 font-mono">Target: ${formatDeg(gcBearing)}</div>
+            </div>
+            <button onclick="selectSection(2)" class="px-2.5 py-1.5 rounded-lg bg-orange-500/20 text-orange-400 border border-orange-500/40 text-[10px] font-mono font-bold">
+              Inspect Arc
+            </button>
+          </div>
+          <button class="w-full py-3 rounded-2xl bg-[#ff5722] text-white font-black text-xs uppercase tracking-wider">
+            Next Waypoint →
+          </button>
+        `;
+
+        explainer.innerHTML = `
+          <div class="flex items-center gap-2 text-slate-400 font-bold font-mono text-xs uppercase">
+            <span>Treatment C: Modal Sheet / Dedicated Inspector</span>
+          </div>
+          <h3 class="text-base font-black text-white">Full-Screen Tactical Modal</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Minimal in-game screen with an opt-in modal inspector button.
+          </p>
+        `;
+      }
+    }
+
+    function toggleFlipState() {
+      isFlipped = !isFlipped;
+      const inner = document.getElementById('flip-card-inner');
+      if (inner) {
+        if (isFlipped) {
+          inner.classList.add('rotate-y-180');
+          setTimeout(() => startBouncingGlobeAnimation('flip-globe-canvas'), 150);
+        } else {
+          inner.classList.remove('rotate-y-180');
+        }
+      }
+    }
+
+    // ===================================================================================
+    // 2D CANVAS GLOBE WITH CONTINENTS, GRATICULES, ARCS & EASED BOUNCE ROTATION
+    // ===================================================================================
+    function startBouncingGlobeAnimation(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+      const radius = width / 2 - 6;
+
+      const r = ROUTES[activeRouteKey];
+      const lon1 = r.origin.lon, lat1 = r.origin.lat;
+      let lon2 = r.dest.lon, lat2 = r.dest.lat;
+
+      // Handle wrap-around for Pacific crossings
+      let dLon = lon2 - lon1;
+      if (dLon > 180) lon2 -= 360;
+      if (dLon < -180) lon2 += 360;
+
+      const gcCoords = interpolateGreatCircle(lat1, lon1, lat2, lon2, 60);
+      const rhumbCoords = interpolateRhumbLine(lat1, lon1, lat2, lon2, 60);
+
+      const startTime = performance.now();
+
+      function drawFrame(now) {
+        const elapsed = now - startTime;
+        
+        // Smooth sine wave oscillating 0 to 1 with smooth acceleration/deceleration at ends
+        const t = (Math.sin(elapsed * 0.0016) + 1) / 2;
+        // Cubic easing for extra tactile bounce feel
+        const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+        // Current focal center panning smoothly back and forth between origin & dest
+        const curLon = lon1 + (lon2 - lon1) * (0.15 + 0.70 * eased);
+        const curLat = lat1 + (lat2 - lat1) * (0.15 + 0.70 * eased);
+
+        // Orthographic projection centered at (curLon, curLat)
+        const projection = d3.geoOrthographic()
+          .scale(radius)
+          .translate([width / 2, height / 2])
+          .rotate([-curLon, -curLat, 0])
+          .clipAngle(90);
+
+        const path = d3.geoPath(projection, ctx);
+
+        // Clear canvas
+        ctx.clearRect(0, 0, width, height);
+
+        // 1. Ocean Sphere Background & Atmospheric Gradient
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(width / 2, height / 2, radius, 0, 2 * Math.PI);
+        const oceanGrad = ctx.createRadialGradient(
+          width / 2 - radius * 0.2, height / 2 - radius * 0.2, radius * 0.1,
+          width / 2, height / 2, radius
+        );
+        oceanGrad.addColorStop(0, '#10141f');
+        oceanGrad.addColorStop(0.8, '#080a10');
+        oceanGrad.addColorStop(1, '#040508');
+        ctx.fillStyle = oceanGrad;
+        ctx.fill();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#ff5722';
+        ctx.stroke();
+        ctx.clip(); // Clip everything to the sphere!
+
+        // 2. Graticule Grid
+        const graticule = d3.geoGraticule().step([30, 30]);
+        ctx.beginPath();
+        path(graticule());
+        ctx.strokeStyle = '#1e2433';
+        ctx.lineWidth = 0.75;
+        ctx.stroke();
+
+        // Equator highlight
+        ctx.beginPath();
+        path({ type: 'LineString', coordinates: [[-180, 0], [180, 0]] });
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // 3. Continents (Crisp vector landmasses)
+        ctx.beginPath();
+        path(CONTINENTS_GEOJSON);
+        ctx.fillStyle = '#1c2230';
+        ctx.fill();
+        ctx.strokeStyle = '#2d3748';
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+
+        // 4. Dashed Rhumb Line (Flat map constant heading in blue)
+        ctx.beginPath();
+        path({ type: 'LineString', coordinates: rhumbCoords });
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+        ctx.setLineDash([]); // Reset dash
+
+        // 5. Bold Glowing Geodesic Arc (Great Circle in orange)
+        ctx.save();
+        ctx.shadowColor = '#ff5722';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        path({ type: 'LineString', coordinates: gcCoords });
+        ctx.strokeStyle = '#ff5722';
+        ctx.lineWidth = 3.2;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        ctx.restore();
+
+        // 6. Origin & Dest City Markers
+        const origPt = projection([lon1, lat1]);
+        const destPt = projection([r.dest.lon, r.dest.lat]);
+
+        if (origPt) {
+          ctx.beginPath();
+          ctx.arc(origPt[0], origPt[1], 4, 0, 2 * Math.PI);
+          ctx.fillStyle = '#ff5722';
+          ctx.fill();
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = '#ffffff';
+          ctx.stroke();
+
+          ctx.font = 'bold 9px JetBrains Mono, monospace';
+          ctx.fillStyle = '#ffffff';
+          ctx.textAlign = 'center';
+          ctx.fillText(r.origin.code, origPt[0], origPt[1] - 6);
+        }
+
+        if (destPt) {
+          ctx.beginPath();
+          ctx.arc(destPt[0], destPt[1], 4, 0, 2 * Math.PI);
+          ctx.fillStyle = '#38bdf8';
+          ctx.fill();
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = '#ffffff';
+          ctx.stroke();
+
+          ctx.font = 'bold 9px JetBrains Mono, monospace';
+          ctx.fillStyle = '#ffffff';
+          ctx.textAlign = 'center';
+          ctx.fillText(r.dest.code, destPt[0], destPt[1] + 12);
+        }
+
+        ctx.restore(); // Restore clip
+
+        bouncingAnimFrameId = requestAnimationFrame(drawFrame);
+      }
+
+      bouncingAnimFrameId = requestAnimationFrame(drawFrame);
+    }
+
+    // ===================================================================================
+    // SECTION 2: PROJECTION VISUALIZER (GLOBE VS FLAT MERCATOR)
+    // ===================================================================================
+    function setProjectionMode(mode) {
+      activeProjection = mode;
+      const btnG = document.getElementById('proj-btn-globe');
+      const btnF = document.getElementById('proj-btn-flat');
+      if (mode === 'globe') {
+        btnG.className = "px-3 py-1.5 rounded-lg bg-orange-500 text-white font-bold transition-all flex items-center gap-1.5 shadow";
+        btnF.className = "px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-1.5";
+      } else {
+        btnF.className = "px-3 py-1.5 rounded-lg bg-orange-500 text-white font-bold transition-all flex items-center gap-1.5 shadow";
+        btnG.className = "px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-1.5";
+      }
+      redrawActiveVisualizer();
+    }
+
+    function redrawActiveVisualizer() {
+      const container = document.getElementById('projection-canvas-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const r = ROUTES[activeRouteKey];
+      const showGC = document.getElementById('layer-gc')?.checked ?? true;
+      const showRhumb = document.getElementById('layer-rhumb')?.checked ?? true;
+      const showVector = document.getElementById('layer-vector')?.checked ?? true;
+
+      const width = Math.min(680, window.innerWidth - 60);
+      const height = activeProjection === 'globe' ? 380 : 340;
+
+      const svg = d3.create('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('viewBox', `0 0 ${width} ${height}`)
+        .attr('class', 'overflow-visible');
+
+      const midLon = (r.origin.lon + r.dest.lon) / 2;
+      const midLat = (r.origin.lat + r.dest.lat) / 2;
+
+      let projection;
+      if (activeProjection === 'globe') {
+        projection = d3.geoOrthographic()
+          .scale(150)
+          .translate([width / 2, height / 2])
+          .rotate([-midLon, -midLat, 0])
+          .clipAngle(90);
+
+        const defs = svg.append('defs');
+        const radialGrad = defs.append('radialGradient')
+          .attr('id', 'globe-grad')
+          .attr('cx', '50%').attr('cy', '50%').attr('r', '50%');
+        radialGrad.append('stop').attr('offset', '70%').attr('stop-color', '#10131a');
+        radialGrad.append('stop').attr('offset', '100%').attr('stop-color', '#07080a');
+
+        svg.append('circle')
+          .attr('cx', width / 2)
+          .attr('cy', height / 2)
+          .attr('r', 150)
+          .attr('fill', 'url(#globe-grad)')
+          .attr('stroke', '#ff5722')
+          .attr('stroke-width', 2)
+          .attr('stroke-opacity', 0.5);
+
+      } else {
+        projection = d3.geoEquirectangular()
+          .scale(width / (2 * Math.PI))
+          .translate([width / 2, height / 2])
+          .center([0, 0]);
+
+        svg.append('rect')
+          .attr('x', 20)
+          .attr('y', 20)
+          .attr('width', width - 40)
+          .attr('height', height - 40)
+          .attr('fill', '#0c0d11')
+          .attr('stroke', '#262830')
+          .attr('stroke-width', 1.5)
+          .attr('rx', 12);
+      }
+
+      const pathGen = d3.geoPath().projection(projection);
+
+      // Graticules
+      const graticule = d3.geoGraticule().step([30, 30]);
+      svg.append('path')
+        .datum(graticule)
+        .attr('d', pathGen)
+        .attr('fill', 'none')
+        .attr('stroke', '#262830')
+        .attr('stroke-width', 0.75)
+        .attr('stroke-dasharray', '2,4');
+
+      // Continents
+      svg.append('path')
+        .datum(CONTINENTS_GEOJSON)
+        .attr('d', pathGen)
+        .attr('fill', '#181e2b')
+        .attr('stroke', '#2d3748')
+        .attr('stroke-width', 0.8);
+
+      const gcCoords = interpolateGreatCircle(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon, 80);
+      const rhumbCoords = interpolateRhumbLine(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon, 80);
+
+      if (showRhumb) {
+        svg.append('path')
+          .datum({ type: 'LineString', coordinates: rhumbCoords })
+          .attr('d', pathGen)
+          .attr('fill', 'none')
+          .attr('stroke', '#38bdf8')
+          .attr('stroke-width', 2.5)
+          .attr('stroke-dasharray', '5,5')
+          .attr('stroke-opacity', 0.85);
+      }
+
+      if (showGC) {
+        svg.append('path')
+          .datum({ type: 'LineString', coordinates: gcCoords })
+          .attr('d', pathGen)
+          .attr('fill', 'none')
+          .attr('stroke', '#ff5722')
+          .attr('stroke-width', 3.5)
+          .attr('class', 'arc-glow');
+      }
+
+      const origPt = projection([r.origin.lon, r.origin.lat]);
+      const destPt = projection([r.dest.lon, r.dest.lat]);
+
+      if (origPt) {
+        if (showVector && gcCoords.length > 3) {
+          const vPt = projection(gcCoords[8]);
+          if (vPt) {
+            svg.append('line')
+              .attr('x1', origPt[0]).attr('y1', origPt[1])
+              .attr('x2', vPt[0]).attr('y2', vPt[1])
+              .attr('stroke', '#34d399')
+              .attr('stroke-width', 3);
+          }
+        }
+        svg.append('circle').attr('cx', origPt[0]).attr('cy', origPt[1]).attr('r', 6).attr('fill', '#ff5722').attr('stroke', '#ffffff').attr('stroke-width', 2);
+        svg.append('text').attr('x', origPt[0]).attr('y', origPt[1] - 10).attr('text-anchor', 'middle').attr('class', 'fill-white font-mono text-[10px] font-bold').text(`${r.origin.code} (Origin)`);
+      }
+
+      if (destPt) {
+        svg.append('circle').attr('cx', destPt[0]).attr('cy', destPt[1]).attr('r', 6).attr('fill', '#38bdf8').attr('stroke', '#ffffff').attr('stroke-width', 2);
+        svg.append('text').attr('x', destPt[0]).attr('y', destPt[1] + 18).attr('text-anchor', 'middle').attr('class', 'fill-white font-mono text-[10px] font-bold').text(`${r.dest.code} (Dest)`);
+      }
+
+      container.appendChild(svg.node());
+    }
+
+    // ===================================================================================
+    // SECTION 4: RENDERING ENGINE COMPARISON (SVG VS WEBGL)
+    // ===================================================================================
+    function setRenderEngine(engine) {
+      const btnS = document.getElementById('render-btn-svg');
+      const btnW = document.getElementById('render-btn-webgl');
+      if (engine === 'svg') {
+        btnS.className = "px-3 py-1.5 rounded-lg bg-orange-500 text-white font-bold transition-all";
+        btnW.className = "px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all";
+      } else {
+        btnW.className = "px-3 py-1.5 rounded-lg bg-orange-500 text-white font-bold transition-all";
+        btnS.className = "px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all";
+      }
+    }
+
+    function renderSVGComparison() {
+      const container = document.getElementById('compare-svg-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const r = ROUTES[activeRouteKey];
+      const w = 270, h = 270;
+      const radius = 120;
+      const midLon = (r.origin.lon + r.dest.lon) / 2;
+      const midLat = (r.origin.lat + r.dest.lat) / 2;
+
+      const svg = d3.create('svg')
+        .attr('width', w).attr('height', h)
+        .attr('viewBox', `0 0 ${w} ${h}`);
+
+      const projection = d3.geoOrthographic()
+        .scale(radius)
+        .translate([w / 2, h / 2])
+        .rotate([-midLon, -midLat, 0])
+        .clipAngle(90);
+
+      const pathGen = d3.geoPath().projection(projection);
+
+      svg.append('circle').attr('cx', w / 2).attr('cy', h / 2).attr('r', radius).attr('fill', '#0e1118').attr('stroke', '#334155').attr('stroke-width', 2);
+
+      const graticule = d3.geoGraticule().step([30, 30]);
+      svg.append('path').datum(graticule).attr('d', pathGen).attr('fill', 'none').attr('stroke', '#1e293b').attr('stroke-width', 1);
+
+      svg.append('path').datum(CONTINENTS_GEOJSON).attr('d', pathGen).attr('fill', '#1c2230').attr('stroke', '#2d3748').attr('stroke-width', 0.8);
+
+      const gcCoords = interpolateGreatCircle(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon, 60);
+      svg.append('path').datum({ type: 'LineString', coordinates: gcCoords }).attr('d', pathGen).attr('fill', 'none').attr('stroke', '#ff5722').attr('stroke-width', 3).attr('class', 'arc-glow');
+
+      const p1 = projection([r.origin.lon, r.origin.lat]);
+      const p2 = projection([r.dest.lon, r.dest.lat]);
+      if (p1) svg.append('circle').attr('cx', p1[0]).attr('cy', p1[1]).attr('r', 5).attr('fill', '#ff5722');
+      if (p2) svg.append('circle').attr('cx', p2[0]).attr('cy', p2[1]).attr('r', 5).attr('fill', '#38bdf8');
+
+      container.appendChild(svg.node());
+    }
+
+    // 3D WebGL Three.js Sphere Setup
+    let threeScene, threeCamera, threeRenderer, threeGlobeMesh, threeArcMesh;
+    let isDraggingGlobe = false, prevMousePos = { x: 0, y: 0 };
+
+    function initWebGL() {
+      const canvas = document.getElementById('webgl-canvas');
+      if (!canvas || threeRenderer) return;
+
+      const w = 270, h = 270;
+      threeScene = new THREE.Scene();
+      threeCamera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+      threeCamera.position.z = 2.8;
+
+      threeRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      threeRenderer.setSize(w, h);
+      threeRenderer.setPixelRatio(window.devicePixelRatio || 1);
+
+      const ambientLight = new THREE.AmbientLight(0x223344, 1.2);
+      threeScene.add(ambientLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+      dirLight.position.set(3, 4, 3);
+      threeScene.add(dirLight);
+
+      const geometry = new THREE.SphereGeometry(1, 48, 48);
+      const material = new THREE.MeshPhongMaterial({
+        color: 0x0c111d,
+        emissive: 0x050811,
+        specular: 0x334466,
+        shininess: 25,
+        wireframe: false
+      });
+      threeGlobeMesh = new THREE.Mesh(geometry, material);
+      threeScene.add(threeGlobeMesh);
+
+      const wireGeo = new THREE.SphereGeometry(1.002, 24, 24);
+      const wireMat = new THREE.MeshBasicMaterial({ color: 0x1e293b, wireframe: true, transparent: true, opacity: 0.4 });
+      const wireMesh = new THREE.Mesh(wireGeo, wireMat);
+      threeGlobeMesh.add(wireMesh);
+
+      const glowGeo = new THREE.SphereGeometry(1.12, 32, 32);
+      const glowMat = new THREE.MeshBasicMaterial({ color: 0xff5722, transparent: true, opacity: 0.12, side: THREE.BackSide });
+      const glowMesh = new THREE.Mesh(glowGeo, glowMat);
+      threeScene.add(glowMesh);
+
+      updateWebGLRoute();
+
+      canvas.addEventListener('pointerdown', (e) => {
+        isDraggingGlobe = true;
+        prevMousePos = { x: e.clientX, y: e.clientY };
+      });
+      window.addEventListener('pointermove', (e) => {
+        if (!isDraggingGlobe || !threeGlobeMesh) return;
+        const dx = e.clientX - prevMousePos.x;
+        const dy = e.clientY - prevMousePos.y;
+        threeGlobeMesh.rotation.y += dx * 0.008;
+        threeGlobeMesh.rotation.x += dy * 0.008;
+        prevMousePos = { x: e.clientX, y: e.clientY };
+      });
+      window.addEventListener('pointerup', () => { isDraggingGlobe = false; });
+
+      function animate() {
+        requestAnimationFrame(animate);
+        if (!isDraggingGlobe && threeGlobeMesh) {
+          threeGlobeMesh.rotation.y += 0.002;
+        }
+        threeRenderer.render(threeScene, threeCamera);
+      }
+      animate();
+    }
+
+    function updateWebGLRoute() {
+      if (!threeScene || !threeGlobeMesh) return;
+      if (threeArcMesh) threeGlobeMesh.remove(threeArcMesh);
+
+      const r = ROUTES[activeRouteKey];
+      const coords = interpolateGreatCircle(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon, 60);
+
+      const points = coords.map(([lon, lat]) => {
+        const v = latLonToVector(lat, lon);
+        return new THREE.Vector3(v[0] * 1.025, v[2] * 1.025, -v[1] * 1.025);
+      });
+
+      const curve = new THREE.CatmullRomCurve3(points);
+      const tubeGeo = new THREE.TubeGeometry(curve, 64, 0.015, 8, false);
+      const tubeMat = new THREE.MeshBasicMaterial({ color: 0xff5722 });
+      threeArcMesh = new THREE.Mesh(tubeGeo, tubeMat);
+      threeGlobeMesh.add(threeArcMesh);
+    }
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      switchRoute('syd-scl');
+      selectSection(1);
+    });
+  </script>
+</body>
+</html>

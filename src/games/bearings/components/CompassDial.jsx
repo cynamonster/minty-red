@@ -7,16 +7,74 @@ import {
 import { soundEngine } from '../../../shared/audio/soundEngine';
 import { Compass, RotateCw, Target, ShieldAlert } from 'lucide-react';
 
+function polarToCartesian(cx, cy, r, angleInDegrees) {
+  const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
+  return {
+    x: cx + r * Math.cos(angleInRadians),
+    y: cy + r * Math.sin(angleInRadians),
+  };
+}
+
+function describeArc(cx, cy, r, startAngle, endAngle) {
+  const start = polarToCartesian(cx, cy, r, endAngle);
+  const end = polarToCartesian(cx, cy, r, startAngle);
+  const arcSweep = endAngle - startAngle <= 180 ? '0' : '1';
+  return [
+    'M', start.x, start.y,
+    'A', r, r, 0, arcSweep, 0, end.x, end.y,
+  ].join(' ');
+}
+
+const TOLERANCE_TIERS = [
+  { delta: 45,  color: '#f59e0b', r: 132 },
+  { delta: 25,  color: '#94a3b8', r: 132 },
+  { delta: 12,  color: '#ff5722', r: 132 },
+  { delta: 5,   color: '#34d399', r: 132 },
+  { delta: 1.5, color: '#10b981', r: 132 },
+];
+
 export function CompassDial({
   currentBearing,
   onChangeBearing,
   targetBearing = null,
   isLocked = false,
   disabled = false,
+  overlaySlot = null,
 }) {
   const containerRef = useRef(null);
   const isDraggingRef = useRef(false);
   const lastTickDegRef = useRef(currentBearing);
+  const [fanProgress, setFanProgress] = useState(0);
+
+  // Sweep Fan-Out animation for revealed tolerance ranges
+  useEffect(() => {
+    if (!isLocked || targetBearing === null) {
+      setFanProgress(0);
+      return;
+    }
+
+    let startTime = null;
+    let animId = null;
+    const duration = 350;
+
+    const animate = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(1.0, elapsed / duration);
+      // Ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setFanProgress(eased);
+
+      if (progress < 1.0) {
+        animId = requestAnimationFrame(animate);
+      }
+    };
+
+    animId = requestAnimationFrame(animate);
+    return () => {
+      if (animId) cancelAnimationFrame(animId);
+    };
+  }, [isLocked, targetBearing]);
 
   // Helper to calculate angle from pointer event to center of dial
   const getAngleFromEvent = useCallback((e) => {
@@ -104,6 +162,16 @@ export function CompassDial({
 
   const delta = targetBearing !== null ? calculateBearingDelta(currentBearing, targetBearing) : null;
 
+  // Determine active achieved rating tier when locked
+  let activeTier = null;
+  if (isLocked && delta !== null) {
+    if (delta <= 1.5) activeTier = 1.5;
+    else if (delta <= 5.0) activeTier = 5.0;
+    else if (delta <= 12.0) activeTier = 12.0;
+    else if (delta <= 25.0) activeTier = 25.0;
+    else if (delta <= 45.0) activeTier = 45.0;
+  }
+
   // Degrees tick generation (36 ticks every 10 degrees)
   const ticks = [];
   for (let d = 0; d < 360; d += 5) {
@@ -172,43 +240,11 @@ export function CompassDial({
 
   return (
     <div className="w-full flex flex-col items-center select-none">
-      {/* Dynamic Digital HUD Heading Readout */}
-      <div className="flex items-center justify-center gap-3 mb-3">
-        <div className="px-4 py-1.5 rounded-xl bg-[#121316] border border-slate-800 shadow-inner flex items-center gap-2">
-          <Compass className="w-4 h-4 text-orange-400 animate-spin-slow" />
-          <span className="text-2xl font-black font-mono tracking-wider text-white">
-            {formatDegrees(currentBearing)}
-          </span>
-          <span className="text-xs font-bold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 font-mono">
-            {getCompassHeading(currentBearing)}
-          </span>
-        </div>
-
-        {isLocked && delta !== null && (
-          <div
-            className={`px-3 py-1.5 rounded-xl border font-mono text-sm font-bold flex items-center gap-1.5 ${
-              delta <= 1.5
-                ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
-                : delta <= 12
-                ? 'bg-orange-500/20 border-orange-500/50 text-orange-300'
-                : delta <= 25
-                ? 'bg-slate-800 border-slate-700 text-slate-200'
-                : delta <= 45
-                ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
-                : 'bg-rose-500/20 border-rose-500/50 text-rose-300'
-            }`}
-          >
-            <Target className="w-4 h-4" />
-            <span>Δ {delta}°</span>
-          </div>
-        )}
-      </div>
-
       {/* Main Interactive Compass Dial SVG */}
       <div
         ref={containerRef}
         onPointerDown={handlePointerDown}
-        className={`relative w-72 h-72 sm:w-80 sm:h-80 rounded-full cursor-grab active:cursor-grabbing touch-none transition-shadow ${
+        className={`relative w-64 h-64 sm:w-72 sm:h-72 rounded-full cursor-grab active:cursor-grabbing touch-none transition-shadow ${
           isLocked
             ? 'ring-4 ring-orange-500/30'
             : 'hover:shadow-[0_0_30px_rgba(255,87,34,0.15)]'
@@ -256,6 +292,38 @@ export function CompassDial({
           />
           <line x1="150" y1="65" x2="150" y2="235" stroke="#262830" strokeWidth="1" />
           <line x1="65" y1="150" x2="235" y2="150" stroke="#262830" strokeWidth="1" />
+
+          {/* Rating Tolerance Ranges Layer (Sweep Fan-Out & Active Tier Spotlight) */}
+          {isLocked && targetBearing !== null && fanProgress > 0 && (
+            <g className="transition-opacity duration-300">
+              {TOLERANCE_TIERS.map((tier) => {
+                const isCurrent = activeTier === tier.delta;
+                const currentDelta = tier.delta * fanProgress;
+                if (currentDelta <= 0.2) return null;
+
+                const startAngle = targetBearing - currentDelta;
+                const endAngle = targetBearing + currentDelta;
+                const d = describeArc(150, 150, tier.r, startAngle, endAngle);
+
+                return (
+                  <path
+                    key={`tier-${tier.delta}`}
+                    d={d}
+                    fill="none"
+                    stroke={tier.color}
+                    strokeWidth={isCurrent ? 7.5 : 3.5}
+                    opacity={isCurrent ? (fanProgress >= 0.9 ? 1.0 : 0.4) : 0.22}
+                    strokeLinecap="round"
+                    style={
+                      isCurrent && fanProgress >= 0.9
+                        ? { filter: `drop-shadow(0 0 6px ${tier.color})` }
+                        : undefined
+                    }
+                  />
+                );
+              })}
+            </g>
+          )}
 
           {/* Compass Ticks & Degree Labels */}
           {ticks}
@@ -337,75 +405,124 @@ export function CompassDial({
         </svg>
       </div>
 
-      {/* Tactile High-Precision Nudge & Snap Controls */}
-      <div className="w-full max-w-xs mt-3 flex flex-col gap-2">
-        {/* Fine Adjustment Bar */}
-        <div className="grid grid-cols-4 gap-1.5">
-          <button
-            onClick={() => nudge(-10)}
-            disabled={disabled || isLocked}
-            className="py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-slate-300 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
-            title="Rotate -10°"
-          >
-            -10°
-          </button>
-          <button
-            onClick={() => nudge(-1)}
-            disabled={disabled || isLocked}
-            className="py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-orange-400 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
-            title="Rotate -1°"
-          >
-            -1°
-          </button>
-          <button
-            onClick={() => nudge(1)}
-            disabled={disabled || isLocked}
-            className="py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-orange-400 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
-            title="Rotate +1°"
-          >
-            +1°
-          </button>
-          <button
-            onClick={() => nudge(10)}
-            disabled={disabled || isLocked}
-            className="py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-slate-300 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
-            title="Rotate +10°"
-          >
-            +10°
-          </button>
+      {/* Lower Area Housing Dynamic Digital HUD, Snaps, and Absolutely Positioned Overlay Card */}
+      <div className="relative w-full mt-3.5 min-h-[60px] flex flex-col items-center">
+        {/* The HUD & Controls Layer (dims when locked with overlay card active) */}
+        <div
+          className={`w-full flex flex-col items-center gap-2 transition-opacity duration-300 ${
+            isLocked && overlaySlot ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
+        >
+          {/* Dynamic Digital HUD Heading Readout (Moved below dial, above snap controls) */}
+          <div className="flex items-center justify-center gap-2.5">
+            <div className="px-4 py-1.5 rounded-xl bg-[#121316] border border-slate-800 shadow-inner flex items-center gap-2">
+              <Compass className="w-4 h-4 text-orange-400 animate-spin-slow" />
+              <span className="text-2xl font-black font-mono tracking-wider text-white">
+                {formatDegrees(currentBearing)}
+              </span>
+              <span className="text-xs font-bold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 font-mono">
+                {getCompassHeading(currentBearing)}
+              </span>
+            </div>
+
+            {isLocked && delta !== null && (
+              <div
+                className={`px-3 py-1.5 rounded-xl border font-mono text-sm font-bold flex items-center gap-1.5 ${
+                  delta <= 1.5
+                    ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
+                    : delta <= 12
+                    ? 'bg-orange-500/20 border-orange-500/50 text-orange-300'
+                    : delta <= 25
+                    ? 'bg-slate-800 border-slate-700 text-slate-200'
+                    : delta <= 45
+                    ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
+                    : 'bg-rose-500/20 border-rose-500/50 text-rose-300'
+                }`}
+              >
+                <Target className="w-4 h-4" />
+                <span>Δ {delta}°</span>
+              </div>
+            )}
+          </div>
+
+          {/* Tactile High-Precision Nudge & Snap Controls */}
+          <div className="w-full flex flex-col gap-2">
+            {/* Fine Adjustment Bar */}
+            <div className="grid grid-cols-4 gap-1.5">
+              <button
+                onClick={() => nudge(-10)}
+                disabled={disabled || isLocked}
+                className="py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-slate-300 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
+                title="Rotate -10°"
+              >
+                -10°
+              </button>
+              <button
+                onClick={() => nudge(-1)}
+                disabled={disabled || isLocked}
+                className="py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-orange-400 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
+                title="Rotate -1°"
+              >
+                -1°
+              </button>
+              <button
+                onClick={() => nudge(1)}
+                disabled={disabled || isLocked}
+                className="py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-orange-400 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
+                title="Rotate +1°"
+              >
+                +1°
+              </button>
+              <button
+                onClick={() => nudge(10)}
+                disabled={disabled || isLocked}
+                className="py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-slate-300 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
+                title="Rotate +10°"
+              >
+                +10°
+              </button>
+            </div>
+
+            {/* Cardinal Quick Snaps */}
+            <div className="grid grid-cols-4 gap-1.5">
+              <button
+                onClick={() => snapTo(0)}
+                disabled={disabled || isLocked}
+                className="py-1 rounded-md bg-slate-950 border border-orange-500/40 text-[11px] font-bold text-orange-400 hover:bg-orange-500/10 active:scale-95 disabled:opacity-40 transition-all"
+              >
+                0° N
+              </button>
+              <button
+                onClick={() => snapTo(90)}
+                disabled={disabled || isLocked}
+                className="py-1 rounded-md bg-slate-950 border border-slate-800 text-[11px] font-bold text-slate-300 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
+              >
+                90° E
+              </button>
+              <button
+                onClick={() => snapTo(180)}
+                disabled={disabled || isLocked}
+                className="py-1 rounded-md bg-slate-950 border border-slate-800 text-[11px] font-bold text-slate-300 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
+              >
+                180° S
+              </button>
+              <button
+                onClick={() => snapTo(270)}
+                disabled={disabled || isLocked}
+                className="py-1 rounded-md bg-slate-950 border border-slate-800 text-[11px] font-bold text-slate-300 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
+              >
+                270° W
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Cardinal Quick Snaps */}
-        <div className="grid grid-cols-4 gap-1.5">
-          <button
-            onClick={() => snapTo(0)}
-            disabled={disabled || isLocked}
-            className="py-1 rounded-md bg-slate-950 border border-orange-500/40 text-[11px] font-bold text-orange-400 hover:bg-orange-500/10 active:scale-95 disabled:opacity-40 transition-all"
-          >
-            0° N
-          </button>
-          <button
-            onClick={() => snapTo(90)}
-            disabled={disabled || isLocked}
-            className="py-1 rounded-md bg-slate-950 border border-slate-800 text-[11px] font-bold text-slate-300 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
-          >
-            90° E
-          </button>
-          <button
-            onClick={() => snapTo(180)}
-            disabled={disabled || isLocked}
-            className="py-1 rounded-md bg-slate-950 border border-slate-800 text-[11px] font-bold text-slate-300 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
-          >
-            180° S
-          </button>
-          <button
-            onClick={() => snapTo(270)}
-            disabled={disabled || isLocked}
-            className="py-1 rounded-md bg-slate-950 border border-slate-800 text-[11px] font-bold text-slate-300 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
-          >
-            270° W
-          </button>
-        </div>
+        {/* Treatment B Inline Card (Absolutely positioned covering HUD and Snap Controls) */}
+        {isLocked && overlaySlot && (
+          <div className="absolute inset-0 z-20">
+            {overlaySlot}
+          </div>
+        )}
       </div>
     </div>
   );

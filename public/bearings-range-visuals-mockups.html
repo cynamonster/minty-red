@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEARINGS° — Rating Range Visualization Mockups</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .font-inter { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-[#0a0b0e] text-slate-100 antialiased p-3 sm:p-6 font-inter select-none min-h-screen">
+
+  <div class="max-w-4xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 pb-4">
+      <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold tracking-wider uppercase bg-orange-500/15 text-orange-400 border border-orange-500/30">
+        Accuracy Range Visual System
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1">
+        BEARINGS<span class="text-[#ff5722] font-mono">°</span> <span class="text-slate-400 text-lg font-normal">— Painting Accuracy Ranges</span>
+      </h1>
+      <p class="text-xs text-slate-400 mt-0.5">
+        When the true heading is revealed, visualize tolerance zones (±1.5° True Meridian, ±5° Pinpoint, ±12° High Precision, ±25° Tolerance, ±45° Deviation) directly on the dial.
+      </p>
+    </header>
+
+    <!-- Option Selector Tabs -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 bg-slate-900/90 border border-slate-800 rounded-xl">
+      <button id="tab-1" onclick="selectOption(1)" class="p-2.5 rounded-lg text-left transition-all bg-[#ff5722] text-white shadow-md">
+        <div class="text-[9px] font-mono uppercase font-bold opacity-80">Option 01 (Rec.)</div>
+        <div class="text-xs font-black truncate">Concentric Arc Bands</div>
+      </button>
+
+      <button id="tab-2" onclick="selectOption(2)" class="p-2.5 rounded-lg text-left transition-all text-slate-400 hover:text-white hover:bg-slate-800/60">
+        <div class="text-[9px] font-mono uppercase font-bold opacity-80">Option 02</div>
+        <div class="text-xs font-black truncate">Radial Sector Wedges</div>
+      </button>
+
+      <button id="tab-3" onclick="selectOption(3)" class="p-2.5 rounded-lg text-left transition-all text-slate-400 hover:text-white hover:bg-slate-800/60">
+        <div class="text-[9px] font-mono uppercase font-bold opacity-80">Option 03</div>
+        <div class="text-xs font-black truncate">Outer Bezel Gauge Track</div>
+      </button>
+
+      <button id="tab-4" onclick="selectOption(4)" class="p-2.5 rounded-lg text-left transition-all text-slate-400 hover:text-white hover:bg-slate-800/60">
+        <div class="text-[9px] font-mono uppercase font-bold opacity-80">Option 04</div>
+        <div class="text-xs font-black truncate">Caliper Reticle Gates</div>
+      </button>
+    </div>
+
+    <!-- Active Detail Box -->
+    <div class="p-4 rounded-xl bg-[#121316] border border-orange-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+      <div>
+        <div class="text-white font-black text-sm flex items-center gap-2">
+          <span id="opt-title">Option 01: Concentric Arc Bands on Tick Track</span>
+          <span id="opt-badge" class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-orange-500/20 text-orange-400 border border-orange-500/30 font-bold">SWISS INSTRUMENT</span>
+        </div>
+        <p id="opt-desc" class="text-slate-300 mt-1 max-w-xl leading-relaxed">
+          Nested colored arc bands along the degree tick track centered on the true target heading. Minimalist, elegant, and preserves full legibility of all compass degree ticks.
+        </p>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <div class="flex flex-col items-end">
+          <span class="text-[10px] font-mono text-slate-400 uppercase">Test Guess Slider</span>
+          <input id="slider-error" type="range" min="0" max="60" value="8" step="0.5" oninput="updateSimulation(this.value)" class="w-32 accent-[#ff5722] mt-1 cursor-pointer">
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Dial Mockup Stage -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      
+      <!-- Interactive Dial Container -->
+      <div class="p-5 rounded-2xl bg-[#121316] border border-slate-800 flex flex-col items-center justify-center space-y-3 relative shadow-2xl">
+        <div class="w-full flex items-center justify-between text-xs font-mono">
+          <span class="text-slate-400">TARGET: <strong class="text-white">090° E</strong></span>
+          <span id="active-rating-pill" class="px-2.5 py-0.5 rounded font-bold font-mono text-xs bg-orange-500/20 text-orange-400 border border-orange-500/40">
+            HIGH PRECISION (Δ 8.0°)
+          </span>
+        </div>
+
+        <!-- SVG Dial -->
+        <div class="relative w-64 h-64 sm:w-72 sm:h-72 rounded-full select-none my-1">
+          <svg id="dial-canvas" viewBox="0 0 300 300" class="w-full h-full drop-shadow-2xl overflow-visible">
+            <!-- Housing -->
+            <circle cx="150" cy="150" r="146" fill="#0d0e11" stroke="#262830" stroke-width="3" />
+            <circle cx="150" cy="150" r="138" fill="#14151a" stroke="#1e2026" stroke-width="1.5" />
+            <circle cx="150" cy="150" r="85" fill="none" stroke="#262830" stroke-dasharray="3,3" stroke-width="1" />
+            <line x1="150" y1="65" x2="150" y2="235" stroke="#262830" stroke-width="1" />
+            <line x1="65" y1="150" x2="235" y2="150" stroke="#262830" stroke-width="1" />
+
+            <!-- Painted Rating Ranges Dynamic Layer (Rendered below ticks for options 1 & 2, or above) -->
+            <g id="ranges-layer"></g>
+
+            <!-- Compass Ticks & Degree Labels -->
+            <g id="ticks-layer"></g>
+
+            <!-- Revealed Target Vector (at 90° East) -->
+            <g id="target-vector-group">
+              <line x1="150" y1="150" x2="280" y2="150" stroke="#f8fafc" stroke-width="3" stroke-linecap="round" />
+              <circle cx="282" cy="150" r="6" fill="#ff5722" stroke="#0d0e11" stroke-width="2" />
+            </g>
+
+            <!-- Player Needle (Rotatable via Slider) -->
+            <g id="player-needle-group">
+              <line id="needle-tail" x1="150" y1="150" x2="110" y2="150" stroke="#64748b" stroke-width="3" stroke-linecap="round" />
+              <line id="needle-head" x1="150" y1="150" x2="270" y2="150" stroke="#ff5722" stroke-width="3.5" stroke-linecap="round" />
+              <polygon id="needle-arrow" points="282,150 265,142 265,158" fill="#ff5722" />
+            </g>
+
+            <!-- Center Hub -->
+            <circle cx="150" cy="150" r="15" fill="#181a1f" stroke="#ff5722" stroke-width="2" />
+            <circle cx="150" cy="150" r="5" fill="#ff5722" />
+            <circle cx="150" cy="150" r="2.5" fill="#ffffff" />
+          </svg>
+        </div>
+
+        <!-- Legend Bar -->
+        <div class="grid grid-cols-5 gap-1 text-[9px] font-mono w-full text-center pt-1 border-t border-slate-800">
+          <div class="p-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+            ±1.5° MERIDIAN
+          </div>
+          <div class="p-1 rounded bg-emerald-400/10 text-emerald-300 border border-emerald-400/20">
+            ±5° PINPOINT
+          </div>
+          <div class="p-1 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">
+            ±12° PRECISION
+          </div>
+          <div class="p-1 rounded bg-slate-800 text-slate-300 border border-slate-700">
+            ±25° TOLERANCE
+          </div>
+          <div class="p-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            ±45° DEVIATION
+          </div>
+        </div>
+      </div>
+
+      <!-- Analysis & Details Card -->
+      <div class="p-5 rounded-2xl bg-[#121316] border border-slate-800 flex flex-col justify-between space-y-4">
+        <div class="space-y-3">
+          <div class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold">
+            Interactive Range Diagnostics
+          </div>
+
+          <div class="p-4 rounded-xl bg-[#17181d] border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-slate-400">SIMULATED GUESS:</span>
+              <span id="readout-guess" class="text-white font-bold">098.0°</span>
+            </div>
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-slate-400">ANGULAR DELTA:</span>
+              <span id="readout-delta" class="text-orange-400 font-bold">Δ 8.0°</span>
+            </div>
+            <div class="flex items-center justify-between text-xs font-mono border-t border-slate-800 pt-2">
+              <span class="text-slate-400">FALLS INSIDE ZONE:</span>
+              <span id="readout-zone" class="text-orange-400 font-bold">HIGH PRECISION (±12°)</span>
+            </div>
+          </div>
+
+          <!-- Why it works in Swiss design -->
+          <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs space-y-1.5 leading-relaxed">
+            <div class="font-bold text-slate-200 uppercase font-mono text-[10px]">Swiss Instrument Assessment</div>
+            <p id="analysis-text" class="text-slate-400">
+              Concentric arc bands keep the center of the dial uncluttered while offering an immediate, intuitive read of how close the guess was to the True Meridian.
+            </p>
+          </div>
+        </div>
+
+        <button onclick="confirmOptionAlert()" class="w-full py-3 rounded-xl bg-[#ff5722] text-white font-black text-xs uppercase tracking-wider hover:bg-orange-600 transition-all shadow-md shadow-orange-950/40">
+          Confirm Visual Range Style
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    let activeOption = 1;
+    let targetDeg = 90; // Target heading at 90° (East)
+    let errorDeg = 8.0;
+
+    const optData = {
+      1: {
+        title: "Option 01: Concentric Arc Bands on Tick Track",
+        badge: "SWISS INSTRUMENT",
+        desc: "Nested colored arc bands along the degree tick track centered on the true target heading. Minimalist, elegant, and preserves full legibility of all compass degree ticks.",
+        analysis: "Concentric arc bands keep the center of the dial uncluttered while offering an immediate, intuitive read of how close the guess was to the True Meridian. Follows classic chronometer tachymeter conventions."
+      },
+      2: {
+        title: "Option 02: Translucent Radial Sector Wedges",
+        badge: "RADAR SECTOR",
+        desc: "Layered semi-transparent colored pie wedges projecting from radius 60 out to radius 132. Shows the full cone of precision radiating from the dial axis.",
+        analysis: "Wedges provide strong visual feedback of angular tolerances, giving a wide radar-like target capture area across the compass face."
+      },
+      3: {
+        title: "Option 03: Outer Bezel Gauge Track",
+        badge: "PERIMETER GAUGE",
+        desc: "A dedicated multi-color tolerance gauge track painted on the outer instrument housing rim with micro-caliper threshold marks.",
+        analysis: "Leaves the inner dial 100% clean and pristine, moving the scoring evaluation entirely onto the outer instrument bezel like a diving or slide-rule bezel."
+      },
+      4: {
+        title: "Option 04: Caliper Reticle Gates",
+        badge: "HUD CALIPERS",
+        desc: "Minimalist technical caliper brackets projecting perpendicular to the target vector at each tolerance threshold (±1.5°, ±5°, ±12°, ±25°, ±45°).",
+        analysis: "Ultra-technical avionics feel. The gate bracket where your needle lands illuminates with an animated bracket lock indicator."
+      }
+    };
+
+    // Helper: SVG Arc Path Generator
+    function polarToCartesian(cx, cy, r, angleInDegrees) {
+      const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
+      return {
+        x: cx + r * Math.cos(angleInRadians),
+        y: cy + r * Math.sin(angleInRadians)
+      };
+    }
+
+    function describeArc(cx, cy, r, startAngle, endAngle) {
+      const start = polarToCartesian(cx, cy, r, endAngle);
+      const end = polarToCartesian(cx, cy, r, startAngle);
+      const arcSweep = endAngle - startAngle <= 180 ? "0" : "1";
+      return [
+        "M", start.x, start.y,
+        "A", r, r, 0, arcSweep, 0, end.x, end.y
+      ].join(" ");
+    }
+
+    function describeWedge(cx, cy, rInner, rOuter, startAngle, endAngle) {
+      const p1 = polarToCartesian(cx, cy, rOuter, startAngle);
+      const p2 = polarToCartesian(cx, cy, rOuter, endAngle);
+      const p3 = polarToCartesian(cx, cy, rInner, endAngle);
+      const p4 = polarToCartesian(cx, cy, rInner, startAngle);
+      const arcSweep = endAngle - startAngle <= 180 ? "0" : "1";
+
+      return [
+        "M", p1.x, p1.y,
+        "A", rOuter, rOuter, 0, arcSweep, 1, p2.x, p2.y,
+        "L", p3.x, p3.y,
+        "A", rInner, rInner, 0, arcSweep, 0, p4.x, p4.y,
+        "Z"
+      ].join(" ");
+    }
+
+    // Render Dial Ticks
+    function renderTicks() {
+      const g = document.getElementById('ticks-layer');
+      g.innerHTML = '';
+      for (let d = 0; d < 360; d += 5) {
+        const isMajor = d % 30 === 0;
+        const isMedium = d % 10 === 0 && !isMajor;
+        const rad = (d * Math.PI) / 180;
+        const rOuter = 132;
+        const rInner = isMajor ? 116 : isMedium ? 122 : 126;
+        const x1 = 150 + rOuter * Math.sin(rad);
+        const y1 = 150 - rOuter * Math.cos(rad);
+        const x2 = 150 + rInner * Math.sin(rad);
+        const y2 = 150 - rInner * Math.cos(rad);
+
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', x1);
+        line.setAttribute('y1', y1);
+        line.setAttribute('x2', x2);
+        line.setAttribute('y2', y2);
+        line.setAttribute('stroke', isMajor ? '#f8fafc' : isMedium ? '#94a3b8' : '#3b3f4a');
+        line.setAttribute('stroke-width', isMajor ? 2.5 : isMedium ? 1.5 : 1);
+        g.appendChild(line);
+
+        if (isMajor) {
+          const rText = 104;
+          const tx = 150 + rText * Math.sin(rad);
+          const ty = 150 - rText * Math.cos(rad);
+          let label = `${d}°`;
+          let fillColor = '#94a3b8';
+          let fontW = '500';
+          let fontSize = '9px';
+
+          if (d === 0) {
+            label = 'N';
+            fillColor = '#ff5722';
+            fontW = '900';
+            fontSize = '13px';
+          } else if (d === 90) {
+            label = 'E';
+            fillColor = '#f8fafc';
+            fontW = '700';
+            fontSize = '12px';
+          } else if (d === 180) {
+            label = 'S';
+            fillColor = '#f8fafc';
+            fontW = '700';
+            fontSize = '12px';
+          } else if (d === 270) {
+            label = 'W';
+            fillColor = '#f8fafc';
+            fontW = '700';
+            fontSize = '12px';
+          }
+
+          const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          txt.setAttribute('x', tx);
+          txt.setAttribute('y', ty);
+          txt.setAttribute('text-anchor', 'middle');
+          txt.setAttribute('dominant-baseline', 'central');
+          txt.setAttribute('fill', fillColor);
+          txt.setAttribute('font-family', "'JetBrains Mono', monospace");
+          txt.setAttribute('font-weight', fontW);
+          txt.setAttribute('font-size', fontSize);
+          txt.textContent = label;
+          g.appendChild(txt);
+        }
+      }
+    }
+
+    // Render the painted ranges based on active option
+    function renderRanges() {
+      const g = document.getElementById('ranges-layer');
+      g.innerHTML = '';
+      const t = targetDeg;
+
+      if (activeOption === 1) {
+        // Option 1: Concentric Arc Bands on the Tick Track
+        const zones = [
+          { delta: 45, color: '#f59e0b', width: 4, r: 132, opacity: 0.35 },
+          { delta: 25, color: '#94a3b8', width: 5, r: 132, opacity: 0.55 },
+          { delta: 12, color: '#ff5722', width: 6, r: 132, opacity: 0.85 },
+          { delta: 5,  color: '#34d399', width: 7, r: 132, opacity: 0.95 },
+          { delta: 1.5, color: '#10b981', width: 9, r: 132, opacity: 1.0 }
+        ];
+
+        zones.forEach(z => {
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', describeArc(150, 150, z.r, t - z.delta, t + z.delta));
+          path.setAttribute('fill', 'none');
+          path.setAttribute('stroke', z.color);
+          path.setAttribute('stroke-width', z.width);
+          path.setAttribute('opacity', z.opacity);
+          path.setAttribute('stroke-linecap', 'round');
+          g.appendChild(path);
+        });
+
+      } else if (activeOption === 2) {
+        // Option 2: Translucent Radial Sector Wedges
+        const wedges = [
+          { delta: 45, fill: '#f59e0b', opacity: 0.08, rIn: 60, rOut: 132 },
+          { delta: 25, fill: '#94a3b8', opacity: 0.12, rIn: 60, rOut: 132 },
+          { delta: 12, fill: '#ff5722', opacity: 0.18, rIn: 60, rOut: 132 },
+          { delta: 5,  fill: '#34d399', opacity: 0.25, rIn: 60, rOut: 132 },
+          { delta: 1.5, fill: '#10b981', opacity: 0.40, rIn: 60, rOut: 132 }
+        ];
+
+        wedges.forEach(w => {
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', describeWedge(150, 150, w.rIn, w.rOut, t - w.delta, t + w.delta));
+          path.setAttribute('fill', w.fill);
+          path.setAttribute('opacity', w.opacity);
+          g.appendChild(path);
+        });
+
+      } else if (activeOption === 3) {
+        // Option 3: Outer Bezel Gauge Track (r=141)
+        const bezelSegments = [
+          { delta: 45, color: '#f59e0b', width: 6, opacity: 0.5 },
+          { delta: 25, color: '#94a3b8', width: 6, opacity: 0.7 },
+          { delta: 12, color: '#ff5722', width: 7, opacity: 0.9 },
+          { delta: 5,  color: '#34d399', width: 8, opacity: 0.95 },
+          { delta: 1.5, color: '#10b981', width: 9, opacity: 1.0 }
+        ];
+
+        bezelSegments.forEach(s => {
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', describeArc(150, 150, 142, t - s.delta, t + s.delta));
+          path.setAttribute('fill', 'none');
+          path.setAttribute('stroke', s.color);
+          path.setAttribute('stroke-width', s.width);
+          path.setAttribute('opacity', s.opacity);
+          g.appendChild(path);
+        });
+
+      } else if (activeOption === 4) {
+        // Option 4: Caliper Reticle Gates (Brackets on vector)
+        const gates = [
+          { delta: 1.5, r: 128, color: '#10b981', label: '±1.5°' },
+          { delta: 5,   r: 110, color: '#34d399', label: '±5°' },
+          { delta: 12,  r: 95,  color: '#ff5722', label: '±12°' },
+          { delta: 25,  r: 80,  color: '#94a3b8', label: '±25°' },
+          { delta: 45,  r: 65,  color: '#f59e0b', label: '±45°' }
+        ];
+
+        gates.forEach(gObj => {
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', describeArc(150, 150, gObj.r, t - gObj.delta, t + gObj.delta));
+          path.setAttribute('fill', 'none');
+          path.setAttribute('stroke', gObj.color);
+          path.setAttribute('stroke-width', 2);
+          path.setAttribute('stroke-dasharray', '2,2');
+          g.appendChild(path);
+        });
+      }
+    }
+
+    function selectOption(n) {
+      activeOption = n;
+      [1, 2, 3, 4].forEach(i => {
+        const btn = document.getElementById(`tab-${i}`);
+        if (i === n) {
+          btn.className = "p-2.5 rounded-lg text-left transition-all bg-[#ff5722] text-white shadow-md";
+        } else {
+          btn.className = "p-2.5 rounded-lg text-left transition-all text-slate-400 hover:text-white hover:bg-slate-800/60";
+        }
+      });
+
+      const d = optData[n];
+      document.getElementById('opt-title').textContent = d.title;
+      document.getElementById('opt-badge').textContent = d.badge;
+      document.getElementById('opt-desc').textContent = d.desc;
+      document.getElementById('analysis-text').textContent = d.analysis;
+
+      renderRanges();
+      updateSimulation(errorDeg);
+    }
+
+    function updateSimulation(val) {
+      errorDeg = parseFloat(val);
+      const guessDeg = targetDeg + errorDeg;
+      const rad = (guessDeg * Math.PI) / 180;
+
+      // Update Needle Rotation
+      const tailX = 150 - 40 * Math.sin(rad);
+      const tailY = 150 + 40 * Math.cos(rad);
+      const headX = 150 + 120 * Math.sin(rad);
+      const headY = 150 - 120 * Math.cos(rad);
+
+      const needleTail = document.getElementById('needle-tail');
+      needleTail.setAttribute('x1', 150);
+      needleTail.setAttribute('y1', 150);
+      needleTail.setAttribute('x2', tailX);
+      needleTail.setAttribute('y2', tailY);
+
+      const needleHead = document.getElementById('needle-head');
+      needleHead.setAttribute('x1', 150);
+      needleHead.setAttribute('y1', 150);
+      needleHead.setAttribute('x2', headX);
+      needleHead.setAttribute('y2', headY);
+
+      const tipX = 150 + 132 * Math.sin(rad);
+      const tipY = 150 - 132 * Math.cos(rad);
+      const leftX = 150 + 115 * Math.sin(rad) - 8 * Math.cos(rad);
+      const leftY = 150 - 115 * Math.cos(rad) - 8 * Math.sin(rad);
+      const rightX = 150 + 115 * Math.sin(rad) + 8 * Math.cos(rad);
+      const rightY = 150 - 115 * Math.cos(rad) + 8 * Math.sin(rad);
+      document.getElementById('needle-arrow').setAttribute('points', `${tipX},${tipY} ${leftX},${leftY} ${rightX},${rightY}`);
+
+      // Evaluate Zone
+      let zoneName = "OUT OF BOUNDS (> 45°)";
+      let zoneBadgeClass = "bg-rose-500/20 text-rose-400 border-rose-500/40";
+      let deltaColor = "text-rose-400";
+
+      if (errorDeg <= 1.5) {
+        zoneName = "TRUE MERIDIAN (±1.5°)";
+        zoneBadgeClass = "bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
+        deltaColor = "text-emerald-400";
+      } else if (errorDeg <= 5.0) {
+        zoneName = "PINPOINT (±5.0°)";
+        zoneBadgeClass = "bg-emerald-400/20 text-emerald-300 border-emerald-400/40";
+        deltaColor = "text-emerald-300";
+      } else if (errorDeg <= 12.0) {
+        zoneName = "HIGH PRECISION (±12.0°)";
+        zoneBadgeClass = "bg-orange-500/20 text-orange-400 border-orange-500/40";
+        deltaColor = "text-orange-400";
+      } else if (errorDeg <= 25.0) {
+        zoneName = "WITHIN TOLERANCE (±25.0°)";
+        zoneBadgeClass = "bg-slate-800 text-slate-300 border-slate-700";
+        deltaColor = "text-slate-300";
+      } else if (errorDeg <= 45.0) {
+        zoneName = "DEVIATION (±45.0°)";
+        zoneBadgeClass = "bg-amber-500/20 text-amber-400 border-amber-500/40";
+        deltaColor = "text-amber-400";
+      }
+
+      document.getElementById('active-rating-pill').className = `px-2.5 py-0.5 rounded font-bold font-mono text-xs border ${zoneBadgeClass}`;
+      document.getElementById('active-rating-pill').textContent = `${zoneName} • Δ ${errorDeg.toFixed(1)}°`;
+      document.getElementById('readout-guess').textContent = guessDeg.toFixed(1) + '°';
+      document.getElementById('readout-delta').textContent = `Δ ${errorDeg.toFixed(1)}°`;
+      document.getElementById('readout-delta').className = `font-bold ${deltaColor}`;
+      document.getElementById('readout-zone').textContent = zoneName;
+      document.getElementById('readout-zone').className = `font-bold ${deltaColor}`;
+    }
+
+    function confirmOptionAlert() {
+      alert("Option " + activeOption + " selected! You can tell Antigravity in chat.");
+    }
+
+    renderTicks();
+    renderRanges();
+    updateSimulation(8.0);
+  </script>
+</body>
+</html>

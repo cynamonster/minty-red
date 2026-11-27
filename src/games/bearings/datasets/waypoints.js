@@ -41,6 +41,135 @@ export function calculateGreatCircleDistance(lat1, lon1, lat2, lon2) {
   return Math.round(R * c);
 }
 
+// Constant course (Rhumb Line / straight line on Mercator projection)
+export function calculateRhumbBearing(lat1, lon1, lat2, lon2) {
+  const φ1 = toRad(lat1);
+  const φ2 = toRad(lat2);
+  let Δλ = toRad(lon2 - lon1);
+  const Δψ = Math.log(Math.tan(Math.PI / 4 + φ2 / 2) / Math.tan(Math.PI / 4 + φ1 / 2));
+  if (Math.abs(Δλ) > Math.PI) {
+    Δλ = Δλ > 0 ? -(2 * Math.PI - Δλ) : (2 * Math.PI + Δλ);
+  }
+  return Math.round((toDeg(Math.atan2(Δλ, Δψ)) + 360) % 360);
+}
+
+// Distance along constant rhumb line course in kilometers
+export function calculateRhumbDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const φ1 = toRad(lat1);
+  const φ2 = toRad(lat2);
+  const Δφ = toRad(lat2 - lat1);
+  let Δλ = toRad(lon2 - lon1);
+  if (Math.abs(Δλ) > Math.PI) {
+    Δλ = Δλ > 0 ? -(2 * Math.PI - Δλ) : (2 * Math.PI + Δλ);
+  }
+  const Δψ = Math.log(Math.tan(Math.PI / 4 + φ2 / 2) / Math.tan(Math.PI / 4 + φ1 / 2));
+  const q = Math.abs(Δψ) > 1e-10 ? Δφ / Δψ : Math.cos(φ1);
+  return Math.round(R * Math.sqrt(Δφ * Δφ + q * q * Δλ * Δλ));
+}
+
+// SLERP interpolation for Great Circle points
+export function interpolateGreatCirclePoints(lat1, lon1, lat2, lon2, n = 50) {
+  const toVec = (lat, lon) => {
+    const φ = toRad(lat), λ = toRad(lon);
+    return [Math.cos(φ) * Math.cos(λ), Math.cos(φ) * Math.sin(λ), Math.sin(φ)];
+  };
+  const toLatLon = (v) => {
+    const lat = toDeg(Math.asin(Math.max(-1, Math.min(1, v[2]))));
+    const lon = toDeg(Math.atan2(v[1], v[0]));
+    return { lat, lon };
+  };
+
+  const p1 = toVec(lat1, lon1);
+  const p2 = toVec(lat2, lon2);
+  let dot = p1[0]*p2[0] + p1[1]*p2[1] + p1[2]*p2[2];
+  dot = Math.max(-1, Math.min(1, dot));
+  const omega = Math.acos(dot);
+  const points = [];
+
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    if (omega === 0) {
+      points.push([lon1, lat1]);
+      continue;
+    }
+    const s1 = Math.sin((1 - t) * omega) / Math.sin(omega);
+    const s2 = Math.sin(t * omega) / Math.sin(omega);
+    const vx = s1 * p1[0] + s2 * p2[0];
+    const vy = s1 * p1[1] + s2 * p2[1];
+    const vz = s1 * p1[2] + s2 * p2[2];
+    const pt = toLatLon([vx, vy, vz]);
+    points.push([pt.lon, pt.lat]);
+  }
+  return points;
+}
+
+// Interpolation for Rhumb Line points
+export function interpolateRhumbLinePoints(lat1, lon1, lat2, lon2, n = 50) {
+  const points = [];
+  let dLon = lon2 - lon1;
+  if (Math.abs(dLon) > 180) {
+    dLon = dLon > 0 ? dLon - 360 : dLon + 360;
+  }
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    const lat = lat1 + t * (lat2 - lat1);
+    const lon = lon1 + t * dLon;
+    points.push([lon, lat]);
+  }
+  return points;
+}
+
+// Dynamic Algorithmic "WHY" Explanation Generator with Curated Overrides
+export function generateWhyExplanation(wp, gcBearing, rhumbBearing, gcDist, rhumbDist) {
+  let delta = Math.abs(gcBearing - rhumbBearing);
+  if (delta > 180) delta = 360 - delta;
+
+  // Curated overrides for iconic high-discrepancy routes
+  if (wp.id === 'syd-scl') {
+    return {
+      title: "WHY THIS ISN'T EAST (090°)",
+      text: "Flat maps make Santiago look due east. But Earth is round! The shortest path arches southeast toward Antarctica before curving back north to Chile.",
+    };
+  }
+  if (wp.id === 'ber-tok') {
+    return {
+      title: "WHY THIS HEADS NORTHEAST (035°)",
+      text: "Flat maps suggest heading due east across Asia. But near polar latitudes, longitude lines converge! Shortest path climbs northeast over Scandinavia and Siberia.",
+    };
+  }
+  if (wp.id === 'sfo-tok') {
+    return {
+      title: "WHY THIS HEADS NORTHWEST (301°)",
+      text: "On a flat map Tokyo looks due west. But the spherical great-circle arc climbs northwest over the Aleutian Islands and Alaska, saving 1,800 km!",
+    };
+  }
+  if (wp.id === 'nyc-lon') {
+    return {
+      title: "WHY THIS HEADS NORTHEAST (051°)",
+      text: "Flat maps suggest flying east (085°). But transatlantic flights arc sharply northeast up over Nova Scotia and Newfoundland before crossing to Ireland.",
+    };
+  }
+
+  // Dynamic Algorithmic fallback
+  const isTrap = delta >= 15;
+  const extraKm = Math.max(0, rhumbDist - gcDist);
+  const midLat = (wp.origin.lat + wp.dest.lat) / 2;
+  const poleDir = midLat >= 0 ? 'north toward the Arctic' : 'south toward Antarctica';
+
+  if (!isTrap) {
+    return {
+      title: "MINIMAL POLAR DISTORTION",
+      text: `Spherical geodesic and flat Mercator paths closely align on this route (Δ${delta}°). Initial heading is ${formatDegrees(gcBearing)} (${getCompassHeading(gcBearing)}).`,
+    };
+  }
+
+  return {
+    title: `MERCATOR TRAP: Δ${delta}° POLAR OFFSET`,
+    text: `Flat maps suggest heading ${formatDegrees(rhumbBearing)} (${getCompassHeading(rhumbBearing)}), but Earth's sphere causes the shortest geodesic path to arc ${poleDir} (${formatDegrees(gcBearing)} ${getCompassHeading(gcBearing)}), saving ${extraKm.toLocaleString()} km!`,
+  };
+}
+
 // Shortest angular difference between two bearings in degrees [0, 180]
 export function calculateBearingDelta(guess, target) {
   const g = (guess % 360 + 360) % 360;
@@ -71,24 +200,34 @@ export function formatDegrees(deg) {
 // Calculate score based on angular error
 export function calculateBearingScore(deltaDeg) {
   if (deltaDeg <= 1.5) {
-    return { score: 1000, grade: 'TRUE MERIDIAN', badge: 'TRUE MERIDIAN', color: 'text-emerald-400', isBullseye: true };
+    return { score: 1000, grade: 'TRUE MERIDIAN', badge: 'TRUE MERIDIAN', color: 'text-emerald-400', isBullseye: true, timeBonus: 5 };
   }
   if (deltaDeg <= 5) {
-    return { score: 950, grade: 'PINPOINT', badge: 'PINPOINT', color: 'text-emerald-300', isBullseye: false };
+    return { score: 950, grade: 'PINPOINT', badge: 'PINPOINT', color: 'text-emerald-300', isBullseye: false, timeBonus: 4 };
   }
   if (deltaDeg <= 12) {
-    return { score: 850, grade: 'HIGH PRECISION', badge: 'HIGH PRECISION', color: 'text-orange-400', isBullseye: false };
+    return { score: 850, grade: 'HIGH PRECISION', badge: 'HIGH PRECISION', color: 'text-orange-400', isBullseye: false, timeBonus: 3 };
   }
   if (deltaDeg <= 25) {
-    return { score: 650, grade: 'WITHIN TOLERANCE', badge: 'WITHIN TOLERANCE', color: 'text-slate-300', isBullseye: false };
+    return { score: 650, grade: 'WITHIN TOLERANCE', badge: 'WITHIN TOLERANCE', color: 'text-slate-300', isBullseye: false, timeBonus: 2 };
   }
   if (deltaDeg <= 45) {
-    return { score: 400, grade: 'DEVIATION', badge: 'DEVIATION', color: 'text-amber-400', isBullseye: false };
+    return { score: 400, grade: 'DEVIATION', badge: 'DEVIATION', color: 'text-amber-400', isBullseye: false, timeBonus: 1 };
   }
   if (deltaDeg <= 90) {
-    return { score: 180, grade: 'OUT OF BOUNDS', badge: 'OUT OF BOUNDS', color: 'text-rose-400', isBullseye: false };
+    return { score: 180, grade: 'OUT OF BOUNDS', badge: 'OUT OF BOUNDS', color: 'text-rose-400', isBullseye: false, timeBonus: 0 };
   }
-  return { score: 50, grade: 'OUT OF BOUNDS', badge: 'OUT OF BOUNDS', color: 'text-rose-400', isBullseye: false };
+  return { score: 50, grade: 'OUT OF BOUNDS', badge: 'OUT OF BOUNDS', color: 'text-rose-400', isBullseye: false, timeBonus: 0 };
+}
+
+// Time Challenge bonus seconds based on accuracy (5/4/3/2/1s)
+export function getAccuracyTimeBonus(deltaDeg) {
+  if (deltaDeg <= 1.5) return 5;
+  if (deltaDeg <= 5) return 4;
+  if (deltaDeg <= 12) return 3;
+  if (deltaDeg <= 25) return 2;
+  if (deltaDeg <= 45) return 1;
+  return 0;
 }
 
 export const WAYPOINTS = [
@@ -309,12 +448,39 @@ export const ENRICHED_WAYPOINTS = WAYPOINTS.map((wp) => {
     wp.dest.lat,
     wp.dest.lon
   );
+  const rhumbBearing = calculateRhumbBearing(
+    wp.origin.lat,
+    wp.origin.lon,
+    wp.dest.lat,
+    wp.dest.lon
+  );
+  const rhumbDistance = calculateRhumbDistance(
+    wp.origin.lat,
+    wp.origin.lon,
+    wp.dest.lat,
+    wp.dest.lon
+  );
   const heading = getCompassHeading(bearing);
+  const rhumbHeading = getCompassHeading(rhumbBearing);
+  
+  let trapDelta = Math.abs(bearing - rhumbBearing);
+  if (trapDelta > 180) trapDelta = 360 - trapDelta;
+  trapDelta = Math.round(trapDelta * 10) / 10;
+
+  const why = generateWhyExplanation(wp, bearing, rhumbBearing, distance, rhumbDistance);
+
   return {
     ...wp,
     trueBearing: bearing,
     distanceKm: distance,
     heading,
+    rhumbBearing,
+    rhumbDistanceKm: rhumbDistance,
+    rhumbHeading,
+    mercatorTrapDelta: trapDelta,
+    isMercatorTrap: trapDelta >= 15,
+    whyTitle: why.title,
+    whyText: why.text,
   };
 });
 

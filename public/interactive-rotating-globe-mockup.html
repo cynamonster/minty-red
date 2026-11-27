@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEARINGS° — Interactive Rotating SVG & Canvas Globes</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <!-- D3.js and TopoJSON for high performance orthographic 2D projections without WebGL -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+  <style>
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .font-inter { font-family: 'Inter', sans-serif; }
+    
+    /* Smooth cursor behavior */
+    .globe-drag-area {
+      cursor: grab;
+      touch-action: none;
+    }
+    .globe-drag-area:active {
+      cursor: grabbing;
+    }
+
+    /* Glow effects */
+    .svg-glow-arc {
+      filter: drop-shadow(0 0 6px #ff5722) drop-shadow(0 0 12px rgba(255, 87, 34, 0.6));
+    }
+    .svg-pulse-pin {
+      animation: pin-pulse 2s infinite ease-in-out;
+    }
+    @keyframes pin-pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.35); opacity: 0.75; }
+    }
+  </style>
+</head>
+<body class="bg-[#07080a] text-slate-100 antialiased font-inter select-none min-h-screen p-3 sm:p-6">
+
+  <div class="max-w-6xl mx-auto space-y-6">
+
+    <!-- Top Header & Controls -->
+    <header class="border-b border-slate-800 pb-5">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold uppercase bg-orange-500/15 text-orange-400 border border-orange-500/30">
+            <span>Zero-WebGL Interactive Lab</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>60-120 FPS Native 2D</span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1">
+            BEARINGS<span class="text-[#ff5722] font-mono">°</span> <span class="text-slate-400 text-lg font-normal">— Interactive Rotating SVG & Canvas Globes</span>
+          </h1>
+          <p class="text-xs text-slate-400 mt-1 max-w-2xl leading-relaxed">
+            Drag with your finger or mouse to freely rotate the globe around any axis. Notice how the Great-Circle geodesic arc and city pins smoothly track, scale, and occlude behind the horizon—with <strong>0 KB WebGL overhead</strong>.
+          </p>
+        </div>
+
+        <!-- Master Route Selector -->
+        <div class="flex flex-col items-end">
+          <span class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-1">Select Route to Inspect:</span>
+          <select id="route-select" onchange="changeRoute(this.value)" class="bg-[#121316] border border-orange-500/40 text-orange-300 font-mono text-xs rounded-xl px-3 py-2 outline-none cursor-pointer hover:border-orange-400 focus:ring-1 focus:ring-orange-500">
+            <option value="syd-scl">Sydney (SYD) → Santiago (SCL) [Polar Dip Δ48°]</option>
+            <option value="ber-tok">Berlin (BER) → Tokyo (HND) [Arctic Arc Δ55°]</option>
+            <option value="sfo-tok">San Francisco (SFO) → Tokyo (NRT) [Aleutian Arc Δ31°]</option>
+            <option value="nyc-lon">New York (JFK) → London (LHR) [North Atlantic Δ34°]</option>
+            <option value="cai-cpt">Cairo (CAI) → Cape Town (CPT) [Trans-African Spine]</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Route HUD Banner -->
+      <div id="route-hud" class="mt-4 p-3.5 rounded-2xl bg-[#101216] border border-slate-800 flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
+        <!-- Dynamically rendered -->
+      </div>
+    </header>
+
+    <!-- Global Controls Toolbar -->
+    <div class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-[#0f1014] border border-slate-800 text-xs font-mono">
+      <div class="flex items-center gap-3">
+        <!-- Auto-spin toggle -->
+        <button id="btn-spin" onclick="toggleAutoSpin()" class="px-3 py-1.5 rounded-xl bg-orange-500/20 text-orange-400 border border-orange-500/40 font-bold hover:bg-orange-500 hover:text-white transition-all flex items-center gap-1.5 shadow">
+          <span id="spin-icon">⏸️</span>
+          <span id="spin-label">Auto-Rotation: ON</span>
+        </button>
+
+        <!-- Reset to Route Center -->
+        <button onclick="resetOrientation()" class="px-3 py-1.5 rounded-xl bg-[#16171d] border border-slate-700/80 text-slate-300 hover:text-white transition-all flex items-center gap-1.5">
+          <span>🎯</span>
+          <span>Center on Route</span>
+        </button>
+      </div>
+
+      <!-- Interactive Toggles -->
+      <div class="flex items-center gap-4 text-[11px] text-slate-400">
+        <label class="flex items-center gap-1.5 cursor-pointer">
+          <input type="checkbox" id="chk-graticules" checked onchange="toggleLayers()" class="accent-[#ff5722]">
+          <span>Graticule Grid</span>
+        </label>
+        <label class="flex items-center gap-1.5 cursor-pointer">
+          <input type="checkbox" id="chk-land" checked onchange="toggleLayers()" class="accent-[#ff5722]">
+          <span>Continents</span>
+        </label>
+        <label class="flex items-center gap-1.5 cursor-pointer">
+          <input type="checkbox" id="chk-rhumb" checked onchange="toggleLayers()" class="accent-[#38bdf8]">
+          <span class="text-sky-400">Rhumb Line (Contrast)</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Side-by-Side Live Implementation Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <!-- ===================================================================
+           GLOBE 1: PURE SVG INTERACTIVE GLOBE
+      ==================================================================== -->
+      <div class="p-5 rounded-3xl bg-[#0e0f13] border border-slate-800 flex flex-col items-center justify-between space-y-4 shadow-2xl relative overflow-hidden">
+        
+        <!-- Header Pill -->
+        <div class="w-full flex items-center justify-between text-xs font-mono">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse"></span>
+            <span class="font-bold text-white uppercase">Globe 1: Pure Scalable Vector (SVG)</span>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-orange-500/15 text-orange-400 border border-orange-500/30">
+            DOM VECTORS • CSS GLOW
+          </span>
+        </div>
+
+        <!-- SVG Container Area (Interactive Drag Target) -->
+        <div id="svg-globe-wrapper" class="relative w-full max-w-[340px] aspect-square rounded-full flex items-center justify-center globe-drag-area select-none my-2 shadow-inner">
+          <svg id="svg-globe" viewBox="0 0 340 340" class="w-full h-full overflow-visible"></svg>
+          <div class="absolute bottom-2 text-[9px] font-mono text-slate-500 pointer-events-none bg-black/40 px-2 py-0.5 rounded-full">
+            👆 Drag / swipe to rotate
+          </div>
+        </div>
+
+        <!-- Tech Details & Metrics -->
+        <div class="w-full p-3 rounded-2xl bg-[#121318] border border-slate-800/80 text-[11px] font-mono space-y-2">
+          <div class="flex items-center justify-between text-slate-400">
+            <span>Rendering Target:</span>
+            <span class="text-white font-bold">&lt;svg&gt; DOM Elements</span>
+          </div>
+          <div class="flex items-center justify-between text-slate-400">
+            <span>Styling Support:</span>
+            <span class="text-emerald-400 font-bold">Tailwind / CSS drop-shadow filters</span>
+          </div>
+          <div class="flex items-center justify-between text-slate-400">
+            <span>Best For:</span>
+            <span class="text-orange-400 font-bold">Responsive HUD integration & UI animations</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================================================================
+           GLOBE 2: PURE HTML5 2D CANVAS INTERACTIVE GLOBE
+      ==================================================================== -->
+      <div class="p-5 rounded-3xl bg-[#0e0f13] border border-slate-800 flex flex-col items-center justify-between space-y-4 shadow-2xl relative overflow-hidden">
+        
+        <!-- Header Pill -->
+        <div class="w-full flex items-center justify-between text-xs font-mono">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse"></span>
+            <span class="font-bold text-white uppercase">Globe 2: Pure 2D Canvas (Context2D)</span>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-500/15 text-sky-400 border border-sky-500/30">
+            ULTRA-LIGHT • 120 FPS
+          </span>
+        </div>
+
+        <!-- Canvas Container Area (Interactive Drag Target) -->
+        <div id="canvas-globe-wrapper" class="relative w-full max-w-[340px] aspect-square rounded-full flex items-center justify-center globe-drag-area select-none my-2 shadow-inner">
+          <canvas id="canvas-globe" width="680" height="680" class="w-full h-full rounded-full"></canvas>
+          <div class="absolute bottom-2 text-[9px] font-mono text-slate-500 pointer-events-none bg-black/40 px-2 py-0.5 rounded-full">
+            👆 Drag / swipe to rotate
+          </div>
+        </div>
+
+        <!-- Tech Details & Metrics -->
+        <div class="w-full p-3 rounded-2xl bg-[#121318] border border-slate-800/80 text-[11px] font-mono space-y-2">
+          <div class="flex items-center justify-between text-slate-400">
+            <span>Rendering Target:</span>
+            <span class="text-white font-bold">&lt;canvas&gt; 2D Context</span>
+          </div>
+          <div class="flex items-center justify-between text-slate-400">
+            <span>Memory Footprint:</span>
+            <span class="text-emerald-400 font-bold">Zero DOM overhead (&lt; 2 MB RAM)</span>
+          </div>
+          <div class="flex items-center justify-between text-slate-400">
+            <span>Best For:</span>
+            <span class="text-sky-400 font-bold">Ultra smooth 120Hz drag momentum on mobile</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Mathematical Epiphany Callout -->
+    <div class="p-5 rounded-2xl bg-[#121419] border border-orange-500/30 space-y-2 text-xs">
+      <h3 class="text-sm font-black text-white font-mono uppercase tracking-wider flex items-center gap-2">
+        <span>💡 What Makes This Rotate in 2D Without 3D Engines?</span>
+      </h3>
+      <p class="text-slate-300 leading-relaxed">
+        Both globes use pure <strong>Orthographic Projection Mathematics</strong>:
+        Every point $(\lambda, \phi)$ in 3D spherical space projects directly onto a 2D circle using the yaw $(\lambda_0)$ and pitch $(\phi_0)$ camera angles. 
+        When you drag, we simply increment $[\lambda_0, \phi_0]$. Any point where the angular distance from the camera center exceeds $90^\circ$ is geometrically hidden behind the sphere's horizon. 
+        This eliminates the need for 3D matrix transforms, WebGL shaders, or heavy engine bundles while keeping rendering instant and crisp!
+      </p>
+    </div>
+
+  </div>
+
+  <!-- INTERACTIVE ROTATION & MATHEMATICAL PROJECTION ENGINE -->
+  <script>
+    // Route Datasets
+    const ROUTES = {
+      'syd-scl': {
+        name: 'Sydney → Santiago',
+        origin: { name: 'Sydney', code: 'SYD', country: 'Australia', flag: '🇦🇺', lat: -33.8688, lon: 151.2093 },
+        dest: { name: 'Santiago', code: 'SCL', country: 'Chile', flag: '🇨🇱', lat: -33.4489, lon: -70.6693 },
+        trivia: 'Dips south toward Antarctica on a 138° heading, far from flat map 090° East.'
+      },
+      'ber-tok': {
+        name: 'Berlin → Tokyo',
+        origin: { name: 'Berlin', code: 'BER', country: 'Germany', flag: '🇩🇪', lat: 52.5200, lon: 13.4050 },
+        dest: { name: 'Tokyo', code: 'HND', country: 'Japan', flag: '🇯🇵', lat: 35.6762, lon: 139.6503 },
+        trivia: 'Launches northeast at 035° across Scandinavia and Siberia rather than due east.'
+      },
+      'sfo-tok': {
+        name: 'San Francisco → Tokyo',
+        origin: { name: 'San Francisco', code: 'SFO', country: 'United States', flag: '🇺🇸', lat: 37.7749, lon: -122.4194 },
+        dest: { name: 'Tokyo', code: 'NRT', country: 'Japan', flag: '🇯🇵', lat: 35.6762, lon: 139.6503 },
+        trivia: 'Heads northwest at 301° toward the Aleutian Islands, not straight west.'
+      },
+      'nyc-lon': {
+        name: 'New York → London',
+        origin: { name: 'New York', code: 'JFK', country: 'United States', flag: '🇺🇸', lat: 40.7128, lon: -74.0060 },
+        dest: { name: 'London', code: 'LHR', country: 'United Kingdom', flag: '🇬🇧', lat: 51.5074, lon: -0.1278 },
+        trivia: 'Curves northeast at 051° up past Newfoundland and Nova Scotia.'
+      },
+      'cai-cpt': {
+        name: 'Cairo → Cape Town',
+        origin: { name: 'Cairo', code: 'CAI', country: 'Egypt', flag: '🇪🇬', lat: 30.0444, lon: 31.2357 },
+        dest: { name: 'Cape Town', code: 'CPT', country: 'South Africa', flag: '🇿🇦', lat: -33.9249, lon: 18.4241 },
+        trivia: 'Trans-African meridian route straight down south-southwest at 198°.'
+      }
+    };
+
+    let activeRouteKey = 'syd-scl';
+    let autoSpin = true;
+    let worldLandData = null; // TopoJSON land data
+
+    // Shared Camera Rotation State: [yaw, pitch, roll]
+    let rotation = [-150, 20, 0];
+    let isDragging = false;
+    let lastPointerPos = { x: 0, y: 0 };
+    let dragVelocity = { vx: 0.3, vy: 0 };
+
+    // Math Helpers
+    const toRad = d => (d * Math.PI) / 180;
+    const toDeg = r => (r * 180) / Math.PI;
+
+    function calculateInitialBearing(lat1, lon1, lat2, lon2) {
+      const φ1 = toRad(lat1), φ2 = toRad(lat2);
+      const Δλ = toRad(lon2 - lon1);
+      const y = Math.sin(Δλ) * Math.cos(φ2);
+      const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+      return Math.round((toDeg(Math.atan2(y, x)) + 360) % 360);
+    }
+
+    function calculateGreatCircleDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const φ1 = toRad(lat1), φ2 = toRad(lat2);
+      const Δφ = toRad(lat2 - lat1), Δλ = toRad(lon2 - lon1);
+      const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
+      return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+    }
+
+    // Great Circle Geodesic Interpolation (SLERP)
+    function interpolateGreatCircle(lat1, lon1, lat2, lon2, n = 80) {
+      const p1 = latLonToVector(lat1, lon1);
+      const p2 = latLonToVector(lat2, lon2);
+      let dot = p1[0]*p2[0] + p1[1]*p2[1] + p1[2]*p2[2];
+      dot = Math.max(-1, Math.min(1, dot));
+      const omega = Math.acos(dot);
+      const points = [];
+
+      for (let i = 0; i <= n; i++) {
+        const t = i / n;
+        if (omega === 0) {
+          points.push([lon1, lat1]);
+          continue;
+        }
+        const s1 = Math.sin((1 - t) * omega) / Math.sin(omega);
+        const s2 = Math.sin(t * omega) / Math.sin(omega);
+        const vx = s1 * p1[0] + s2 * p2[0];
+        const vy = s1 * p1[1] + s2 * p2[1];
+        const vz = s1 * p1[2] + s2 * p2[2];
+        const pt = vectorToLatLon([vx, vy, vz]);
+        points.push([pt.lon, pt.lat]);
+      }
+      return points;
+    }
+
+    // Rhumb Line Interpolation (Constant Heading)
+    function interpolateRhumbLine(lat1, lon1, lat2, lon2, n = 80) {
+      const points = [];
+      let dLon = lon2 - lon1;
+      if (Math.abs(dLon) > 180) {
+        dLon = dLon > 0 ? dLon - 360 : dLon + 360;
+      }
+      for (let i = 0; i <= n; i++) {
+        const t = i / n;
+        const lat = lat1 + t * (lat2 - lat1);
+        const lon = lon1 + t * dLon;
+        points.push([lon, lat]);
+      }
+      return points;
+    }
+
+    function latLonToVector(lat, lon) {
+      const φ = toRad(lat), λ = toRad(lon);
+      return [Math.cos(φ) * Math.cos(λ), Math.cos(φ) * Math.sin(λ), Math.sin(φ)];
+    }
+
+    function vectorToLatLon(v) {
+      const lat = toDeg(Math.asin(v[2]));
+      const lon = toDeg(Math.atan2(v[1], v[0]));
+      return { lat, lon };
+    }
+
+    // Check if a [lon, lat] is on the visible front hemisphere given camera rotation [yaw, pitch]
+    function isPointVisible(lon, lat, yaw, pitch) {
+      // Angular distance from camera center
+      const d = d3.geoDistance([lon, lat], [-yaw, -pitch]);
+      return d < Math.PI / 2; // Less than 90°
+    }
+
+    // Load TopoJSON Land Data from CDN
+    async function loadWorldData() {
+      try {
+        const response = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json');
+        if (response.ok) {
+          const world = await response.json();
+          worldLandData = topojson.feature(world, world.objects.land);
+        }
+      } catch (err) {
+        console.warn('Network offline: using procedural graticule globe');
+      }
+      updateRouteHUD();
+      resetOrientation();
+      renderAll();
+    }
+
+    // Change Active Route
+    function changeRoute(routeKey) {
+      activeRouteKey = routeKey;
+      updateRouteHUD();
+      resetOrientation();
+      renderAll();
+    }
+
+    function resetOrientation() {
+      const r = ROUTES[activeRouteKey];
+      const midLon = (r.origin.lon + r.dest.lon) / 2;
+      const midLat = (r.origin.lat + r.dest.lat) / 2;
+      rotation = [-midLon, -midLat, 0];
+      dragVelocity = { vx: 0.25, vy: 0 };
+      renderAll();
+    }
+
+    function toggleAutoSpin() {
+      autoSpin = !autoSpin;
+      document.getElementById('spin-icon').innerText = autoSpin ? '⏸️' : '▶️';
+      document.getElementById('spin-label').innerText = autoSpin ? 'Auto-Rotation: ON' : 'Auto-Rotation: OFF';
+    }
+
+    function toggleLayers() {
+      renderAll();
+    }
+
+    function updateRouteHUD() {
+      const r = ROUTES[activeRouteKey];
+      const bearing = calculateInitialBearing(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon);
+      const distance = calculateGreatCircleDistance(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon);
+
+      document.getElementById('route-hud').innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="text-white font-black text-sm flex items-center gap-2">
+            <span>${r.origin.flag} ${r.origin.name} (${r.origin.code})</span>
+            <span class="text-orange-400">→</span>
+            <span>${r.dest.name} (${r.dest.code}) ${r.dest.flag}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-5 text-xs">
+          <div>
+            <span class="text-slate-400 text-[10px] uppercase">Initial Geodesic Bearing:</span>
+            <div class="text-orange-400 font-bold">${String(bearing).padStart(3, '0')}° TRUE</div>
+          </div>
+          <div>
+            <span class="text-slate-400 text-[10px] uppercase">Great-Circle Distance:</span>
+            <div class="text-white font-bold">${distance.toLocaleString()} km</div>
+          </div>
+          <div class="hidden sm:block text-slate-400 italic text-[11px]">
+            💡 ${r.trivia}
+          </div>
+        </div>
+      `;
+    }
+
+    // ===================================================================
+    // RENDERER 1: PURE SVG GLOBE
+    // ===================================================================
+    function renderSVGGlobe() {
+      const svg = d3.select('#svg-globe');
+      svg.selectAll('*').remove();
+
+      const width = 340, height = 340, radius = 150;
+      const r = ROUTES[activeRouteKey];
+      const showGraticules = document.getElementById('chk-graticules').checked;
+      const showLand = document.getElementById('chk-land').checked;
+      const showRhumb = document.getElementById('chk-rhumb').checked;
+
+      // Define Orthographic Projection
+      const projection = d3.geoOrthographic()
+        .scale(radius)
+        .translate([width / 2, height / 2])
+        .rotate(rotation)
+        .clipAngle(90);
+
+      const path = d3.geoPath().projection(projection);
+
+      // SVG Definitions (Gradients & Filters)
+      const defs = svg.append('defs');
+
+      // Ocean radial shading
+      const oceanGrad = defs.append('radialGradient')
+        .attr('id', 'ocean-grad')
+        .attr('cx', '45%').attr('cy', '45%').attr('r', '60%');
+      oceanGrad.append('stop').attr('offset', '60%').attr('stop-color', '#0e121a');
+      oceanGrad.append('stop').attr('offset', '100%').attr('stop-color', '#06080c');
+
+      // Atmospheric Rim Glow
+      const glowGrad = defs.append('radialGradient')
+        .attr('id', 'rim-glow')
+        .attr('cx', '50%').attr('cy', '50%').attr('r', '50%');
+      glowGrad.append('stop').attr('offset', '88%').attr('stop-color', '#ff5722').attr('stop-opacity', 0);
+      glowGrad.append('stop').attr('offset', '100%').attr('stop-color', '#ff5722').attr('stop-opacity', 0.25);
+
+      // Globe Base Circle
+      svg.append('circle')
+        .attr('cx', width / 2).attr('cy', height / 2).attr('r', radius)
+        .attr('fill', 'url(#ocean-grad)')
+        .attr('stroke', '#262833')
+        .attr('stroke-width', 2);
+
+      // Graticules
+      if (showGraticules) {
+        const graticule = d3.geoGraticule().step([30, 30]);
+        svg.append('path')
+          .datum(graticule)
+          .attr('d', path)
+          .attr('fill', 'none')
+          .attr('stroke', '#1e2430')
+          .attr('stroke-width', 0.75);
+
+        // Equator highlight
+        svg.append('path')
+          .datum({ type: 'LineString', coordinates: [[-180, 0], [180, 0]] })
+          .attr('d', path)
+          .attr('fill', 'none')
+          .attr('stroke', '#334155')
+          .attr('stroke-width', 1);
+      }
+
+      // World Landmasses
+      if (showLand && worldLandData) {
+        svg.append('path')
+          .datum(worldLandData)
+          .attr('d', path)
+          .attr('fill', '#171b26')
+          .attr('stroke', '#2b3245')
+          .attr('stroke-width', 0.6);
+      }
+
+      // Rhumb Line (Flat map comparison)
+      if (showRhumb) {
+        const rhumbCoords = interpolateRhumbLine(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon, 80);
+        svg.append('path')
+          .datum({ type: 'LineString', coordinates: rhumbCoords })
+          .attr('d', path)
+          .attr('fill', 'none')
+          .attr('stroke', '#38bdf8')
+          .attr('stroke-width', 2)
+          .attr('stroke-dasharray', '4,4')
+          .attr('stroke-opacity', 0.85);
+      }
+
+      // Great Circle Geodesic Arc
+      const gcCoords = interpolateGreatCircle(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon, 80);
+      svg.append('path')
+        .datum({ type: 'LineString', coordinates: gcCoords })
+        .attr('d', path)
+        .attr('fill', 'none')
+        .attr('stroke', '#ff5722')
+        .attr('stroke-width', 3.5)
+        .attr('class', 'svg-glow-arc');
+
+      // Origin and Destination City Pins (Front Hemisphere check)
+      const origVisible = isPointVisible(r.origin.lon, r.origin.lat, rotation[0], rotation[1]);
+      const destVisible = isPointVisible(r.dest.lon, r.dest.lat, rotation[0], rotation[1]);
+
+      const origPos = projection([r.origin.lon, r.origin.lat]);
+      const destPos = projection([r.dest.lon, r.dest.lat]);
+
+      // Departure Pin (Orange)
+      if (origVisible && origPos) {
+        const g = svg.append('g').attr('transform', `translate(${origPos[0]}, ${origPos[1]})`);
+        g.append('circle').attr('r', 8).attr('fill', '#ff5722').attr('opacity', 0.35).attr('class', 'svg-pulse-pin');
+        g.append('circle').attr('r', 5).attr('fill', '#ff5722').attr('stroke', '#ffffff').attr('stroke-width', 2);
+        g.append('text')
+          .attr('y', -10)
+          .attr('text-anchor', 'middle')
+          .attr('class', 'fill-white font-mono text-[10px] font-bold')
+          .text(`${r.origin.code}`);
+      }
+
+      // Destination Pin (Sky Blue)
+      if (destVisible && destPos) {
+        const g = svg.append('g').attr('transform', `translate(${destPos[0]}, ${destPos[1]})`);
+        g.append('circle').attr('r', 8).attr('fill', '#38bdf8').attr('opacity', 0.35).attr('class', 'svg-pulse-pin');
+        g.append('circle').attr('r', 5).attr('fill', '#38bdf8').attr('stroke', '#ffffff').attr('stroke-width', 2);
+        g.append('text')
+          .attr('y', 16)
+          .attr('text-anchor', 'middle')
+          .attr('class', 'fill-white font-mono text-[10px] font-bold')
+          .text(`${r.dest.code}`);
+      }
+
+      // Atmosphere Corona Outer Layer
+      svg.append('circle')
+        .attr('cx', width / 2).attr('cy', height / 2).attr('r', radius)
+        .attr('fill', 'url(#rim-glow)')
+        .attr('pointer-events', 'none');
+    }
+
+    // ===================================================================
+    // RENDERER 2: PURE 2D CANVAS GLOBE
+    // ===================================================================
+    function renderCanvasGlobe() {
+      const canvas = document.getElementById('canvas-globe');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width, height = canvas.height;
+      const radius = 300;
+      const r = ROUTES[activeRouteKey];
+      const showGraticules = document.getElementById('chk-graticules').checked;
+      const showLand = document.getElementById('chk-land').checked;
+      const showRhumb = document.getElementById('chk-rhumb').checked;
+
+      ctx.clearRect(0, 0, width, height);
+
+      // Define Orthographic Projection for Canvas
+      const projection = d3.geoOrthographic()
+        .scale(radius)
+        .translate([width / 2, height / 2])
+        .rotate(rotation)
+        .clipAngle(90);
+
+      const path = d3.geoPath().projection(projection).context(ctx);
+
+      // Globe Background Sphere
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(width / 2, height / 2, radius, 0, 2 * Math.PI);
+      ctx.clip();
+
+      const oceanGrad = ctx.createRadialGradient(
+        width / 2 - 40, height / 2 - 40, 20,
+        width / 2, height / 2, radius
+      );
+      oceanGrad.addColorStop(0, '#10141f');
+      oceanGrad.addColorStop(0.7, '#0b0d14');
+      oceanGrad.addColorStop(1, '#05070a');
+      ctx.fillStyle = oceanGrad;
+      ctx.fillRect(0, 0, width, height);
+
+      // Graticules
+      if (showGraticules) {
+        const graticule = d3.geoGraticule().step([30, 30]);
+        ctx.beginPath();
+        path(graticule);
+        ctx.strokeStyle = '#1e2430';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Equator
+        ctx.beginPath();
+        path({ type: 'LineString', coordinates: [[-180, 0], [180, 0]] });
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      // Continents
+      if (showLand && worldLandData) {
+        ctx.beginPath();
+        path(worldLandData);
+        ctx.fillStyle = '#171b26';
+        ctx.fill();
+        ctx.strokeStyle = '#2b3245';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+      }
+
+      // Rhumb Line
+      if (showRhumb) {
+        const rhumbCoords = interpolateRhumbLine(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon, 80);
+        ctx.save();
+        ctx.beginPath();
+        path({ type: 'LineString', coordinates: rhumbCoords });
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 4;
+        ctx.setLineDash([8, 8]);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Great Circle Arc with Glow
+      const gcCoords = interpolateGreatCircle(r.origin.lat, r.origin.lon, r.dest.lat, r.dest.lon, 80);
+      
+      // Arc Shadow / Glow
+      ctx.save();
+      ctx.shadowColor = '#ff5722';
+      ctx.shadowBlur = 16;
+      ctx.beginPath();
+      path({ type: 'LineString', coordinates: gcCoords });
+      ctx.strokeStyle = '#ff5722';
+      ctx.lineWidth = 6;
+      ctx.stroke();
+      ctx.restore();
+
+      // Core crisp arc line
+      ctx.beginPath();
+      path({ type: 'LineString', coordinates: gcCoords });
+      ctx.strokeStyle = '#ffa07a';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // City Markers
+      const origVisible = isPointVisible(r.origin.lon, r.origin.lat, rotation[0], rotation[1]);
+      const destVisible = isPointVisible(r.dest.lon, r.dest.lat, rotation[0], rotation[1]);
+      const origPos = projection([r.origin.lon, r.origin.lat]);
+      const destPos = projection([r.dest.lon, r.dest.lat]);
+
+      ctx.font = 'bold 20px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+
+      // Origin Pin
+      if (origVisible && origPos) {
+        ctx.save();
+        ctx.shadowColor = '#ff5722';
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = '#ff5722';
+        ctx.beginPath();
+        ctx.arc(origPos[0], origPos[1], 10, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(r.origin.code, origPos[0], origPos[1] - 18);
+        ctx.restore();
+      }
+
+      // Dest Pin
+      if (destVisible && destPos) {
+        ctx.save();
+        ctx.shadowColor = '#38bdf8';
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.arc(destPos[0], destPos[1], 10, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(r.dest.code, destPos[0], destPos[1] + 32);
+        ctx.restore();
+      }
+
+      ctx.restore(); // remove clip
+
+      // Globe Rim Outer Outline & Atmosphere Halo
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(width / 2, height / 2, radius, 0, 2 * Math.PI);
+      ctx.strokeStyle = '#ff5722';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function renderAll() {
+      renderSVGGlobe();
+      renderCanvasGlobe();
+    }
+
+    // ===================================================================
+    // TOUCH & MOUSE INTERACTION (MOMENTUM ROTATION ENGINE)
+    // ===================================================================
+    function attachDragControls(elementId) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+
+      el.addEventListener('pointerdown', (e) => {
+        isDragging = true;
+        autoSpin = false;
+        document.getElementById('spin-icon').innerText = '▶️';
+        document.getElementById('spin-label').innerText = 'Auto-Rotation: OFF';
+        lastPointerPos = { x: e.clientX, y: e.clientY };
+        dragVelocity = { vx: 0, vy: 0 };
+        el.setPointerCapture(e.pointerId);
+      });
+
+      el.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - lastPointerPos.x;
+        const dy = e.clientY - lastPointerPos.y;
+
+        // Sensible sensitivity ratio
+        const k = 0.45;
+        rotation[0] += dx * k;
+        rotation[1] = Math.max(-85, Math.min(85, rotation[1] - dy * k));
+
+        dragVelocity = { vx: dx * 0.4, vy: -dy * 0.4 };
+        lastPointerPos = { x: e.clientX, y: e.clientY };
+
+        renderAll();
+      });
+
+      const endDrag = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        try { el.releasePointerCapture(e.pointerId); } catch(err) {}
+      };
+
+      el.addEventListener('pointerup', endDrag);
+      el.addEventListener('pointercancel', endDrag);
+    }
+
+    // 60-120 FPS Animation Loop (Inertia & Auto-Rotation)
+    function startAnimationLoop() {
+      function tick() {
+        if (autoSpin && !isDragging) {
+          rotation[0] += 0.35; // Steady smooth auto-spin
+          renderAll();
+        } else if (!isDragging && (Math.abs(dragVelocity.vx) > 0.02 || Math.abs(dragVelocity.vy) > 0.02)) {
+          // Inertia damping
+          rotation[0] += dragVelocity.vx;
+          rotation[1] = Math.max(-85, Math.min(85, rotation[1] + dragVelocity.vy));
+          dragVelocity.vx *= 0.94;
+          dragVelocity.vy *= 0.94;
+          renderAll();
+        }
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      attachDragControls('svg-globe-wrapper');
+      attachDragControls('canvas-globe-wrapper');
+      loadWorldData();
+      startAnimationLoop();
+    });
+  </script>
+</body>
+</html>

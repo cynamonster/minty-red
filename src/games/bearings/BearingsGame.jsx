@@ -6,10 +6,12 @@ import {
   getRandomWaypoint,
   calculateBearingDelta,
   calculateBearingScore,
+  getAccuracyTimeBonus,
   formatDegrees,
   getCompassHeading,
 } from './datasets/waypoints';
 import { CompassDial } from './components/CompassDial';
+import { GeodesicRevealCard } from './components/GeodesicRevealCard';
 import { GameContainer } from '../../shared/components/GameContainer';
 import { AdBanner } from '../../shared/components/AdBanner';
 import { ReviewDrawer } from '../../shared/components/ReviewDrawer';
@@ -52,7 +54,6 @@ import {
 } from 'lucide-react';
 
 const BLITZ_START_TIME = 45; // 45s blitz timer
-const BLITZ_ACCURACY_BONUS = 8; // +8s bonus time for locks within 15°
 
 export function BearingsGame({ onHome, onSelectGame, challengeCode }) {
   const [mode, setMode] = useState('menu'); // 'menu' | 'daily' | 'blitz' | 'challenge'
@@ -99,14 +100,19 @@ export function BearingsGame({ onHome, onSelectGame, challengeCode }) {
     }
   }, [challengeCode]);
 
-  // Handle Blitz countdown
+  const finishGameRef = useRef(null);
   useEffect(() => {
-    if (mode === 'blitz' && !gameOver) {
+    finishGameRef.current = finishGame;
+  });
+
+  // Handle Blitz countdown (pauses after reveal when isLocked is true, unpauses on next round)
+  useEffect(() => {
+    if (mode === 'blitz' && !gameOver && !isLocked) {
       blitzTimerRef.current = setInterval(() => {
         setBlitzTimeRemaining((prev) => {
           if (prev <= 1) {
             clearInterval(blitzTimerRef.current);
-            finishGame();
+            finishGameRef.current?.();
             return 0;
           }
           return prev - 1;
@@ -114,7 +120,7 @@ export function BearingsGame({ onHome, onSelectGame, challengeCode }) {
       }, 1000);
     }
     return () => clearInterval(blitzTimerRef.current);
-  }, [mode, gameOver]);
+  }, [mode, gameOver, isLocked]);
 
   // Start Daily Mode
   const startDaily = (customDateKey = null) => {
@@ -238,11 +244,14 @@ export function BearingsGame({ onHome, onSelectGame, challengeCode }) {
     setRoundResult(record);
     setHistory((prev) => [...prev, record]);
 
-    // Time Challenge mode time bonus
-    if (mode === 'blitz' && delta <= 15) {
-      setBlitzTimeRemaining((prev) => prev + BLITZ_ACCURACY_BONUS);
-      setBlitzBonusNotice(`+${BLITZ_ACCURACY_BONUS}s TIME BONUS!`);
-      setTimeout(() => setBlitzBonusNotice(null), 1800);
+    // Time Challenge mode time bonus based on accuracy (5/4/3/2/1s)
+    if (mode === 'blitz') {
+      const bonusSeconds = scoreResult.timeBonus ?? getAccuracyTimeBonus(delta);
+      if (bonusSeconds > 0) {
+        setBlitzTimeRemaining((prev) => prev + bonusSeconds);
+        setBlitzBonusNotice(`+${bonusSeconds}s TIME BONUS!`);
+        setTimeout(() => setBlitzBonusNotice(null), 1800);
+      }
     }
   }, [isLocked, currentWaypoint, gameOver, currentGuess, combo, mode]);
 
@@ -293,7 +302,15 @@ export function BearingsGame({ onHome, onSelectGame, challengeCode }) {
   const finishGame = () => {
     clearInterval(blitzTimerRef.current);
     setGameOver(true);
-    soundEngine.playCelebration();
+    try {
+      if (typeof soundEngine.playCelebration === 'function') {
+        soundEngine.playCelebration();
+      } else if (typeof soundEngine.playBullseye === 'function') {
+        soundEngine.playBullseye();
+      }
+    } catch (e) {
+      console.warn('Audio celebration error:', e);
+    }
     setShowConfetti(true);
 
     const correctCount = history.filter((h) => h.delta <= 15).length;
@@ -470,7 +487,7 @@ Play now: ${window.location.origin}/bearings`;
                     </div>
                     <div className="text-[11px] text-slate-400">
                       Continuous rapid-fire calibration.<br />
-                      (+8s bonus time for precision)
+                      (+1s to +5s bonus time for accuracy)
                     </div>
                   </div>
                 </div>
@@ -508,8 +525,13 @@ Play now: ${window.location.origin}/bearings`;
               <div className="flex items-center gap-2 text-xs font-mono font-bold text-slate-400">
                 {mode === 'blitz' ? (
                   <span className="flex items-center gap-1.5 text-orange-400 font-bold px-2 py-0.5 rounded bg-orange-500/10 border border-orange-500/30">
-                    <Clock className="w-3.5 h-3.5 animate-pulse" />
-                    {blitzTimeRemaining}s
+                    <Clock className={`w-3.5 h-3.5 ${isLocked ? 'text-slate-400' : 'animate-pulse'}`} />
+                    <span>{blitzTimeRemaining}s</span>
+                    {isLocked && (
+                      <span className="text-[9px] text-slate-400 font-mono uppercase tracking-wider ml-0.5">
+                        PAUSED
+                      </span>
+                    )}
                   </span>
                 ) : (
                   <span>
@@ -587,11 +609,12 @@ Play now: ${window.location.origin}/bearings`;
               onChangeBearing={setCurrentGuess}
               targetBearing={isLocked ? currentWaypoint?.trueBearing : null}
               isLocked={isLocked}
+              overlaySlot={isLocked ? <GeodesicRevealCard waypoint={currentWaypoint} /> : null}
             />
           </div>
 
           {/* Action Area: Lock or Next */}
-          <div className="w-full mt-3">
+          <div className="w-full">
             {!isLocked ? (
               <button
                 onClick={handleLockBearing}
@@ -607,7 +630,7 @@ Play now: ${window.location.origin}/bearings`;
               <div className="flex flex-col gap-2 animate-fadeIn">
                 {/* Result Pill */}
                 {roundResult && (
-                  <div className="p-3 rounded-2xl bg-[#121316] border border-slate-800 flex items-center justify-between">
+                  <div className="px-3 mb-0.5 rounded-2xl border-slate-800 flex items-center justify-between">
                     <div>
                       <div className={`text-xs font-black uppercase font-mono ${roundResult.scoreResult.color}`}>
                         {roundResult.scoreResult.badge}
@@ -630,11 +653,11 @@ Play now: ${window.location.origin}/bearings`;
                 )}
 
                 {/* Geodesic Navigation Trivia */}
-                {currentWaypoint?.trivia && (
+                {/* {currentWaypoint?.trivia && (
                   <p className="text-[11px] text-slate-400 px-2 italic">
                     💡 {currentWaypoint.trivia}
                   </p>
-                )}
+                )} */}
 
                 {/* Continue Button */}
                 <button

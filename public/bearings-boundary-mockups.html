@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEARINGS° — Boundary & Label Mockups</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .font-inter { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-[#0a0b0e] text-slate-100 antialiased p-3 sm:p-6 font-inter select-none min-h-screen">
+
+  <div class="max-w-4xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 pb-4">
+      <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold tracking-wider uppercase bg-orange-500/15 text-orange-400 border border-orange-500/30">
+        Dial Face Micro-Typography
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1">
+        BEARINGS<span class="text-[#ff5722] font-mono">°</span> <span class="text-slate-400 text-lg font-normal">— Boundary Ticks & Labels</span>
+      </h1>
+      <p class="text-xs text-slate-400 mt-0.5">
+        Compare the 3 treatments for displaying threshold boundaries on the tolerance arcs: Clean Minimalist, Hairline Ticks, or Micro Degree Labels.
+      </p>
+    </header>
+
+    <!-- Tab Selector -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 p-1.5 bg-slate-900/90 border border-slate-800 rounded-xl">
+      <button id="tab-1" onclick="selectStyle(1)" class="p-3 rounded-lg text-left transition-all bg-[#ff5722] text-white shadow-md">
+        <div class="text-[9px] font-mono uppercase font-bold opacity-80">Option 01 (Recommended)</div>
+        <div class="text-sm font-black truncate">Clean Minimalist Arcs</div>
+        <div class="text-[11px] opacity-90 mt-0.5">Pure graphic arcs, zero dial clutter, HUD pill displays rating</div>
+      </button>
+
+      <button id="tab-2" onclick="selectStyle(2)" class="p-3 rounded-lg text-left transition-all text-slate-400 hover:text-white hover:bg-slate-800/60">
+        <div class="text-[9px] font-mono uppercase font-bold opacity-80">Option 02</div>
+        <div class="text-sm font-black truncate">Subtle Boundary Ticks</div>
+        <div class="text-[11px] opacity-75 mt-0.5">Hairline demarcation ticks at exact ±1.5°, ±5°, ±12°, ±25°, ±45° borders</div>
+      </button>
+
+      <button id="tab-3" onclick="selectStyle(3)" class="p-3 rounded-lg text-left transition-all text-slate-400 hover:text-white hover:bg-slate-800/60">
+        <div class="text-[9px] font-mono uppercase font-bold opacity-80">Option 03</div>
+        <div class="text-sm font-black truncate">Micro Degree Labels</div>
+        <div class="text-[11px] opacity-75 mt-0.5">Tiny monospaced degree numbers ("5°", "12°", etc.) at arc tips</div>
+      </button>
+    </div>
+
+    <!-- Active Detail Box -->
+    <div class="p-4 rounded-xl bg-[#121316] border border-orange-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+      <div>
+        <div class="text-white font-black text-sm flex items-center gap-2">
+          <span id="opt-title">Option 01: Clean Minimalist Graphic Arcs</span>
+          <span id="opt-badge" class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-orange-500/20 text-orange-400 border border-orange-500/30 font-bold">
+            ZERO CLUTTER
+          </span>
+        </div>
+        <p id="opt-desc" class="text-slate-300 mt-1 max-w-xl leading-relaxed">
+          The arcs are rendered as pure, unencumbered graphic bands. The achieved rating, score, and exact delta (±4.5°) are presented clearly in the HUD pill above the dial, preserving Bauhaus functional simplicity.
+        </p>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <div class="flex flex-col items-end">
+          <span class="text-[10px] font-mono text-slate-400 uppercase">Test Error Slider</span>
+          <input id="slider-error" type="range" min="0" max="60" value="4.5" step="0.5" oninput="updateSimulation(this.value)" class="w-32 accent-[#ff5722] mt-1 cursor-pointer">
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Dial Stage -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      
+      <!-- Interactive Dial Container -->
+      <div class="p-5 rounded-2xl bg-[#121316] border border-slate-800 flex flex-col items-center justify-center space-y-3 relative shadow-2xl">
+        <div class="w-full flex items-center justify-between text-xs font-mono">
+          <span class="text-slate-400">TARGET: <strong class="text-white">090° E</strong></span>
+          <span id="active-rating-pill" class="px-2.5 py-0.5 rounded font-bold font-mono text-xs bg-emerald-400/20 text-emerald-300 border border-emerald-400/40">
+            PINPOINT (Δ 4.5°)
+          </span>
+        </div>
+
+        <!-- SVG Dial -->
+        <div class="relative w-64 h-64 sm:w-72 sm:h-72 rounded-full select-none my-1">
+          <svg id="dial-canvas" viewBox="0 0 300 300" class="w-full h-full drop-shadow-2xl overflow-visible">
+            <!-- Housing -->
+            <circle cx="150" cy="150" r="146" fill="#0d0e11" stroke="#262830" stroke-width="3" />
+            <circle cx="150" cy="150" r="138" fill="#14151a" stroke="#1e2026" stroke-width="1.5" />
+            <circle cx="150" cy="150" r="85" fill="none" stroke="#262830" stroke-dasharray="3,3" stroke-width="1" />
+            <line x1="150" y1="65" x2="150" y2="235" stroke="#262830" stroke-width="1" />
+            <line x1="65" y1="150" x2="235" y2="150" stroke="#262830" stroke-width="1" />
+
+            <!-- Painted Rating Ranges Dynamic Layer -->
+            <g id="ranges-layer"></g>
+
+            <!-- Boundaries / Labels Layer -->
+            <g id="boundaries-layer"></g>
+
+            <!-- Compass Ticks & Degree Labels -->
+            <g id="ticks-layer"></g>
+
+            <!-- Revealed Target Vector (at 90° East) -->
+            <g id="target-vector-group">
+              <line x1="150" y1="150" x2="280" y2="150" stroke="#f8fafc" stroke-width="3.5" stroke-linecap="round" />
+              <circle cx="282" cy="150" r="6" fill="#ff5722" stroke="#0d0e11" stroke-width="2" />
+            </g>
+
+            <!-- Player Needle -->
+            <g id="player-needle-group">
+              <line id="needle-tail" x1="150" y1="150" x2="110" y2="150" stroke="#64748b" stroke-width="3" stroke-linecap="round" />
+              <line id="needle-head" x1="150" y1="150" x2="270" y2="150" stroke="#ff5722" stroke-width="3.5" stroke-linecap="round" />
+              <polygon id="needle-arrow" points="282,150 265,142 265,158" fill="#ff5722" />
+            </g>
+
+            <!-- Center Hub -->
+            <circle cx="150" cy="150" r="15" fill="#181a1f" stroke="#ff5722" stroke-width="2" />
+            <circle cx="150" cy="150" r="5" fill="#ff5722" />
+            <circle cx="150" cy="150" r="2.5" fill="#ffffff" />
+          </svg>
+        </div>
+
+        <!-- Legend Bar -->
+        <div class="grid grid-cols-5 gap-1 text-[9px] font-mono w-full text-center pt-1 border-t border-slate-800">
+          <div class="p-1 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold">
+            ±1.5° MERIDIAN
+          </div>
+          <div class="p-1 rounded bg-emerald-400/20 text-emerald-300 border border-emerald-400/40 font-bold">
+            ±5° PINPOINT
+          </div>
+          <div class="p-1 rounded bg-orange-500/20 text-orange-400 border border-orange-500/40 font-bold">
+            ±12° PRECISION
+          </div>
+          <div class="p-1 rounded bg-slate-700/60 text-slate-200 border border-slate-600 font-bold">
+            ±25° TOLERANCE
+          </div>
+          <div class="p-1 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40 font-bold">
+            ±45° DEVIATION
+          </div>
+        </div>
+      </div>
+
+      <!-- Analysis Card -->
+      <div class="p-5 rounded-2xl bg-[#121316] border border-slate-800 flex flex-col justify-between space-y-4">
+        <div class="space-y-3">
+          <div class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold">
+            Dial Legibility Assessment
+          </div>
+
+          <div class="p-4 rounded-xl bg-[#17181d] border border-slate-800 space-y-2 text-xs font-mono">
+            <div class="flex items-center justify-between">
+              <span class="text-slate-400">GUESS OFFSET:</span>
+              <span id="readout-delta" class="text-emerald-400 font-bold">Δ 4.5°</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-400">FALLS INSIDE:</span>
+              <span id="readout-zone" class="text-emerald-400 font-bold">PINPOINT (±5.0°)</span>
+            </div>
+            <div class="flex items-center justify-between border-t border-slate-800 pt-2">
+              <span class="text-slate-400">DIAL CLUTTER SCORE:</span>
+              <span id="stat-clutter" class="text-emerald-400 font-bold">MINIMAL (0 TEXT OVERLAYS)</span>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs space-y-1.5 leading-relaxed">
+            <div class="font-bold text-slate-200 uppercase font-mono text-[10px]">Ergonomic Analysis</div>
+            <p id="analysis-text" class="text-slate-400">
+              Clean minimalist arcs preserve the quiet precision of Dieter Rams design. The HUD readout pill above already delivers the exact numeric feedback, so the dial remains a pure navigation instrument.
+            </p>
+          </div>
+        </div>
+
+        <button onclick="confirmStyleAlert()" class="w-full py-3 rounded-xl bg-[#ff5722] text-white font-black text-xs uppercase tracking-wider hover:bg-orange-600 transition-all shadow-md shadow-orange-950/40">
+          Confirm Boundary Style
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    let activeStyle = 1;
+    let targetDeg = 90;
+    let errorDeg = 4.5;
+
+    const styleData = {
+      1: {
+        title: "Option 01: Clean Minimalist Graphic Arcs",
+        badge: "ZERO CLUTTER",
+        desc: "The arcs are rendered as pure, unencumbered graphic bands. The achieved rating, score, and exact delta (±4.5°) are presented clearly in the HUD pill above the dial, preserving Bauhaus functional simplicity.",
+        clutter: "MINIMAL (0 TEXT OVERLAYS)",
+        clutterClass: "text-emerald-400",
+        analysis: "Clean minimalist arcs preserve the quiet precision of Dieter Rams design. The HUD readout pill above already delivers the exact numeric feedback, so the dial remains a pure navigation instrument."
+      },
+      2: {
+        title: "Option 02: Subtle Boundary Ticks",
+        badge: "PRECISION TICKS",
+        desc: "Sharp, fine hairline perpendicular boundary ticks mark the exact ±1.5°, ±5°, ±12°, ±25°, and ±45° transition points on the arc like precision vernier caliper marks.",
+        clutter: "LOW (5 HAIRLINE TICKS)",
+        clutterClass: "text-orange-400",
+        analysis: "Vernier boundary ticks offer subtle mathematical verification of the thresholds without cluttering the dial with numbers."
+      },
+      3: {
+        title: "Option 03: Micro Degree Labels on Endcaps",
+        badge: "EXPLICIT LABELS",
+        desc: "Tiny monospaced degree numbers ('5°', '12°', '25°', '45°') are positioned directly at the outer tips of each tolerance arc in JetBrains Mono.",
+        clutter: "MODERATE (TEXT LABELS ON DIAL)",
+        clutterClass: "text-amber-400",
+        analysis: "Explicit numbers make the tolerance angles completely self-documenting directly on the dial face, but adds minor text density near existing degree ticks."
+      }
+    };
+
+    function polarToCartesian(cx, cy, r, angleInDegrees) {
+      const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
+      return {
+        x: cx + r * Math.cos(angleInRadians),
+        y: cy + r * Math.sin(angleInRadians)
+      };
+    }
+
+    function describeArc(cx, cy, r, startAngle, endAngle) {
+      const start = polarToCartesian(cx, cy, r, endAngle);
+      const end = polarToCartesian(cx, cy, r, startAngle);
+      const arcSweep = endAngle - startAngle <= 180 ? "0" : "1";
+      return [
+        "M", start.x, start.y,
+        "A", r, r, 0, arcSweep, 0, end.x, end.y
+      ].join(" ");
+    }
+
+    function renderTicks() {
+      const g = document.getElementById('ticks-layer');
+      g.innerHTML = '';
+      for (let d = 0; d < 360; d += 5) {
+        const isMajor = d % 30 === 0;
+        const isMedium = d % 10 === 0 && !isMajor;
+        const rad = (d * Math.PI) / 180;
+        const rOuter = 132;
+        const rInner = isMajor ? 116 : isMedium ? 122 : 126;
+        const x1 = 150 + rOuter * Math.sin(rad);
+        const y1 = 150 - rOuter * Math.cos(rad);
+        const x2 = 150 + rInner * Math.sin(rad);
+        const y2 = 150 - rInner * Math.cos(rad);
+
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', x1);
+        line.setAttribute('y1', y1);
+        line.setAttribute('x2', x2);
+        line.setAttribute('y2', y2);
+        line.setAttribute('stroke', isMajor ? '#f8fafc' : isMedium ? '#94a3b8' : '#3b3f4a');
+        line.setAttribute('stroke-width', isMajor ? 2.5 : isMedium ? 1.5 : 1);
+        g.appendChild(line);
+
+        if (isMajor) {
+          const rText = 104;
+          const tx = 150 + rText * Math.sin(rad);
+          const ty = 150 - rText * Math.cos(rad);
+          let label = `${d}°`;
+          let fillColor = '#94a3b8';
+          let fontW = '500';
+          let fontSize = '9px';
+
+          if (d === 0) {
+            label = 'N';
+            fillColor = '#ff5722';
+            fontW = '900';
+            fontSize = '13px';
+          } else if (d === 90) {
+            label = 'E';
+            fillColor = '#f8fafc';
+            fontW = '700';
+            fontSize = '12px';
+          } else if (d === 180) {
+            label = 'S';
+            fillColor = '#f8fafc';
+            fontW = '700';
+            fontSize = '12px';
+          } else if (d === 270) {
+            label = 'W';
+            fillColor = '#f8fafc';
+            fontW = '700';
+            fontSize = '12px';
+          }
+
+          const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          txt.setAttribute('x', tx);
+          txt.setAttribute('y', ty);
+          txt.setAttribute('text-anchor', 'middle');
+          txt.setAttribute('dominant-baseline', 'central');
+          txt.setAttribute('fill', fillColor);
+          txt.setAttribute('font-family', "'JetBrains Mono', monospace");
+          txt.setAttribute('font-weight', fontW);
+          txt.setAttribute('font-size', fontSize);
+          txt.textContent = label;
+          g.appendChild(txt);
+        }
+      }
+    }
+
+    function renderRangesAndBoundaries() {
+      const gRanges = document.getElementById('ranges-layer');
+      const gBounds = document.getElementById('boundaries-layer');
+      gRanges.innerHTML = '';
+      gBounds.innerHTML = '';
+      const t = targetDeg;
+
+      // Identify active tier
+      let activeTier = 45;
+      if (errorDeg <= 1.5) activeTier = 1.5;
+      else if (errorDeg <= 5) activeTier = 5;
+      else if (errorDeg <= 12) activeTier = 12;
+      else if (errorDeg <= 25) activeTier = 25;
+
+      const tiers = [
+        { delta: 45,  color: '#f59e0b', r: 132, label: '45°' },
+        { delta: 25,  color: '#94a3b8', r: 132, label: '25°' },
+        { delta: 12,  color: '#ff5722', r: 132, label: '12°' },
+        { delta: 5,   color: '#34d399', r: 132, label: '5°' },
+        { delta: 1.5, color: '#10b981', r: 132, label: '1.5°' }
+      ];
+
+      // Draw Arcs
+      tiers.forEach(tr => {
+        const isCurrent = tr.delta === activeTier;
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', describeArc(150, 150, tr.r, t - tr.delta, t + tr.delta));
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', tr.color);
+        path.setAttribute('stroke-width', isCurrent ? 8 : 3.5);
+        path.setAttribute('opacity', isCurrent ? 1.0 : 0.22);
+        path.setAttribute('stroke-linecap', 'round');
+        if (isCurrent) {
+          path.setAttribute('filter', 'drop-shadow(0 0 6px ' + tr.color + ')');
+        }
+        gRanges.appendChild(path);
+      });
+
+      // Boundaries & Labels
+      if (activeStyle === 2) {
+        // Option 2: Subtle Boundary Ticks
+        [1.5, 5, 12, 25, 45].forEach(deg => {
+          [-deg, deg].forEach(offset => {
+            const angle = t + offset;
+            const p1 = polarToCartesian(150, 150, 126, angle);
+            const p2 = polarToCartesian(150, 150, 137, angle);
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', p1.x);
+            line.setAttribute('y1', p1.y);
+            line.setAttribute('x2', p2.x);
+            line.setAttribute('y2', p2.y);
+            line.setAttribute('stroke', '#ffffff');
+            line.setAttribute('stroke-width', 1.5);
+            line.setAttribute('opacity', 0.85);
+            gBounds.appendChild(line);
+          });
+        });
+
+      } else if (activeStyle === 3) {
+        // Option 3: Micro Degree Labels on Endcaps
+        tiers.forEach(tr => {
+          [tr.delta, -tr.delta].forEach((offset, idx) => {
+            const angle = t + offset;
+            // Radius 144 for label
+            const p = polarToCartesian(150, 150, 142, angle);
+            const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            txt.setAttribute('x', p.x);
+            txt.setAttribute('y', p.y);
+            txt.setAttribute('text-anchor', 'middle');
+            txt.setAttribute('dominant-baseline', 'central');
+            txt.setAttribute('fill', tr.color);
+            txt.setAttribute('font-family', "'JetBrains Mono', monospace");
+            txt.setAttribute('font-weight', '700');
+            txt.setAttribute('font-size', '8px');
+            txt.textContent = tr.label;
+            gBounds.appendChild(txt);
+          });
+        });
+      }
+    }
+
+    function selectStyle(n) {
+      activeStyle = n;
+      [1, 2, 3].forEach(i => {
+        const btn = document.getElementById(`tab-${i}`);
+        if (i === n) {
+          btn.className = "p-3 rounded-lg text-left transition-all bg-[#ff5722] text-white shadow-md";
+        } else {
+          btn.className = "p-3 rounded-lg text-left transition-all text-slate-400 hover:text-white hover:bg-slate-800/60";
+        }
+      });
+
+      const d = styleData[n];
+      document.getElementById('opt-title').textContent = d.title;
+      document.getElementById('opt-badge').textContent = d.badge;
+      document.getElementById('opt-desc').textContent = d.desc;
+      document.getElementById('stat-clutter').textContent = d.clutter;
+      document.getElementById('stat-clutter').className = `font-bold ${d.clutterClass}`;
+      document.getElementById('analysis-text').textContent = d.analysis;
+
+      renderRangesAndBoundaries();
+      updateSimulation(errorDeg);
+    }
+
+    function updateSimulation(val) {
+      errorDeg = parseFloat(val);
+      const guessDeg = targetDeg + errorDeg;
+      const rad = (guessDeg * Math.PI) / 180;
+
+      const tailX = 150 - 40 * Math.sin(rad);
+      const tailY = 150 + 40 * Math.cos(rad);
+      const headX = 150 + 120 * Math.sin(rad);
+      const headY = 150 - 120 * Math.cos(rad);
+
+      const needleTail = document.getElementById('needle-tail');
+      needleTail.setAttribute('x1', 150);
+      needleTail.setAttribute('y1', 150);
+      needleTail.setAttribute('x2', tailX);
+      needleTail.setAttribute('y2', tailY);
+
+      const needleHead = document.getElementById('needle-head');
+      needleHead.setAttribute('x1', 150);
+      needleHead.setAttribute('y1', 150);
+      needleHead.setAttribute('x2', headX);
+      needleHead.setAttribute('y2', headY);
+
+      const tipX = 150 + 132 * Math.sin(rad);
+      const tipY = 150 - 132 * Math.cos(rad);
+      const leftX = 150 + 115 * Math.sin(rad) - 8 * Math.cos(rad);
+      const leftY = 150 - 115 * Math.cos(rad) - 8 * Math.sin(rad);
+      const rightX = 150 + 115 * Math.sin(rad) + 8 * Math.cos(rad);
+      const rightY = 150 - 115 * Math.cos(rad) + 8 * Math.sin(rad);
+      document.getElementById('needle-arrow').setAttribute('points', `${tipX},${tipY} ${leftX},${leftY} ${rightX},${rightY}`);
+
+      let zoneName = "OUT OF BOUNDS (> 45°)";
+      let zoneBadgeClass = "bg-rose-500/20 text-rose-400 border-rose-500/40";
+      let deltaColor = "text-rose-400";
+
+      if (errorDeg <= 1.5) {
+        zoneName = "TRUE MERIDIAN (±1.5°)";
+        zoneBadgeClass = "bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
+        deltaColor = "text-emerald-400";
+      } else if (errorDeg <= 5.0) {
+        zoneName = "PINPOINT (±5.0°)";
+        zoneBadgeClass = "bg-emerald-400/20 text-emerald-300 border-emerald-400/40";
+        deltaColor = "text-emerald-300";
+      } else if (errorDeg <= 12.0) {
+        zoneName = "HIGH PRECISION (±12.0°)";
+        zoneBadgeClass = "bg-orange-500/20 text-orange-400 border-orange-500/40";
+        deltaColor = "text-orange-400";
+      } else if (errorDeg <= 25.0) {
+        zoneName = "WITHIN TOLERANCE (±25.0°)";
+        zoneBadgeClass = "bg-slate-700/60 text-slate-200 border-slate-600";
+        deltaColor = "text-slate-200";
+      } else if (errorDeg <= 45.0) {
+        zoneName = "DEVIATION (±45.0°)";
+        zoneBadgeClass = "bg-amber-500/20 text-amber-400 border-amber-500/40";
+        deltaColor = "text-amber-400";
+      }
+
+      document.getElementById('active-rating-pill').className = `px-2.5 py-0.5 rounded font-bold font-mono text-xs border ${zoneBadgeClass}`;
+      document.getElementById('active-rating-pill').textContent = `${zoneName} • Δ ${errorDeg.toFixed(1)}°`;
+      document.getElementById('readout-delta').textContent = `Δ ${errorDeg.toFixed(1)}°`;
+      document.getElementById('readout-delta').className = `font-bold ${deltaColor}`;
+      document.getElementById('readout-zone').textContent = zoneName;
+      document.getElementById('readout-zone').className = `font-bold ${deltaColor}`;
+
+      renderRangesAndBoundaries();
+    }
+
+    function confirmStyleAlert() {
+      alert("Option " + activeStyle + " selected! You can tell Antigravity in chat.");
+    }
+
+    renderTicks();
+    renderRangesAndBoundaries();
+    updateSimulation(4.5);
+  </script>
+</body>
+</html>
