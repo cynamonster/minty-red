@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEARINGS — Swiss Styling Variations</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .font-inter { font-family: 'Inter', sans-serif; }
+    .font-space { font-family: 'Space Grotesk', sans-serif; }
+    .smooth { transition: all 0.2s ease-in-out; }
+  </style>
+</head>
+<body class="bg-[#0b0c0e] text-slate-100 antialiased p-3 sm:p-5 font-inter select-none min-h-screen">
+
+  <div class="max-w-3xl mx-auto space-y-5">
+
+    <!-- Top Navigation & Variation Switcher -->
+    <header class="border-b border-slate-800 pb-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold tracking-wider uppercase bg-orange-500/15 text-orange-400 border border-orange-500/30">
+            Swiss Refinement Prototype
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1">
+            BEARINGS <span class="text-slate-400 text-lg font-normal">— Swiss Palette & Font Variations</span>
+          </h1>
+          <p class="text-xs text-slate-400 mt-0.5">
+            Preserving the current compass geometry, tactile layout, and mechanics while exploring refined Swiss color palettes & typography.
+          </p>
+        </div>
+
+        <!-- Variation Tabs -->
+        <div class="flex p-1 bg-slate-900 border border-slate-800 rounded-xl gap-1 shrink-0 overflow-x-auto">
+          <button id="btn-orig" onclick="setVariation('orig')" class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold text-slate-400 hover:text-white transition-all">
+            Current
+          </button>
+          <button id="btn-orange" onclick="setVariation('orange')" class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#ff5722] text-white shadow-md transition-all">
+            A: Safety Orange
+          </button>
+          <button id="btn-cobalt" onclick="setVariation('cobalt')" class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold text-slate-400 hover:text-white transition-all">
+            B: Alpine Cobalt
+          </button>
+          <button id="btn-yellow" onclick="setVariation('yellow')" class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold text-slate-400 hover:text-white transition-all">
+            C: Signal Yellow
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Variation Briefing Callout -->
+    <div id="briefing-box" class="p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-[#15161a] border-orange-500/30 text-slate-200">
+      <div>
+        <div class="font-bold text-sm flex items-center gap-2">
+          <span id="briefing-title" class="text-white font-inter font-black uppercase">Variation A: Pure Bauhaus / Dieter Rams Precision</span>
+          <span id="briefing-pill" class="text-[10px] px-2 py-0.5 rounded-full font-mono bg-orange-500/20 text-orange-400 border border-orange-500/40">RECOMMENDED</span>
+        </div>
+        <p id="briefing-desc" class="text-xs text-slate-400 mt-0.5 leading-relaxed">
+          Matte charcoal/graphite housing, ultra-crisp stark white typography, and International Safety Orange (#ff5722) for the needle pointer, North indicator, and lock action.
+        </p>
+      </div>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <span class="text-[10px] font-mono text-slate-400 uppercase mr-1">Palette:</span>
+        <div id="palette-swatches" class="flex gap-1">
+          <span class="w-5 h-5 rounded-full bg-[#121316] border border-slate-700" title="Matte Graphite #121316"></span>
+          <span class="w-5 h-5 rounded-full bg-[#f8fafc] border border-white" title="Pure Crisp White #f8fafc"></span>
+          <span class="w-5 h-5 rounded-full bg-[#ff5722] border border-orange-400 shadow-[0_0_8px_#ff5722]" title="Safety Orange #ff5722"></span>
+          <span class="w-5 h-5 rounded-full bg-[#94a3b8] border border-slate-600" title="Technical Steel #94a3b8"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOCKUP CONTAINER: Faithfully reproduces the BEARINGS game screen -->
+    <div id="game-frame" class="p-4 sm:p-6 rounded-2xl border bg-[#121316] border-slate-800 shadow-2xl relative space-y-4 max-w-lg mx-auto">
+      
+      <!-- Top Game Header Bar -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 text-xs">
+        <div class="flex items-center gap-2">
+          <div id="header-icon-box" class="w-7 h-7 rounded-lg bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-orange-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 100-16 8 8 0 000 16zm-1-13l4 4-5 1 1-5z"></path></svg>
+          </div>
+          <div>
+            <div id="brand-title" class="font-black text-sm text-white tracking-tight font-inter">BEARINGS</div>
+            <div id="brand-subtitle" class="text-[10px] text-slate-400 font-mono">DAILY EXPEDITION • LEG 3 OF 5</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <div class="px-2.5 py-1 rounded-lg bg-black/40 border border-slate-800 text-right">
+            <div class="text-[9px] uppercase font-mono text-slate-400">SCORE</div>
+            <div id="score-val" class="text-xs font-mono font-bold text-white">2,450</div>
+          </div>
+          <div id="streak-pill" class="px-2 py-1 rounded-lg bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-mono font-bold flex items-center gap-1">
+            <span>🔥</span> 2x
+          </div>
+        </div>
+      </div>
+
+      <!-- Waypoint Challenge Card -->
+      <div id="waypoint-card" class="p-4 rounded-xl border bg-[#181a1f] border-slate-800 space-y-2">
+        <div class="flex items-center justify-between text-[11px] font-mono text-slate-400">
+          <span id="waypoint-category" class="px-2 py-0.5 rounded bg-slate-800/80 text-slate-300 font-semibold border border-slate-700/80">GLOBAL LANDMARK</span>
+          <span class="text-slate-400">DISTANCE: 8,460 KM</span>
+        </div>
+
+        <div>
+          <div class="text-[11px] text-slate-400 font-mono uppercase tracking-wider">Estimate Initial Bearing:</div>
+          <div class="text-base sm:text-lg font-black text-white flex items-center gap-2 mt-0.5">
+            <span class="text-slate-300">London (Greenwich)</span>
+            <span id="waypoint-arrow" class="text-orange-400 font-bold">➔</span>
+            <span class="text-white">Cape Town, South Africa</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">
+            Lock true heading along the great circle arc from departure meridian.
+          </p>
+        </div>
+      </div>
+
+      <!-- Live Interactive Compass Dial -->
+      <div class="w-full flex flex-col items-center select-none py-1">
+        
+        <!-- Dynamic Digital HUD Heading Readout -->
+        <div class="flex items-center justify-center gap-2.5 mb-3">
+          <div id="hud-readout-box" class="px-4 py-1.5 rounded-xl bg-black/60 border border-slate-800 shadow-inner flex items-center gap-2.5">
+            <svg id="hud-compass-icon" class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 100-16 8 8 0 000 16zm-1-13l4 4-5 1 1-5z"></path></svg>
+            <span id="hud-deg" class="text-2xl font-black font-mono tracking-wider text-white">
+              168°
+            </span>
+            <span id="hud-heading-pill" class="text-xs font-bold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 font-mono">
+              SSE
+            </span>
+          </div>
+
+          <div id="target-delta-badge" class="px-2.5 py-1.5 rounded-xl border font-mono text-xs font-bold flex items-center gap-1 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hidden">
+            <span>🎯</span>
+            <span id="target-delta-text">Δ 1.2°</span>
+          </div>
+        </div>
+
+        <!-- SVG Compass Dial Container (Rotatable) -->
+        <div
+          id="dial-touch-zone"
+          class="relative w-64 h-64 sm:w-72 sm:h-72 rounded-full cursor-grab active:cursor-grabbing touch-none select-none transition-shadow"
+        >
+          <svg
+            id="dial-svg"
+            viewBox="0 0 300 300"
+            class="w-full h-full drop-shadow-2xl overflow-visible"
+          >
+            <!-- Outer Compass Housing Rings -->
+            <circle
+              id="svg-housing-outer"
+              cx="150"
+              cy="150"
+              r="146"
+              fill="#0d0e11"
+              stroke="#262830"
+              stroke-width="3"
+            />
+            <circle
+              id="svg-housing-inner"
+              cx="150"
+              cy="150"
+              r="138"
+              fill="#14151a"
+              stroke="#1e2026"
+              stroke-width="1.5"
+            />
+
+            <!-- Internal Measurement Rings -->
+            <circle
+              cx="150"
+              cy="150"
+              r="85"
+              fill="none"
+              stroke="#262830"
+              stroke-dasharray="3,3"
+              stroke-width="1"
+            />
+            <circle
+              cx="150"
+              cy="150"
+              r="50"
+              fill="none"
+              stroke="#1e2026"
+              stroke-width="1"
+            />
+            <!-- Hairline Crosshairs -->
+            <line x1="150" y1="65" x2="150" y2="235" stroke="#262830" stroke-width="1" />
+            <line x1="65" y1="150" x2="235" y2="150" stroke="#262830" stroke-width="1" />
+
+            <!-- Compass Ticks Group -->
+            <g id="svg-ticks-group"></g>
+
+            <!-- Player Current Heading Needle -->
+            <g id="svg-needle-group">
+              <!-- Needle Tail -->
+              <line
+                id="needle-tail"
+                x1="150"
+                y1="150"
+                x2="150"
+                y2="190"
+                stroke="#64748b"
+                stroke-width="3"
+                stroke-linecap="round"
+              />
+              <!-- Needle Head -->
+              <line
+                id="needle-head"
+                x1="150"
+                y1="150"
+                x2="150"
+                y2="30"
+                stroke="#ff5722"
+                stroke-width="3.5"
+                stroke-linecap="round"
+              />
+              <!-- Needle Arrow Tip -->
+              <polygon
+                id="needle-arrow"
+                points="150,18 142,35 158,35"
+                fill="#ff5722"
+              />
+            </g>
+
+            <!-- Center Hub -->
+            <circle
+              id="center-hub-outer"
+              cx="150"
+              cy="150"
+              r="15"
+              fill="#181a1f"
+              stroke="#ff5722"
+              stroke-width="2"
+            />
+            <circle
+              id="center-hub-inner"
+              cx="150"
+              cy="150"
+              r="5"
+              fill="#ff5722"
+            />
+            <circle cx="150" cy="150" r="2.5" fill="#ffffff" />
+          </svg>
+        </div>
+
+        <!-- Tactile Nudge & Snap Controls -->
+        <div class="w-full max-w-xs mt-3 flex flex-col gap-2">
+          <!-- Fine Adjustment Bar -->
+          <div class="grid grid-cols-4 gap-1.5">
+            <button onclick="nudge(-10)" class="py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-slate-300 hover:bg-slate-800 active:scale-95 transition-all">
+              -10°
+            </button>
+            <button id="nudge-minus-1" onclick="nudge(-1)" class="py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-orange-400 hover:bg-slate-800 active:scale-95 transition-all">
+              -1°
+            </button>
+            <button id="nudge-plus-1" onclick="nudge(1)" class="py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-orange-400 hover:bg-slate-800 active:scale-95 transition-all">
+              +1°
+            </button>
+            <button onclick="nudge(10)" class="py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-slate-300 hover:bg-slate-800 active:scale-95 transition-all">
+              +10°
+            </button>
+          </div>
+
+          <!-- Cardinal Quick Snaps -->
+          <div class="grid grid-cols-4 gap-1.5 text-[11px] font-mono font-bold">
+            <button id="snap-n" onclick="snapTo(0)" class="py-1 rounded-md bg-black/40 border border-orange-500/40 text-orange-400 hover:bg-orange-500/10 active:scale-95 transition-all">
+              0° N
+            </button>
+            <button id="snap-e" onclick="snapTo(90)" class="py-1 rounded-md bg-black/40 border border-slate-700 text-slate-300 hover:bg-slate-800 active:scale-95 transition-all">
+              90° E
+            </button>
+            <button id="snap-s" onclick="snapTo(180)" class="py-1 rounded-md bg-black/40 border border-slate-700 text-slate-300 hover:bg-slate-800 active:scale-95 transition-all">
+              180° S
+            </button>
+            <button id="snap-w" onclick="snapTo(270)" class="py-1 rounded-md bg-black/40 border border-slate-700 text-slate-300 hover:bg-slate-800 active:scale-95 transition-all">
+              270° W
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Lock Bearing Button CTA -->
+      <button
+        id="lock-cta-btn"
+        class="w-full py-3.5 rounded-xl font-inter font-black text-xs uppercase tracking-wider text-white bg-[#ff5722] hover:bg-orange-600 active:scale-98 transition-all shadow-lg shadow-orange-950/40 flex items-center justify-center gap-2"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+        <span>Lock Bearing [Space]</span>
+      </button>
+
+    </div>
+
+    <!-- Comparative Specs Matrix Table -->
+    <div class="p-4 rounded-xl border border-slate-800 bg-[#121316] overflow-x-auto text-xs">
+      <div class="font-bold text-white uppercase text-[11px] font-mono tracking-wider mb-2">Design Decision Matrix</div>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-slate-800 text-[10px] font-mono text-slate-400 uppercase">
+            <th class="py-2 pr-3">Attribute</th>
+            <th class="py-2 pr-3 text-sky-400">Current (Baseline)</th>
+            <th class="py-2 pr-3 text-orange-400 font-bold">A: Safety Orange (Rec.)</th>
+            <th class="py-2 pr-3 text-blue-400">B: Alpine Cobalt</th>
+            <th class="py-2 pr-3 text-yellow-400">C: Signal Yellow</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800/60 font-mono text-[11px] text-slate-300">
+          <tr>
+            <td class="py-2 font-semibold text-white">Hero Accent</td>
+            <td class="text-sky-400">Sky Blue (#38bdf8)</td>
+            <td class="text-orange-400 font-bold">Safety Orange (#ff5722)</td>
+            <td class="text-blue-400">Alpine Cobalt (#3b82f6)</td>
+            <td class="text-yellow-400">Signal Yellow (#eab308)</td>
+          </tr>
+          <tr>
+            <td class="py-2 font-semibold text-white">Dial Housing</td>
+            <td>Slate-950 / Slate-800</td>
+            <td>Matte Graphite (#121316)</td>
+            <td>Obsidian Navy (#0b0f19)</td>
+            <td>Carbon Black (#0f1012)</td>
+          </tr>
+          <tr>
+            <td class="py-2 font-semibold text-white">North Marker</td>
+            <td class="text-rose-500">Rose Red (#f43f5e)</td>
+            <td class="text-orange-400 font-bold">Safety Orange (#ff5722)</td>
+            <td class="text-blue-400">Pure White (#ffffff)</td>
+            <td class="text-yellow-400">Signal Yellow (#facc15)</td>
+          </tr>
+          <tr>
+            <td class="py-2 font-semibold text-white">E / S / W Labels</td>
+            <td>Amber / Sky / Emerald</td>
+            <td>Crisp White (#f8fafc)</td>
+            <td>Steel Slate (#94a3b8)</td>
+            <td>Clean White (#f8fafc)</td>
+          </tr>
+          <tr>
+            <td class="py-2 font-semibold text-white">Heading Font</td>
+            <td>Default Sans</td>
+            <td class="font-bold text-white">Inter (Tight 900)</td>
+            <td>Space Grotesk (800)</td>
+            <td>JetBrains Mono (800)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- Interactive JavaScript Engine -->
+  <script>
+    let currentBearing = 168;
+    let activeVar = 'orange';
+
+    const cardinals = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW', 'N'];
+    function getCardinal(deg) {
+      const idx = Math.round(deg / 22.5);
+      return cardinals[idx % 16];
+    }
+
+    const configs = {
+      orig: {
+        title: "Current Baseline (Sky Blue & Slate)",
+        pillText: "BASELINE",
+        pillClass: "bg-sky-500/20 text-sky-400 border-sky-500/40",
+        desc: "The current game appearance with generic sky blue accents, multi-color cardinal points (Rose N, Amber E, Sky S, Emerald W), and slate housing.",
+        heroColor: "#38bdf8",
+        housingOuter: "#020617",
+        housingInner: "#0f172a",
+        housingBorder: "#1e293b",
+        majorTickColor: "#38bdf8",
+        mediumTickColor: "#64748b",
+        minorTickColor: "#334155",
+        northColor: "#f43f5e",
+        eastColor: "#fbbf24",
+        southColor: "#38bdf8",
+        westColor: "#34d399",
+        degTextColor: "#94a3b8",
+        needleColor: "#38bdf8",
+        needleTailColor: "#64748b",
+        ctaBg: "bg-sky-500 hover:bg-sky-400 text-slate-950",
+        headerIconBox: "bg-sky-500/20 border-sky-500/40 text-sky-400",
+        readoutPill: "bg-sky-500/20 text-sky-300 border-sky-500/30",
+        arrowColor: "text-sky-400",
+        swatches: ['#020617', '#38bdf8', '#f43f5e', '#64748b']
+      },
+      orange: {
+        title: "Variation A: Pure Bauhaus / Dieter Rams Precision",
+        pillText: "RECOMMENDED",
+        pillClass: "bg-orange-500/20 text-orange-400 border-orange-500/40",
+        desc: "Matte charcoal/graphite housing, ultra-crisp stark white typography, and International Safety Orange (#ff5722) for the needle pointer, North indicator, and lock action.",
+        heroColor: "#ff5722",
+        housingOuter: "#0d0e11",
+        housingInner: "#14151a",
+        housingBorder: "#262830",
+        majorTickColor: "#f8fafc",
+        mediumTickColor: "#94a3b8",
+        minorTickColor: "#3b3f4a",
+        northColor: "#ff5722",
+        eastColor: "#f8fafc",
+        southColor: "#f8fafc",
+        westColor: "#f8fafc",
+        degTextColor: "#94a3b8",
+        needleColor: "#ff5722",
+        needleTailColor: "#64748b",
+        ctaBg: "bg-[#ff5722] hover:bg-orange-600 text-white",
+        headerIconBox: "bg-orange-500/20 border-orange-500/40 text-orange-400",
+        readoutPill: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+        arrowColor: "text-orange-400",
+        swatches: ['#121316', '#f8fafc', '#ff5722', '#94a3b8']
+      },
+      cobalt: {
+        title: "Variation B: Alpine Technical / Swiss Cobalt",
+        pillText: "HIGH CONTRAST",
+        pillClass: "bg-blue-500/20 text-blue-400 border-blue-500/40",
+        desc: "Deep obsidian navy housing, technical alpine Cobalt Blue (#3b82f6), crisp white North indicator, and clean industrial steel ticks.",
+        heroColor: "#3b82f6",
+        housingOuter: "#080c14",
+        housingInner: "#0f1624",
+        housingBorder: "#1e293b",
+        majorTickColor: "#60a5fa",
+        mediumTickColor: "#94a3b8",
+        minorTickColor: "#334155",
+        northColor: "#60a5fa",
+        eastColor: "#e2e8f0",
+        southColor: "#e2e8f0",
+        westColor: "#e2e8f0",
+        degTextColor: "#64748b",
+        needleColor: "#3b82f6",
+        needleTailColor: "#64748b",
+        ctaBg: "bg-blue-600 hover:bg-blue-500 text-white",
+        headerIconBox: "bg-blue-500/20 border-blue-500/40 text-blue-400",
+        readoutPill: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+        arrowColor: "text-blue-400",
+        swatches: ['#0b0f19', '#f1f5f9', '#3b82f6', '#94a3b8']
+      },
+      yellow: {
+        title: "Variation C: Monochrome Technical / Signal Yellow",
+        pillText: "TELEMETRY GAUGE",
+        pillClass: "bg-yellow-500/20 text-yellow-400 border-yellow-500/40",
+        desc: "Monochromatic carbon black surface, stark white coordinates, and Swiss Signal Yellow (#eab308) high-precision pointer.",
+        heroColor: "#eab308",
+        housingOuter: "#0a0a0c",
+        housingInner: "#131316",
+        housingBorder: "#27272a",
+        majorTickColor: "#facc15",
+        mediumTickColor: "#a1a1aa",
+        minorTickColor: "#3f3f46",
+        northColor: "#facc15",
+        eastColor: "#f4f4f5",
+        southColor: "#f4f4f5",
+        westColor: "#f4f4f5",
+        degTextColor: "#71717a",
+        needleColor: "#eab308",
+        needleTailColor: "#71717a",
+        ctaBg: "bg-yellow-500 hover:bg-yellow-400 text-black",
+        headerIconBox: "bg-yellow-500/20 border-yellow-500/40 text-yellow-400",
+        readoutPill: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",
+        arrowColor: "text-yellow-400",
+        swatches: ['#0f1012', '#ffffff', '#eab308', '#71717a']
+      }
+    };
+
+    function renderTicks(cfg) {
+      const g = document.getElementById('svg-ticks-group');
+      g.innerHTML = '';
+      for (let d = 0; d < 360; d += 5) {
+        const isMajor = d % 30 === 0;
+        const isMedium = d % 10 === 0 && !isMajor;
+        const rad = (d * Math.PI) / 180;
+        const rOuter = 132;
+        const rInner = isMajor ? 116 : isMedium ? 122 : 126;
+        const x1 = 150 + rOuter * Math.sin(rad);
+        const y1 = 150 - rOuter * Math.cos(rad);
+        const x2 = 150 + rInner * Math.sin(rad);
+        const y2 = 150 - rInner * Math.cos(rad);
+
+        const strokeColor = isMajor ? cfg.majorTickColor : isMedium ? cfg.mediumTickColor : cfg.minorTickColor;
+        const strokeW = isMajor ? 2.5 : isMedium ? 1.5 : 1;
+
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', x1);
+        line.setAttribute('y1', y1);
+        line.setAttribute('x2', x2);
+        line.setAttribute('y2', y2);
+        line.setAttribute('stroke', strokeColor);
+        line.setAttribute('stroke-width', strokeW);
+        g.appendChild(line);
+
+        if (isMajor) {
+          const rText = 104;
+          const tx = 150 + rText * Math.sin(rad);
+          const ty = 150 - rText * Math.cos(rad);
+          let label = `${d}°`;
+          let fillColor = cfg.degTextColor;
+          let fontW = '500';
+          let fontSize = '9px';
+
+          if (d === 0) {
+            label = 'N';
+            fillColor = cfg.northColor;
+            fontW = '900';
+            fontSize = '13px';
+          } else if (d === 90) {
+            label = 'E';
+            fillColor = cfg.eastColor;
+            fontW = '700';
+            fontSize = '12px';
+          } else if (d === 180) {
+            label = 'S';
+            fillColor = cfg.southColor;
+            fontW = '700';
+            fontSize = '12px';
+          } else if (d === 270) {
+            label = 'W';
+            fillColor = cfg.westColor;
+            fontW = '700';
+            fontSize = '12px';
+          }
+
+          const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          txt.setAttribute('x', tx);
+          txt.setAttribute('y', ty);
+          txt.setAttribute('text-anchor', 'middle');
+          txt.setAttribute('dominant-baseline', 'central');
+          txt.setAttribute('fill', fillColor);
+          txt.setAttribute('font-family', "'JetBrains Mono', monospace");
+          txt.setAttribute('font-weight', fontW);
+          txt.setAttribute('font-size', fontSize);
+          txt.textContent = label;
+          g.appendChild(txt);
+        }
+      }
+    }
+
+    function setVariation(key) {
+      activeVar = key;
+      const cfg = configs[key];
+
+      // Update tabs
+      ['orig', 'orange', 'cobalt', 'yellow'].forEach(k => {
+        const btn = document.getElementById(`btn-${k}`);
+        if (k === key) {
+          btn.className = k === 'orange' ? "px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#ff5722] text-white shadow-md transition-all"
+            : k === 'cobalt' ? "px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-blue-600 text-white shadow-md transition-all"
+            : k === 'yellow' ? "px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-yellow-500 text-black shadow-md transition-all"
+            : "px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-sky-500 text-slate-950 shadow-md transition-all";
+        } else {
+          btn.className = "px-3 py-1.5 rounded-lg text-xs font-mono font-bold text-slate-400 hover:text-white transition-all";
+        }
+      });
+
+      // Update briefing box
+      document.getElementById('briefing-title').textContent = cfg.title;
+      document.getElementById('briefing-pill').textContent = cfg.pillText;
+      document.getElementById('briefing-pill').className = `text-[10px] px-2 py-0.5 rounded-full font-mono border ${cfg.pillClass}`;
+      document.getElementById('briefing-desc').textContent = cfg.desc;
+
+      // Swatches
+      const swatchesBox = document.getElementById('palette-swatches');
+      swatchesBox.innerHTML = cfg.swatches.map(color => `
+        <span class="w-5 h-5 rounded-full border border-slate-700 shadow-sm" style="background-color: ${color}"></span>
+      `).join('');
+
+      // Update Housing & SVG Elements
+      document.getElementById('svg-housing-outer').setAttribute('fill', cfg.housingOuter);
+      document.getElementById('svg-housing-outer').setAttribute('stroke', cfg.housingBorder);
+      document.getElementById('svg-housing-inner').setAttribute('fill', cfg.housingInner);
+
+      // Needle colors
+      document.getElementById('needle-head').setAttribute('stroke', cfg.needleColor);
+      document.getElementById('needle-arrow').setAttribute('fill', cfg.needleColor);
+      document.getElementById('center-hub-outer').setAttribute('stroke', cfg.needleColor);
+      document.getElementById('center-hub-inner').setAttribute('fill', cfg.needleColor);
+
+      // Re-render ticks
+      renderTicks(cfg);
+
+      // Update UI elements
+      document.getElementById('hud-compass-icon').style.color = cfg.heroColor;
+      document.getElementById('hud-heading-pill').className = `text-xs font-bold px-2 py-0.5 rounded border font-mono ${cfg.readoutPill}`;
+      document.getElementById('header-icon-box').className = `w-7 h-7 rounded-lg border flex items-center justify-center ${cfg.headerIconBox}`;
+      document.getElementById('lock-cta-btn').className = `w-full py-3.5 rounded-xl font-inter font-black text-xs uppercase tracking-wider ${cfg.ctaBg} active:scale-98 transition-all shadow-lg flex items-center justify-center gap-2`;
+      document.getElementById('waypoint-arrow').className = `font-bold ${cfg.arrowColor}`;
+      document.getElementById('nudge-minus-1').style.color = cfg.heroColor;
+      document.getElementById('nudge-plus-1').style.color = cfg.heroColor;
+
+      // Snaps
+      const snapN = document.getElementById('snap-n');
+      snapN.style.color = cfg.northColor;
+      snapN.style.borderColor = cfg.northColor + '60';
+
+      updateDialRotation(currentBearing);
+    }
+
+    function updateDialRotation(deg) {
+      currentBearing = (Math.round(deg) % 360 + 360) % 360;
+      const rad = (currentBearing * Math.PI) / 180;
+
+      // Update needle line coordinates
+      const tailX = 150 - 40 * Math.sin(rad);
+      const tailY = 150 + 40 * Math.cos(rad);
+      const headX = 150 + 120 * Math.sin(rad);
+      const headY = 150 - 120 * Math.cos(rad);
+
+      const needleTail = document.getElementById('needle-tail');
+      needleTail.setAttribute('x1', 150);
+      needleTail.setAttribute('y1', 150);
+      needleTail.setAttribute('x2', tailX);
+      needleTail.setAttribute('y2', tailY);
+
+      const needleHead = document.getElementById('needle-head');
+      needleHead.setAttribute('x1', 150);
+      needleHead.setAttribute('y1', 150);
+      needleHead.setAttribute('x2', headX);
+      needleHead.setAttribute('y2', headY);
+
+      // Arrow head polygon
+      const tipX = 150 + 132 * Math.sin(rad);
+      const tipY = 150 - 132 * Math.cos(rad);
+      const leftX = 150 + 115 * Math.sin(rad) - 8 * Math.cos(rad);
+      const leftY = 150 - 115 * Math.cos(rad) - 8 * Math.sin(rad);
+      const rightX = 150 + 115 * Math.sin(rad) + 8 * Math.cos(rad);
+      const rightY = 150 - 115 * Math.cos(rad) + 8 * Math.sin(rad);
+
+      document.getElementById('needle-arrow').setAttribute('points', `${tipX},${tipY} ${leftX},${leftY} ${rightX},${rightY}`);
+
+      // Readout
+      document.getElementById('hud-deg').textContent = String(currentBearing).padStart(3, '0') + '°';
+      document.getElementById('hud-heading-pill').textContent = getCardinal(currentBearing);
+    }
+
+    function nudge(amount) {
+      updateDialRotation(currentBearing + amount);
+    }
+
+    function snapTo(deg) {
+      updateDialRotation(deg);
+    }
+
+    // Touch / Pointer Drag on Dial
+    const dialZone = document.getElementById('dial-touch-zone');
+    let isDragging = false;
+
+    function calcAngle(e) {
+      const rect = dialZone.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const dx = clientX - cx;
+      const dy = clientY - cy;
+      let rad = Math.atan2(dx, -dy);
+      let deg = (rad * 180) / Math.PI;
+      if (deg < 0) deg += 360;
+      return deg;
+    }
+
+    dialZone.addEventListener('pointerdown', (e) => {
+      isDragging = true;
+      updateDialRotation(calcAngle(e));
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      updateDialRotation(calcAngle(e));
+    });
+
+    window.addEventListener('pointerup', () => {
+      isDragging = false;
+    });
+
+    // Initialize with Swiss Safety Orange
+    setVariation('orange');
+  </script>
+
+</body>
+</html>

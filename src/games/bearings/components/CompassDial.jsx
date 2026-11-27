@@ -125,7 +125,7 @@ export function CompassDial({
         y1={y1}
         x2={x2}
         y2={y2}
-        stroke={isMajor ? '#38bdf8' : isMedium ? '#64748b' : '#334155'}
+        stroke={isMajor ? '#f8fafc' : isMedium ? '#94a3b8' : '#3b3f4a'}
         strokeWidth={isMajor ? 2.5 : isMedium ? 1.5 : 1}
       />
     );
@@ -136,19 +136,19 @@ export function CompassDial({
       const tx = 150 + rText * Math.sin(rad);
       const ty = 150 - rText * Math.cos(rad);
       let label = `${d}°`;
-      let textClass = 'fill-slate-400 text-[9px] font-mono';
+      let textClass = 'fill-[#94a3b8] text-[9px] font-mono';
       if (d === 0) {
         label = 'N';
-        textClass = 'fill-rose-500 font-black text-[13px]';
+        textClass = 'fill-[#ff5722] font-black text-[13px]';
       } else if (d === 90) {
         label = 'E';
-        textClass = 'fill-amber-400 font-bold text-[12px]';
+        textClass = 'fill-[#f8fafc] font-bold text-[12px]';
       } else if (d === 180) {
         label = 'S';
-        textClass = 'fill-sky-400 font-bold text-[12px]';
+        textClass = 'fill-[#f8fafc] font-bold text-[12px]';
       } else if (d === 270) {
         label = 'W';
-        textClass = 'fill-emerald-400 font-bold text-[12px]';
+        textClass = 'fill-[#f8fafc] font-bold text-[12px]';
       }
 
       ticks.push(
@@ -174,12 +174,12 @@ export function CompassDial({
     <div className="w-full flex flex-col items-center select-none">
       {/* Dynamic Digital HUD Heading Readout */}
       <div className="flex items-center justify-center gap-3 mb-3">
-        <div className="px-4 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700/80 shadow-inner flex items-center gap-2">
-          <Compass className="w-4 h-4 text-sky-400 animate-spin-slow" />
+        <div className="px-4 py-1.5 rounded-xl bg-[#121316] border border-slate-800 shadow-inner flex items-center gap-2">
+          <Compass className="w-4 h-4 text-orange-400 animate-spin-slow" />
           <span className="text-2xl font-black font-mono tracking-wider text-white">
             {formatDegrees(currentBearing)}
           </span>
-          <span className="text-xs font-bold px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 font-mono">
+          <span className="text-xs font-bold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 font-mono">
             {getCompassHeading(currentBearing)}
           </span>
         </div>
@@ -187,11 +187,13 @@ export function CompassDial({
         {isLocked && delta !== null && (
           <div
             className={`px-3 py-1.5 rounded-xl border font-mono text-sm font-bold flex items-center gap-1.5 ${
-              delta <= 5
+              delta <= 1.5
                 ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
-                : delta <= 15
-                ? 'bg-sky-500/20 border-sky-500/50 text-sky-300'
-                : delta <= 30
+                : delta <= 12
+                ? 'bg-orange-500/20 border-orange-500/50 text-orange-300'
+                : delta <= 25
+                ? 'bg-slate-800 border-slate-700 text-slate-200'
+                : delta <= 45
                 ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
                 : 'bg-rose-500/20 border-rose-500/50 text-rose-300'
             }`}
@@ -208,8 +210,8 @@ export function CompassDial({
         onPointerDown={handlePointerDown}
         className={`relative w-72 h-72 sm:w-80 sm:h-80 rounded-full cursor-grab active:cursor-grabbing touch-none transition-shadow ${
           isLocked
-            ? 'ring-4 ring-sky-500/30'
-            : 'hover:shadow-[0_0_30px_rgba(56,189,248,0.2)]'
+            ? 'ring-4 ring-orange-500/30'
+            : 'hover:shadow-[0_0_30px_rgba(255,87,34,0.15)]'
         }`}
       >
         <svg
@@ -221,58 +223,62 @@ export function CompassDial({
             cx="150"
             cy="150"
             r="146"
-            className="fill-slate-950 stroke-slate-800"
+            fill="#0d0e11"
+            stroke="#262830"
             strokeWidth="3"
           />
           <circle
             cx="150"
             cy="150"
             r="138"
-            className="fill-slate-900/90 stroke-slate-700/60"
+            fill="#14151a"
+            stroke="#1e2026"
             strokeWidth="1.5"
           />
 
-          {/* Radar Sweep Reticle background */}
+          {/* Measurement Reticle & Hairlines */}
           <circle
             cx="150"
             cy="150"
             r="85"
-            className="fill-none stroke-slate-800/80 stroke-dasharray-2"
+            fill="none"
+            stroke="#262830"
+            strokeDasharray="3,3"
             strokeWidth="1"
           />
           <circle
             cx="150"
             cy="150"
             r="50"
-            className="fill-none stroke-slate-800/60"
+            fill="none"
+            stroke="#1e2026"
             strokeWidth="1"
           />
-          <line x1="150" y1="65" x2="150" y2="235" stroke="#1e293b" strokeWidth="1" />
-          <line x1="65" y1="150" x2="235" y2="150" stroke="#1e293b" strokeWidth="1" />
+          <line x1="150" y1="65" x2="150" y2="235" stroke="#262830" strokeWidth="1" />
+          <line x1="65" y1="150" x2="235" y2="150" stroke="#262830" strokeWidth="1" />
 
           {/* Compass Ticks & Degree Labels */}
           {ticks}
 
-          {/* Target True Bearing Needle (Only revealed when locked) */}
+          {/* Target True Bearing Vector (Stark white laser beam + orange target pip) */}
           {isLocked && targetRad !== null && (
             <g className="transition-all duration-500 ease-out">
-              {/* Laser beam toward true heading */}
               <line
                 x1="150"
                 y1="150"
                 x2={150 + 130 * Math.sin(targetRad)}
                 y2={150 - 130 * Math.cos(targetRad)}
-                stroke="#10b981"
-                strokeWidth="3.5"
+                stroke="#f8fafc"
+                strokeWidth="3"
                 strokeLinecap="round"
                 className="animate-pulse"
               />
-              {/* Target Pip marker */}
               <circle
                 cx={150 + 132 * Math.sin(targetRad)}
                 cy={150 - 132 * Math.cos(targetRad)}
                 r="6"
-                className="fill-emerald-400 stroke-emerald-950"
+                fill="#ff5722"
+                stroke="#0d0e11"
                 strokeWidth="2"
               />
             </g>
@@ -296,36 +302,38 @@ export function CompassDial({
               y1="150"
               x2={150 + 120 * Math.sin(currentRad)}
               y2={150 - 120 * Math.cos(currentRad)}
-              stroke={isLocked ? (delta <= 15 ? '#38bdf8' : '#f59e0b') : '#38bdf8'}
-              strokeWidth="4"
+              stroke="#ff5722"
+              strokeWidth="3.5"
               strokeLinecap="round"
             />
-            {/* Glowing Pointer Arrow Head */}
+            {/* Pointer Arrow Head */}
             <polygon
               points={`
                 ${150 + 132 * Math.sin(currentRad)},${150 - 132 * Math.cos(currentRad)}
                 ${150 + 115 * Math.sin(currentRad) - 8 * Math.cos(currentRad)},${150 - 115 * Math.cos(currentRad) - 8 * Math.sin(currentRad)}
                 ${150 + 115 * Math.sin(currentRad) + 8 * Math.cos(currentRad)},${150 - 115 * Math.cos(currentRad) + 8 * Math.sin(currentRad)}
               `}
-              fill={isLocked ? (delta <= 15 ? '#38bdf8' : '#f59e0b') : '#38bdf8'}
+              fill="#ff5722"
             />
           </g>
 
-          {/* Center Hub & Brass Bearing Pivot */}
+          {/* Center Hub */}
           <circle
             cx="150"
             cy="150"
-            r="16"
-            className="fill-slate-900 stroke-sky-400/80 shadow-md"
-            strokeWidth="2.5"
+            r="15"
+            fill="#181a1f"
+            stroke="#ff5722"
+            strokeWidth="2"
           />
           <circle
             cx="150"
             cy="150"
-            r="7"
-            className="fill-sky-400 animate-ping-slow"
+            r="6"
+            fill="#ff5722"
+            className="animate-ping-slow"
           />
-          <circle cx="150" cy="150" r="4" className="fill-white" />
+          <circle cx="150" cy="150" r="3" fill="#ffffff" />
         </svg>
       </div>
 
@@ -344,7 +352,7 @@ export function CompassDial({
           <button
             onClick={() => nudge(-1)}
             disabled={disabled || isLocked}
-            className="py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-sky-400 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
+            className="py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-orange-400 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
             title="Rotate -1°"
           >
             -1°
@@ -352,7 +360,7 @@ export function CompassDial({
           <button
             onClick={() => nudge(1)}
             disabled={disabled || isLocked}
-            className="py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-sky-400 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
+            className="py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-orange-400 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
             title="Rotate +1°"
           >
             +1°
@@ -372,28 +380,28 @@ export function CompassDial({
           <button
             onClick={() => snapTo(0)}
             disabled={disabled || isLocked}
-            className="py-1 rounded-md bg-slate-950 border border-rose-500/40 text-[11px] font-bold text-rose-400 hover:bg-rose-500/10 active:scale-95 disabled:opacity-40 transition-all"
+            className="py-1 rounded-md bg-slate-950 border border-orange-500/40 text-[11px] font-bold text-orange-400 hover:bg-orange-500/10 active:scale-95 disabled:opacity-40 transition-all"
           >
             0° N
           </button>
           <button
             onClick={() => snapTo(90)}
             disabled={disabled || isLocked}
-            className="py-1 rounded-md bg-slate-950 border border-amber-500/40 text-[11px] font-bold text-amber-400 hover:bg-amber-500/10 active:scale-95 disabled:opacity-40 transition-all"
+            className="py-1 rounded-md bg-slate-950 border border-slate-800 text-[11px] font-bold text-slate-300 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
           >
             90° E
           </button>
           <button
             onClick={() => snapTo(180)}
             disabled={disabled || isLocked}
-            className="py-1 rounded-md bg-slate-950 border border-sky-500/40 text-[11px] font-bold text-sky-400 hover:bg-sky-500/10 active:scale-95 disabled:opacity-40 transition-all"
+            className="py-1 rounded-md bg-slate-950 border border-slate-800 text-[11px] font-bold text-slate-300 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
           >
             180° S
           </button>
           <button
             onClick={() => snapTo(270)}
             disabled={disabled || isLocked}
-            className="py-1 rounded-md bg-slate-950 border border-emerald-500/40 text-[11px] font-bold text-emerald-400 hover:bg-emerald-500/10 active:scale-95 disabled:opacity-40 transition-all"
+            className="py-1 rounded-md bg-slate-950 border border-slate-800 text-[11px] font-bold text-slate-300 hover:bg-slate-800 active:scale-95 disabled:opacity-40 transition-all"
           >
             270° W
           </button>

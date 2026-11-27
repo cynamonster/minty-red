@@ -42,21 +42,21 @@
     },
     {
       "slug": "bearings",
-      "title": "Bearings",
-      "version": "1.0.0",
+      "title": "BEARINGS°",
+      "version": "1.1.0",
       "status": "shipped",
       "rating": 5,
-      "tagline": "Tactile 360° Compass Blitz",
-      "description": "Lock into true nautical and aerial bearings across global landmarks, cities, and corridors on an interactive 360° tactile compass dial.",
+      "tagline": "Test your mental map of the world",
+      "description": "Lock into true spherical bearings across global landmarks, cities, and corridors on an interactive 360° Swiss precision geodesic compass dial.",
       "category": "Navigation / Geography",
       "targetSessionSeconds": 45,
-      "updatedAt": "2026-11-24T20:00:00Z",
+      "updatedAt": "2026-11-27T07:00:00Z",
       "feedbackHistory": [
         {
           "rating": 5,
           "verdict": "ship",
-          "notes": "Available on production. Tactile compass navigation blitz.",
-          "timestamp": "2026-11-24T20:00:00Z"
+          "notes": "Available on production. Swiss Bauhaus precision geodesic compass navigation.",
+          "timestamp": "2026-11-27T07:00:00Z"
         }
       ]
     },
@@ -92,7 +92,7 @@
       "version": "1.0.0",
       "status": "ready_for_review",
       "rating": null,
-      "tagline": "Name where last names are from",
+      "tagline": "Name where last names come from",
       "description": "Rapid-fire 60-second linguistic etymology trivia across 160+ surnames and 8 language families.",
       "category": "Linguistics / Trivia",
       "targetSessionSeconds": 45,

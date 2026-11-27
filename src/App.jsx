@@ -176,7 +176,7 @@ export function App() {
     if (normalized === 'ethnos') return 'Ethnos: Micro Ethnoguesser';
     if (normalized === 'flagship') return 'Flagship: Flag Identification';
     if (normalized === 'orbitdrop') return 'OrbitDrop: Micro-Gravity Slingshot';
-    if (normalized === 'bearings' || normalized === 'bearinglock') return 'Bearings: Compass Blitz';
+    if (normalized === 'bearings' || normalized === 'bearinglock') return 'BEARINGS°: Global Navigation';
     if (normalized === 'metro') return 'METRO: Transit Topology Reflex';
     if (normalized === 'relic') return 'RELIC: Temporal Restitution Protocol';
     return slug;

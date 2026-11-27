@@ -71,24 +71,24 @@ export function formatDegrees(deg) {
 // Calculate score based on angular error
 export function calculateBearingScore(deltaDeg) {
   if (deltaDeg <= 1.5) {
-    return { score: 1000, grade: 'BULLSEYE', badge: '🎯 PERFECT LOCK', color: 'text-emerald-400', isBullseye: true };
+    return { score: 1000, grade: 'TRUE MERIDIAN', badge: 'TRUE MERIDIAN', color: 'text-emerald-400', isBullseye: true };
   }
   if (deltaDeg <= 5) {
-    return { score: 950, grade: 'PINPOINT', badge: '⚡ PINPOINT', color: 'text-emerald-300', isBullseye: false };
+    return { score: 950, grade: 'PINPOINT', badge: 'PINPOINT', color: 'text-emerald-300', isBullseye: false };
   }
   if (deltaDeg <= 12) {
-    return { score: 850, grade: 'EXCELLENT', badge: '✨ EXCELLENT', color: 'text-sky-300', isBullseye: false };
+    return { score: 850, grade: 'HIGH PRECISION', badge: 'HIGH PRECISION', color: 'text-orange-400', isBullseye: false };
   }
   if (deltaDeg <= 25) {
-    return { score: 650, grade: 'ON COURSE', badge: '🧭 ON COURSE', color: 'text-cyan-300', isBullseye: false };
+    return { score: 650, grade: 'WITHIN TOLERANCE', badge: 'WITHIN TOLERANCE', color: 'text-slate-300', isBullseye: false };
   }
   if (deltaDeg <= 45) {
-    return { score: 400, grade: 'DRIFTING', badge: '⚠️ DRIFTING', color: 'text-amber-400', isBullseye: false };
+    return { score: 400, grade: 'DEVIATION', badge: 'DEVIATION', color: 'text-amber-400', isBullseye: false };
   }
   if (deltaDeg <= 90) {
-    return { score: 180, grade: 'OFF COURSE', badge: '💨 OFF COURSE', color: 'text-orange-400', isBullseye: false };
+    return { score: 180, grade: 'OUT OF BOUNDS', badge: 'OUT OF BOUNDS', color: 'text-rose-400', isBullseye: false };
   }
-  return { score: 50, grade: 'LOST AT SEA', badge: '❌ REVERSE HEADING', color: 'text-rose-400', isBullseye: false };
+  return { score: 50, grade: 'OUT OF BOUNDS', badge: 'OUT OF BOUNDS', color: 'text-rose-400', isBullseye: false };
 }
 
 export const WAYPOINTS = [
