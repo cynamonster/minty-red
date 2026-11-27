@@ -199,35 +199,41 @@ export function formatDegrees(deg) {
 
 // Calculate score based on angular error
 export function calculateBearingScore(deltaDeg) {
+  const timeDelta = getAccuracyTimeDelta(deltaDeg);
   if (deltaDeg <= 1.5) {
-    return { score: 1000, grade: 'TRUE MERIDIAN', badge: 'TRUE MERIDIAN', color: 'text-emerald-400', isBullseye: true, timeBonus: 5 };
+    return { score: 1000, grade: 'TRUE MERIDIAN', badge: 'TRUE MERIDIAN', color: 'text-emerald-400', isBullseye: true, timeBonus: 5, timeDelta };
   }
   if (deltaDeg <= 5) {
-    return { score: 950, grade: 'PINPOINT', badge: 'PINPOINT', color: 'text-emerald-300', isBullseye: false, timeBonus: 4 };
+    return { score: 950, grade: 'PINPOINT', badge: 'PINPOINT', color: 'text-emerald-300', isBullseye: false, timeBonus: 3, timeDelta };
   }
   if (deltaDeg <= 12) {
-    return { score: 850, grade: 'HIGH PRECISION', badge: 'HIGH PRECISION', color: 'text-orange-400', isBullseye: false, timeBonus: 3 };
+    return { score: 850, grade: 'HIGH PRECISION', badge: 'HIGH PRECISION', color: 'text-orange-400', isBullseye: false, timeBonus: 1, timeDelta };
   }
   if (deltaDeg <= 25) {
-    return { score: 650, grade: 'WITHIN TOLERANCE', badge: 'WITHIN TOLERANCE', color: 'text-slate-300', isBullseye: false, timeBonus: 2 };
+    return { score: 650, grade: 'WITHIN TOLERANCE', badge: 'WITHIN TOLERANCE', color: 'text-slate-300', isBullseye: false, timeBonus: 0, timeDelta };
   }
   if (deltaDeg <= 45) {
-    return { score: 400, grade: 'DEVIATION', badge: 'DEVIATION', color: 'text-amber-400', isBullseye: false, timeBonus: 1 };
+    return { score: 400, grade: 'DEVIATION', badge: 'DEVIATION', color: 'text-amber-400', isBullseye: false, timeBonus: 0, timeDelta };
   }
   if (deltaDeg <= 90) {
-    return { score: 180, grade: 'OUT OF BOUNDS', badge: 'OUT OF BOUNDS', color: 'text-rose-400', isBullseye: false, timeBonus: 0 };
+    return { score: 0, grade: 'OUT OF BOUNDS', badge: 'OUT OF BOUNDS', color: 'text-rose-400', isBullseye: false, timeBonus: 0, timeDelta };
   }
-  return { score: 50, grade: 'OUT OF BOUNDS', badge: 'OUT OF BOUNDS', color: 'text-rose-400', isBullseye: false, timeBonus: 0 };
+  return { score: 0, grade: 'OUT OF BOUNDS', badge: 'OUT OF BOUNDS', color: 'text-rose-400', isBullseye: false, timeBonus: 0, timeDelta };
 }
 
-// Time Challenge bonus seconds based on accuracy (5/4/3/2/1s)
-export function getAccuracyTimeBonus(deltaDeg) {
+// Time Challenge time delta seconds based on accuracy (+5s down to -4s penalty)
+export function getAccuracyTimeDelta(deltaDeg) {
   if (deltaDeg <= 1.5) return 5;
-  if (deltaDeg <= 5) return 4;
-  if (deltaDeg <= 12) return 3;
-  if (deltaDeg <= 25) return 2;
-  if (deltaDeg <= 45) return 1;
-  return 0;
+  if (deltaDeg <= 5) return 3;
+  if (deltaDeg <= 12) return 1;
+  if (deltaDeg <= 25) return 0;
+  if (deltaDeg <= 45) return -2;
+  return -4;
+}
+
+// Legacy helper for positive-only bonus
+export function getAccuracyTimeBonus(deltaDeg) {
+  return Math.max(0, getAccuracyTimeDelta(deltaDeg));
 }
 
 export const WAYPOINTS = [

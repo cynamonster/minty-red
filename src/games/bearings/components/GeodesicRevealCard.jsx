@@ -175,14 +175,14 @@ export function GeodesicRevealCard({ waypoint }) {
     <div className="absolute inset-0 z-20 rounded-2xl bg-[#0f1117]/95 backdrop-blur-md border border-orange-500/50 shadow-2xl p-2.5 flex items-center gap-3 overflow-hidden animate-fadeIn select-none h-[100%]">
       {/* Left: Globe 1 Pure SVG from interactive-rotating-globe-mockup.html */}
       <div
-        onClick={toggleViewMode}
-        className="relative w-[100px] h-[100px] shrink-0 rounded-full overflow-hidden border border-orange-500/40 shadow-inner bg-[#07090e] cursor-pointer group"
+        // onClick={toggleViewMode}
+        className="relative w-[100px] h-[100px] shrink-0 rounded-full overflow-hidden border border-orange-500/40 shadow-inner bg-[#07090e] group"
         title="Tap to toggle between 3D Globe and Flat Mercator view"
       >
         <svg
           ref={svgRef}
           viewBox="0 0 100 100"
-          className="w-full h-full transition-transform duration-300 group-hover:scale-105 overflow-visible"
+          className="w-full h-full transition-transform duration-300 overflow-visible"
         >
           <defs>
             {/* Ocean Radial Gradient */}

@@ -7,6 +7,7 @@ import {
   calculateBearingDelta,
   calculateBearingScore,
   getAccuracyTimeBonus,
+  getAccuracyTimeDelta,
   formatDegrees,
   getCompassHeading,
 } from './datasets/waypoints';
@@ -110,14 +111,15 @@ export function BearingsGame({ onHome, onSelectGame, challengeCode }) {
     if (mode === 'blitz' && !gameOver && !isLocked) {
       blitzTimerRef.current = setInterval(() => {
         setBlitzTimeRemaining((prev) => {
-          if (prev <= 1) {
+          const next = Math.max(0, Math.round((prev - 0.1) * 10) / 10);
+          if (next <= 0) {
             clearInterval(blitzTimerRef.current);
             finishGameRef.current?.();
             return 0;
           }
-          return prev - 1;
+          return next;
         });
-      }, 1000);
+      }, 100);
     }
     return () => clearInterval(blitzTimerRef.current);
   }, [mode, gameOver, isLocked]);
@@ -244,12 +246,26 @@ export function BearingsGame({ onHome, onSelectGame, challengeCode }) {
     setRoundResult(record);
     setHistory((prev) => [...prev, record]);
 
-    // Time Challenge mode time bonus based on accuracy (5/4/3/2/1s)
+    // Time Challenge mode time bonus or penalty based on accuracy
     if (mode === 'blitz') {
-      const bonusSeconds = scoreResult.timeBonus ?? getAccuracyTimeBonus(delta);
-      if (bonusSeconds > 0) {
-        setBlitzTimeRemaining((prev) => prev + bonusSeconds);
-        setBlitzBonusNotice(`+${bonusSeconds}s TIME BONUS!`);
+      const timeDelta = scoreResult.timeDelta ?? getAccuracyTimeDelta(delta);
+      if (timeDelta !== 0) {
+        setBlitzTimeRemaining((prev) => {
+          const updated = Math.max(0, Math.round((prev + timeDelta) * 10) / 10);
+          if (updated <= 0) {
+            clearInterval(blitzTimerRef.current);
+            setTimeout(() => finishGameRef.current?.(), 200);
+            return 0;
+          }
+          return updated;
+        });
+
+        if (timeDelta > 0) {
+          setBlitzBonusNotice({ text: `+${timeDelta}s BONUS!`, type: 'bonus' });
+        } else {
+          setBlitzBonusNotice({ text: `${timeDelta}s PENALTY!`, type: 'penalty' });
+          soundEngine.playWrong();
+        }
         setTimeout(() => setBlitzBonusNotice(null), 1800);
       }
     }
@@ -260,6 +276,7 @@ export function BearingsGame({ onHome, onSelectGame, challengeCode }) {
     const handleKeyDown = (e) => {
       if (mode === 'menu' || gameOver) return;
       if (e.code === 'Space') {
+        if (e.repeat) return; // Prevent rapid-fire looping from holding Spacebar
         e.preventDefault();
         if (!isLocked) {
           handleLockBearing();
@@ -487,7 +504,7 @@ Play now: ${window.location.origin}/bearings`;
                     </div>
                     <div className="text-[11px] text-slate-400">
                       Continuous rapid-fire calibration.<br />
-                      (+1s to +5s bonus time for accuracy)
+                      (+1s to +5s for accuracy, up to -4s penalty for error)
                     </div>
                   </div>
                 </div>
@@ -524,9 +541,13 @@ Play now: ${window.location.origin}/bearings`;
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2 text-xs font-mono font-bold text-slate-400">
                 {mode === 'blitz' ? (
-                  <span className="flex items-center gap-1.5 text-orange-400 font-bold px-2 py-0.5 rounded bg-orange-500/10 border border-orange-500/30">
+                  <span className={`flex items-center gap-1.5 font-bold px-2 py-0.5 rounded border transition-colors ${
+                    blitzBonusNotice?.type === 'penalty'
+                      ? 'text-rose-400 bg-rose-500/10 border-rose-500/40 animate-pulse'
+                      : 'text-orange-400 bg-orange-500/10 border-orange-500/30'
+                  }`}>
                     <Clock className={`w-3.5 h-3.5 ${isLocked ? 'text-slate-400' : 'animate-pulse'}`} />
-                    <span>{blitzTimeRemaining}s</span>
+                    <span>{Math.ceil(blitzTimeRemaining)}s</span>
                     {isLocked && (
                       <span className="text-[9px] text-slate-400 font-mono uppercase tracking-wider ml-0.5">
                         PAUSED
@@ -539,8 +560,14 @@ Play now: ${window.location.origin}/bearings`;
                   </span>
                 )}
                 {blitzBonusNotice && (
-                  <span className="text-[10px] text-emerald-400 font-black animate-bounce">
-                    {blitzBonusNotice}
+                  <span
+                    className={`text-[10px] font-black ${
+                      blitzBonusNotice.type === 'penalty'
+                        ? 'text-rose-400 animate-pulse'
+                        : 'text-emerald-400 animate-bounce'
+                    }`}
+                  >
+                    {blitzBonusNotice.text}
                   </span>
                 )}
               </div>
@@ -709,7 +736,7 @@ Play now: ${window.location.origin}/bearings`;
             {/* Total Score Badge */}
             <div className="p-4 rounded-2xl bg-[#121316] border border-slate-800 text-center mb-4">
               <div className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1 font-mono">
-                Total Calibration Score
+                Final Score
               </div>
               <div className="text-4xl font-black font-mono text-white tracking-tight">
                 {totalScore.toLocaleString()}
@@ -725,7 +752,7 @@ Play now: ${window.location.origin}/bearings`;
                 <div>
                   <div className="text-[10px] text-slate-400 uppercase font-semibold font-mono">True Meridians (🎯)</div>
                   <div className="text-sm font-black font-mono text-orange-400">
-                    {bullseyeCount} Perfect
+                    {bullseyeCount}
                   </div>
                 </div>
               </div>
@@ -736,7 +763,11 @@ Play now: ${window.location.origin}/bearings`;
               <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 font-mono">
                 Arc Breakdown
               </div>
-              <div className="space-y-1.5">
+              <div
+                className={`space-y-1.5 ${
+                  history.length > 5 ? 'max-h-56 overflow-y-auto pr-1' : ''
+                }`}
+              >
                 {history.map((h, i) => (
                   <div
                     key={i}
