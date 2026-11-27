@@ -117,7 +117,7 @@ export function ArcadeHub({ onSelectGame, onOpenDashboard }) {
       slug: 'roots',
       title: 'ROOTS',
       displayTitle: 'Roots',
-      tagline: 'Name where last names come from',
+      tagline: 'Name where last names are from',
       description: 'Can you identify the linguistic roots of 150+ global surnames? Instant etymology reveals.',
       stats: rootsStats,
       statusLabel: 'IN PROGRESS',
