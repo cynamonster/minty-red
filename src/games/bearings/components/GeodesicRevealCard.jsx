@@ -172,11 +172,11 @@ export function GeodesicRevealCard({ waypoint }) {
   if (!waypoint) return null;
 
   return (
-    <div className="absolute inset-0 z-20 rounded-2xl bg-[#0f1117]/95 backdrop-blur-md border border-orange-500/50 shadow-2xl p-2.5 flex items-center gap-3 overflow-hidden animate-fadeIn select-none h-[100%]">
+    <div className="absolute inset-0 z-20 rounded-2xl bg-[#0f1117]/95 backdrop-blur-md border-orange-500/50 shadow-2xl p-2.5 flex items-center gap-3 overflow-hidden animate-fadeIn select-none h-[100%]">
       {/* Left: Globe 1 Pure SVG from interactive-rotating-globe-mockup.html */}
       <div
         // onClick={toggleViewMode}
-        className="relative w-[100px] h-[100px] shrink-0 rounded-full overflow-hidden border border-orange-500/40 shadow-inner bg-[#07090e] group"
+        className="relative w-[80px] h-[80px] shrink-0 rounded-full overflow-hidden border border-orange-500/40 shadow-inner bg-[#07090e] group"
         title="Tap to toggle between 3D Globe and Flat Mercator view"
       >
         <svg

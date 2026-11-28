@@ -224,11 +224,11 @@ export function calculateBearingScore(deltaDeg) {
 // Time Challenge time delta seconds based on accuracy (+5s down to -4s penalty)
 export function getAccuracyTimeDelta(deltaDeg) {
   if (deltaDeg <= 1.5) return 5;
-  if (deltaDeg <= 5) return 3;
-  if (deltaDeg <= 12) return 1;
-  if (deltaDeg <= 25) return 0;
-  if (deltaDeg <= 45) return -2;
-  return -4;
+  if (deltaDeg <= 5) return 4;
+  if (deltaDeg <= 12) return 3;
+  if (deltaDeg <= 25) return 2;
+  if (deltaDeg <= 45) return 0;
+  return -2;
 }
 
 // Legacy helper for positive-only bonus

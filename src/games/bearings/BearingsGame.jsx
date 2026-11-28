@@ -234,6 +234,8 @@ export function BearingsGame({ onHome, onSelectGame, challengeCode }) {
     const earnedScore = Math.round(scoreResult.score * newCombo);
     setTotalScore((prev) => prev + earnedScore);
 
+    const timeDelta = mode === 'blitz' ? (scoreResult.timeDelta ?? getAccuracyTimeDelta(delta)) : undefined;
+
     const record = {
       waypoint: currentWaypoint,
       guess: currentGuess,
@@ -242,14 +244,14 @@ export function BearingsGame({ onHome, onSelectGame, challengeCode }) {
       earnedScore,
       scoreResult,
       combo: newCombo,
+      timeDelta,
     };
     setRoundResult(record);
     setHistory((prev) => [...prev, record]);
 
     // Time Challenge mode time bonus or penalty based on accuracy
     if (mode === 'blitz') {
-      const timeDelta = scoreResult.timeDelta ?? getAccuracyTimeDelta(delta);
-      if (timeDelta !== 0) {
+      if (timeDelta && timeDelta !== 0) {
         setBlitzTimeRemaining((prev) => {
           const updated = Math.max(0, Math.round((prev + timeDelta) * 10) / 10);
           if (updated <= 0) {
@@ -266,7 +268,6 @@ export function BearingsGame({ onHome, onSelectGame, challengeCode }) {
           setBlitzBonusNotice({ text: `${timeDelta}s PENALTY!`, type: 'penalty' });
           soundEngine.playWrong();
         }
-        setTimeout(() => setBlitzBonusNotice(null), 1800);
       }
     }
   }, [isLocked, currentWaypoint, gameOver, currentGuess, combo, mode]);
@@ -292,6 +293,7 @@ export function BearingsGame({ onHome, onSelectGame, challengeCode }) {
   // Advance to next leg
   const handleNextRound = () => {
     soundEngine.playTap();
+    setBlitzBonusNotice(null);
 
     if (mode === 'blitz') {
       // In blitz mode, pick next random waypoint
@@ -318,6 +320,7 @@ export function BearingsGame({ onHome, onSelectGame, challengeCode }) {
   // Finish session
   const finishGame = () => {
     clearInterval(blitzTimerRef.current);
+    setBlitzBonusNotice(null);
     setGameOver(true);
     try {
       if (typeof soundEngine.playCelebration === 'function') {
@@ -503,8 +506,7 @@ Play now: ${window.location.origin}/bearings`;
                       </span>
                     </div>
                     <div className="text-[11px] text-slate-400">
-                      Continuous rapid-fire calibration.<br />
-                      (+1s to +5s for accuracy, up to -4s penalty for error)
+                      Continuous rapid-fire calibration.<br />Close guesses add time, far guesses lose time.
                     </div>
                   </div>
                 </div>
@@ -657,7 +659,7 @@ Play now: ${window.location.origin}/bearings`;
               <div className="flex flex-col gap-2 animate-fadeIn">
                 {/* Result Pill */}
                 {roundResult && (
-                  <div className="px-3 mb-0.5 rounded-2xl border-slate-800 flex items-center justify-between">
+                  <div className="p-3 mt-2 rounded-2xl border border-orange-800 flex items-center justify-between">
                     <div>
                       <div className={`text-xs font-black uppercase font-mono ${roundResult.scoreResult.color}`}>
                         {roundResult.scoreResult.badge}
